@@ -1,2 +1,2 @@
 # test
-Test templates located here
+Test templates located here :)
