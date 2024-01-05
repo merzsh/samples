@@ -1,0 +1,291 @@
+
+input[type="text"] {
+    color: red;
+}
+
+.st-root {
+    height: 800px;
+    font-family: Arial, sans-serif;
+    /*border: 1px solid grey;*/
+}
+
+.st-root header {
+    height: 5%;
+    border-bottom: 1px solid lightgrey;
+    display: flex;
+    background-color: whitesmoke;
+}
+
+.st-root header h3 {
+    margin: auto;
+}
+
+.st-root main {
+    height: 90%;
+    /*border: 2px solid orange;*/
+    /*float: none;
+    overflow: hidden;*/
+}
+
+.st-root div {
+    display: inline-block;
+}
+
+.st-image {
+    position: relative;
+    width: 555px;
+    height: 100%;
+    float: left;
+
+    /*border: 1px solid lightgreen;*/
+    /*height: 800px;*/
+    /*width: 680px;*/
+    /*background-size: auto;
+    background: lightgrey url('http://localhost:8888/img/stoplight_02.jpg') no-repeat;*/
+}
+
+.st-image div {
+    position: absolute;
+    z-index:5;
+    width: 33px;
+    height: 33px;
+    border-radius: 50%;
+}
+
+.st-image-red {
+    top: 109px;
+    left: 255px;
+    background-color: crimson;
+    opacity: 0.8;
+}
+
+.st-image-yellow {
+    top: 156px;
+    left: 253px;
+    background-color: gold;
+    opacity: 0.8;
+    text-align: center;
+    line-height: 33px; /* 'vertical-align: middle' effect*/
+    font-weight: bold;
+    font-size: larger;
+    font-family: "Courier New", monospace;
+}
+
+.st-image-green {
+    top: 203px;
+    left: 250px;
+    background-color: forestgreen;
+    opacity: 0.8;
+}
+
+.st-image img {
+    object-fit: contain;
+    object-position: 0 18px;
+    width: 100%;
+    height: 100%;
+    /*margin: 0 30px 0 10px;*/
+    /*width: 320px;
+    float: right;*/
+}
+
+.st-whitespace {
+    height: 100%;
+    width: 2%;
+    float: left;
+    /*border: 1px solid blue;*/
+}
+
+.st-toolbar {
+    position: absolute;
+    display: flex;
+    /*height: 91%;*/
+    width: calc(70% - 555px);
+}
+
+.st-toolbar fieldset {
+    display: inline-block;
+    position: relative;
+    top: 10px;
+    height: 600px;
+    width: 43%;
+    vertical-align: top;
+}
+
+.st-toolbar button, table {
+    margin: 2%;
+}
+
+.st-toolbar textarea {
+    float: left;
+    margin: 25px 0 0 1px;
+    width: 100%;
+    border: 0;
+    resize: none;
+    color: crimson;
+    font-style: italic;
+}
+
+.st-toolbar-diagram table {
+    margin-top: 7%;
+    /*border: solid 1px silver;*/
+    width: 97%;
+}
+
+.st-toolbar-diagram td {
+    /*border: solid 1px silver;*/
+}
+
+.st-toolbar-diagram tr {
+    height: 30px;
+}
+
+.st-toolbar-diagram .td-ptr {
+    text-align: center;
+    font-weight: bold;
+    width: 10%;
+}
+
+.st-toolbar-diagram .td-pic {
+    width: 15%;
+    text-align: center;
+    padding: 0;
+    /*vertical-align: bottom;*/
+    /*color: oldlace;*/
+}
+
+#INIT {
+    width: 25px;
+    height: 25px;
+    background: lightgray;
+}
+
+#RED {
+    width: 25px;
+    height: 25px;
+    background: red;
+}
+
+#RED_YELLOW {
+    width: 0;
+    height: 0;
+    border-top: 24px solid red;
+    border-right: 24px solid transparent;
+    border-right: 24px solid yellow;
+}
+
+#GREEN {
+    width: 25px;
+    height: 25px;
+    background: green;
+}
+
+#GREEN_BLINKING {
+    width: 0;
+    height: 0;
+    border-top: 24px solid green;
+    border-right: 24px solid transparent;
+}
+
+#YELLOW {
+    width: 25px;
+    height: 25px;
+    background: yellow;
+}
+
+.st-toolbar-diagram .td-state {
+    font-style: italic;
+    width: 75%;
+}
+
+.st-toolbar-control div {
+    width: 95%;
+    margin: 2%;
+}
+
+.st-toolbar-control label {
+    font-size: 0.9em;
+}
+
+.st-toolbar-control input {
+    float: right;
+}
+
+/*.st-toolbar-control-full-time input {
+}
+.st-toolbar-control-red-percent input {
+}
+.st-toolbar-control-red-yellow-percent input {
+}
+.st-toolbar-control-green-percent input {
+}
+.st-toolbar-control-green-blinking-percent input {
+}
+.st-toolbar-control-yellow-percent input {
+}*/
+
+.st-toolbar-control-btn-init {
+    width: 45%;
+}
+
+.st-toolbar-control-btn-reset{
+    width: 45%;
+}
+
+.st-toolbar-control-btn-next {
+    width: 95%;
+}
+
+.st-toolbar-control-btn-start {
+    width: 45%;
+}
+
+.st-toolbar-control-btn-stop {
+    width: 45%;
+}
+
+
+.st-sidebar-left {
+    width: 10%;
+    height: 100%;
+    float: left;
+    background-color: snow;
+    border-right: 1px solid lightgrey;
+}
+
+.st-sidebar-right {
+    width: 15%;
+    height: 100%;
+    float: right;
+    background-color: snow;
+    border-left: 1px solid lightgrey;
+}
+
+.st-root footer {
+    height: 5%;
+    border-top: 1px solid lightgrey;
+    display: flex;
+    background-color: whitesmoke;
+    /*border: 2px solid grey;*/
+}
+
+.st-root footer div {
+    margin: auto;
+    display: inline-block;
+    font-size: 0.8em;
+}
+
+.st-footer-links li {
+    display:inline-block;
+}
+
+.st-root footer nav {
+    display: inline-block;
+}
+
+.st-root footer li {
+    display: inline-block;
+    margin: 0 15px 0 0;
+}
+
+
+/*<img src={'img/stoplight_02.jpg'} alt={'Image was here and fly away :)'}/>*/
