@@ -50,6 +50,14 @@ const initSettings = {
 const STR_OPACITY_OFF = '0.3';
 const STR_OPACITY_ON = '0.8';
 
+/**
+ * Custom React hook represents finite state machine core based on stoplight (traffic lights) example.
+ *
+ * @param props - finite state machine settings
+ *
+ * @licence - GPL-2.0
+ * @author - authored by Andrey Miroshnichenko (merzsh@gmail.com, https://github.com/merzsh)
+ */
 function useStoplight(props = initSettings): StoplightResult {
   const strError = `Error: hook 'useStoplight' constructor argument 'props' is null or undefined!`;
   if (!props) throw new ReferenceError(strError);
@@ -74,6 +82,7 @@ function useStoplight(props = initSettings): StoplightResult {
     useRef<StateValue>({isLightRed: false, isLightYellow: false,
       isLightGreen: false, countdownMs: 0, stateName: StateNames.INIT});
 
+  // exported hook result
   const result: StoplightResult = {
     init: init,
     reset: reset,
@@ -83,11 +92,13 @@ function useStoplight(props = initSettings): StoplightResult {
     onStateChange: (stateValue: StateValue) => { if(!stateValue) return; }
   }
 
+  // constructor
   React.useEffect(() => {
     // initializer
     init();
   },[]);
 
+  // reacts after each state was changed
   React.useEffect(() => {
     currState.current = store.currState;
     opacityGreenRef.current = store.lightGreenIsBlinking ? true : undefined;
@@ -101,6 +112,12 @@ function useStoplight(props = initSettings): StoplightResult {
     result.onStateChange({...stateValue.current});
   }, [store]);
 
+  /**
+   * Finite state machine (stoplight) switch function checks requested input.
+   *
+   * @param state - current state of stoplight
+   * @param action - requested next action (state)
+   */
   function reducer(state: State, action: Action) {
     const STR_UNACCEPTABLE_STATE = 'Unacceptable state requested: ';
 
@@ -144,6 +161,14 @@ function useStoplight(props = initSettings): StoplightResult {
     throw new Error(STR_UNACCEPTABLE_STATE + action.type + '; current state is: ' + state.currState);
   }
 
+  /**
+   * Gets stoplight current state due time flow period.
+   *
+   * @param maxTimeMs - total lifecycle length, in milliseconds
+   * @param currTimeMs - current time passed from last zero, in milliseconds
+   * @param idleRatioMs - milliseconds count between two tact (tics)
+   * @return - current state from StateNames enum or 'StateNames.INIT' if current  state time was passed
+   */
   function getStateByTimeInMs(maxTimeMs: number, currTimeMs: number, idleRatioMs: number) {
     if (!maxTimeMs || isNaN(maxTimeMs)) throw new Error('Arg maxTimeMs is not a number!');
     if (!currTimeMs || isNaN(currTimeMs)) throw new Error('Arg currTimeMs is not a number!');
@@ -191,6 +216,11 @@ function useStoplight(props = initSettings): StoplightResult {
     return StateNames.INIT;
   }
 
+  /**
+   * Gets next logical state of stoplight from StateNames enum.
+   *
+   * @return - StateNames enum item (next state; if current last first state 'INIT' will be return)
+   */
   function getNextState(): StateNames {
     type StateNamesKeys = keyof typeof StateNames;
 
@@ -205,17 +235,27 @@ function useStoplight(props = initSettings): StoplightResult {
     throw new Error ('Internal error: unreachable state!');
   }
 
+  /**
+   * Resets all time counters.
+   */
   function resetCounters() {
     counter.current = 0;
     passedMs.current = 0;
     passedMsGreenBlink.current = 0;
   }
 
+  /**
+   * Guides stoplight machine to its initial state.
+   */
   function init() {
     resetCounters();
     dispatch({type: StateNames.INIT});
   }
 
+  /**
+   * Resets settings (machine lifecycle options) to initial values.
+   * @param propsInitial - initial values
+   */
   function reset(propsInitial: typeof initSettings) {
     if(!propsInitial) throw new ReferenceError('Internal error: argument propsInitial is null!');
 
@@ -227,14 +267,26 @@ function useStoplight(props = initSettings): StoplightResult {
     props[Controls.LIGHT_PERCENT_YELLOW] = propsInitial[Controls.LIGHT_PERCENT_YELLOW];
   }
 
+  /**
+   * Go to stoplight next state.
+   */
   function next() {
     dispatch({type: getNextState()});
   }
 
+  /**
+   * Runs stoplight
+   */
   function run() {
     init();
   }
 
+  /**
+   * Handler of next machine tact. It determines to change the current state or not.
+   *
+   * @param idleRatioMs - milliseconds count between two tact (tics)
+   * @param idleRatioGreenMs - milliseconds count between two tics of blinking green light
+   */
   function nextTact(idleRatioMs: number, idleRatioGreenMs: number) {
     const strArgIdleRatioMs = 'idleRatioMs', strArgIdleRatioGreenMs = 'idleRatioGreenMs';
     let strError = `Error: function 'onNextTact' argument ${strArgIdleRatioMs} is not a number or less than 10ms (value: ${idleRatioMs})!`;
@@ -267,6 +319,12 @@ function useStoplight(props = initSettings): StoplightResult {
   return result;
 }
 
+/**
+ * React GUI client calls custom hook represents stoplight finite state machine.
+
+ * @licence - GPL-2.0
+ * @author - authored by Andrey Miroshnichenko (merzsh@gmail.com, https://github.com/merzsh)
+ */
 function Stoplight() {
 
   const [settings, setSettings] = useState(initSettings);
@@ -290,6 +348,7 @@ function Stoplight() {
   const timerInitial = setInterval(onTimer, 10000000);
   const timer = useRef(timerInitial);
 
+  // cals when UI blocked/unblocked (run/stop commands)
   React.useEffect(() => {
     clearInterval(timer.current);
     if(isSettingsDisabled) {
@@ -297,10 +356,16 @@ function Stoplight() {
     }
   }, [isSettingsDisabled]);
 
+  /**
+   * 'Initialize state' button handler. Guides stoplight to its initial state.
+   */
   function onClickInit() {
     if(stoplightController) stoplightController.init();
   }
 
+  /**
+   * 'Reset settings' button handler. Resets stoplight all lifecycle options to its initial values.
+   */
   function onClickReset() {
     if(stoplightController) {
       stoplightController.reset(initSettings);
@@ -308,10 +373,16 @@ function Stoplight() {
     }
   }
 
+  /**
+   * 'Go to next state' button handler. Guides stoplight to its next state.
+   */
   function onClickNext() {
     if(stoplightController) stoplightController.next();
   }
 
+  /**
+   * 'Run' button handler. Runs stoplight work.
+   */
   function onClickRun() {
     if(stoplightController) {
       setIsSettingsDisabled(true);
@@ -319,6 +390,9 @@ function Stoplight() {
     }
   }
 
+  /**
+   * 'Stop' button handler. Finishes stoplight work.
+   */
   function onClickStop() {
     setIsSettingsDisabled(false);
     if(stoplightController) {
@@ -326,10 +400,19 @@ function Stoplight() {
     }
   }
 
+  /**
+   * Handler of timer tics (tact).
+   */
   function onTimer() {
     stoplightController.nextTact(INT_TIMER_INCREMENT_MS, INT_TIMER_DELAY_GREEN_BLINK_MS);
   }
 
+  /**
+   * Finite state machine (stoplight) changing each state event handler.
+   * It helps to detect moment when UI have to be refreshed.
+   *
+   * @param stateValue - payload value of each state
+   */
   function onStateChange(stateValue: StateValue) {
     if(!stateValue) throw new ReferenceError('Error: state value is initial!');
 
@@ -344,16 +427,13 @@ function Stoplight() {
       stateValue.countdownMs > 0 && stateValue.countdownMs < 1000 ? '--' : '');
 
     setStateName(stateValue.stateName);
-
-    /*const len: number = Object.keys(StateNames).length;
-    for(let i=0; i<len; i++){
-      if(i === stateValue.stateName){
-        setStateName(StateNames[i]);
-        break;
-      }
-    }*/
   }
 
+  /**
+   * Validates user input.
+   *
+   * @param value - input value
+   */
   function onChangeEditBoxValue(value: any) {
     setMessage('');
     switch(value.target.name){
@@ -376,6 +456,7 @@ function Stoplight() {
     }
   }
 
+  // React TSX-HTML component view of UI
   return <div id={'st-root'} className={'st-root'}>
       <header>
         <h3>Stoplight lifecycle with simple finite state machine implemented under</h3>
