@@ -19,7 +19,7 @@
 			<li><b>/web</b> - samples of sources include JavaScript/TypeScript/HTML/CSS technologies</li>
 			<ul style="list-style-type:square;">
 				<li><b>./stoplight</b> - finite state machine based on stoplight (traffic lights) sample.
-					Demonstartes working 'useReducer' Redux-like React built-in hook.
+					Demonstartes working of 'useReducer' Redux-like React built-in hook.
 					Program logic is implemented with TypeScript language, UI - with HTML/CSS.
 					Building tools are Babel and Webpack.
 				</li>
