@@ -1,6 +1,12 @@
-# Test
-Test templates located here :)
-This content by test user )
-27.01.23 17.01, Owner: Added from local Git CLI ...
-27.01.23 17:40, Deleg: Added from local Git CLI )
-11.10.23 20:50, Admin: preparing for new file loading ...
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Stoplight lifecycle</title>
+		<base href="https://github.com/merzsh/samples/">
+	</head>
+	<body>
+		<h1>Hello, World, I am README.md file!</h1>
+		<p>Some description posted here ...</p>
+	</body>
+</html>
