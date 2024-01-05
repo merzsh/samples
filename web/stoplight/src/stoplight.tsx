@@ -1,3 +1,8 @@
+/**
+ * This file is completely authored by Andrey Miroshnichenko at 2024-01-05 and distributed under GPL-2.0 license
+ * (merzsh@gmail.com, https://github.com/merzsh).
+ */
+
 import React, {Reducer, useReducer, useRef, useState} from 'react';
 require('./stoplight.jpg');
 require('./stoplight.css');

@@ -30,7 +30,7 @@
 			</ul>
 		<img src="fig01.jpg" alt="Sample main screen">
 		<h3>Copyright</h3>
-		<p>This application is authored by Andrey Miroshnichenko and distributed under GPL-2.0 license
+		<p>This application is completely authored by Andrey Miroshnichenko at 2024-01-05 and distributed under GPL-2.0 license
 			(merzsh@gmail.com, https://github.com/merzsh).</p>
 	</body>
 </html>
