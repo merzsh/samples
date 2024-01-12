@@ -131,12 +131,12 @@ input[type="text"] {
     width: 97%;
 }
 
-.st-toolbar-diagram td {
-    /*border: solid 1px silver;*/
+.st-toolbar-diagram tr {
+    height: 45px;
 }
 
-.st-toolbar-diagram tr {
-    height: 30px;
+.st-toolbar-diagram td {
+    /*border: solid 1px silver;*/
 }
 
 .st-toolbar-diagram .td-ptr {
@@ -148,8 +148,7 @@ input[type="text"] {
 .st-toolbar-diagram .td-pic {
     width: 15%;
     text-align: center;
-    padding: 0;
-    /*vertical-align: bottom;*/
+    vertical-align: center;
     /*color: oldlace;*/
 }
 
