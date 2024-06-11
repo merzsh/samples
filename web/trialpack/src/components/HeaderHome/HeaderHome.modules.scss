@@ -1,0 +1,79 @@
+/**
+ * TrialPack is web application contains several basic samples to ease web development experience.
+ * Copyright (c) 2024 Andrey Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
+ *
+ * This file is part of TrialPack.
+ *
+ * TrialPack is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+.header {
+  display: flex;
+  justify-content: center;
+
+  &__back {
+    width: 100%;
+    display: flex;
+
+    &__left {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 279px;
+      height: 50px;
+      background-color: cornflowerblue;
+      border-left: 10px solid lightgray;
+
+      &__selector {
+        height: 60%;
+        padding: 1px 10px;
+        margin-left: 10px;
+        border-radius: 5px;
+        border: 1px solid lightgray;
+        background-color: snow;
+      }
+
+      img {
+        height: 35px;
+      }
+    }
+
+    &__between {
+      visibility: visible;
+
+      &__top {
+        width: 0;
+        height: 0;
+        border-bottom: 41px solid cornflowerblue;
+        border-right: 41px solid transparent;
+      }
+
+      &__bottom {
+        width: 41px;
+        height: 9px;
+        background-color: cornflowerblue;
+      }
+    }
+
+    &__right {
+      width: calc(100% - 320px);
+      height: 50px;
+      border-bottom: 9px solid cornflowerblue;
+    }
+  }
+
+  h2 {
+    position: absolute;
+    margin: 5px;
+  }
+}

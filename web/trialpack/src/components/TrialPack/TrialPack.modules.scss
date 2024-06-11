@@ -1,0 +1,325 @@
+/**
+ * TrialPack is web application contains several basic samples to ease web development experience.
+ * Copyright (c) 2024 Andrey Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
+ *
+ * This file is part of TrialPack.
+ *
+ * TrialPack is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+.trial-pack * {
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-size: 100%;
+  color: #333333;
+
+  box-sizing: border-box;
+  vertical-align: baseline;
+
+  /*vertical-align: baseline;
+  box-sizing: border-box;
+  background-color: whitesmoke;*/
+}
+
+.trial-pack h2, .trial-pack h3, .trial-pack h4, .trial-pack p {
+  all: revert;
+}
+
+.trial-pack {
+  border: none;
+  background-color: white;
+  box-sizing: border-box;
+  display: grid;
+  /*grid-auto-flow: column;*/
+  grid-template-areas:
+                    "header"
+                    "."
+                    "menu"
+                    "."
+                    "side"
+                    "."
+                    "content"
+                    "."
+                    "footer";
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 5px auto 5px auto 5px auto 5px auto;
+
+  /*height:100vh;*/
+  /*height: auto;*/
+  /*height: 1800px;*/
+
+  header {
+    grid-area: header;
+    border: 1px solid lightgray;
+    background-color: #eeeeee;
+  }
+
+  aside {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    order: 0;
+    border: 1px solid lightgray;
+    background-color: whitesmoke;
+  }
+
+  &__aside-left {
+    grid-area: menu;
+
+    summary {
+      font-size: 1em;
+      border-radius: 5px;
+      //border: 1px solid #999;
+      cursor: pointer;
+      //margin: -1%;
+      padding: 3px 15px;
+      color: RGB(30, 30, 30);
+      background-image: linear-gradient(180deg, white, grey);
+    }
+
+    details[open] summary {
+      background: RGB(222, 222, 222);
+    }
+
+    details {
+      color: RGB(30, 30, 30);
+      cursor: pointer;
+      border: 1px solid grey;
+      //background: RGB(233, 233, 233);
+      border-radius: 5px;
+      //margin: 0 2em .4em 2em;
+      //padding-left: 10px;
+    }
+  }
+
+  &__aside-right {
+    grid-area: side;
+
+    nav {
+      //border: 1px solid orange;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+
+      button {
+        padding: 5px 15px;
+      }
+    }
+  }
+
+  main {
+    grid-area: content;
+    padding-left: 1.5em;
+    padding-right: 1em;
+    border: 1px solid lightgray;
+    background-color: snow;
+
+    nav {
+      border-left: 1px solid lightgray;
+      border-right: 1px solid lightgray;
+      border-bottom: 1px solid lightgray;
+      background-color: whitesmoke;
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: row;
+        justify-content: left;
+        height: auto;
+        //border: 1px solid red;
+        //flex-wrap: wrap;
+        /*justify-content: space-around;*/
+
+        li {
+          //display: flex;
+
+          div {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 3px 10px;
+            border-right: 1px solid lightgray;
+            cursor: default;
+            //background-color: snow;
+            //border: 1px solid orange;
+
+            button {
+              height: 1.3em;
+              width: 1.3em;
+              margin-left: 5px;
+              padding-left: 3px;
+              padding-right: 3px;
+              border: 1px solid lightgray;
+              font-size: 1em;
+              font-weight: normal;
+              text-align: left;
+            }
+          }
+        }
+
+      }
+    }
+
+  }
+
+
+  &__footer {
+    grid-area: footer;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    font-family: sans-serif;
+    font-size: small;
+    font-weight: 300;
+    border: 1px solid lightgray;
+    background-color: whitesmoke;
+
+    &__left {
+      //border: 1px solid red;
+    }
+
+    &__right {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      //justify-content: space-around;
+      //border: 1px solid blue;
+    }
+  }
+}
+
+.file-selected {
+  background-color: aqua;
+}
+
+.trial-pack aside div:nth-child(3) {
+  width: 100%;
+  margin-bottom: 10px;
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  justify-content: center;
+  text-align: center;
+}
+
+.trial-pack aside div:nth-child(3) div {
+  width: 240px;
+  height: 180px;
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  color: white;
+  /*background-image: url(./assets/images/winter.jpg);*/
+  background-color: orange;
+  background-size: 100% 100%;
+}
+
+
+
+.trial-pack footer > div {
+  width: 100%;
+  padding: 1.5em;
+}
+
+.trial-pack footer .trial-pack__footer__left span:nth-child(1) {
+  color: #333333;
+  font-size: x-large;
+  font-weight: 400;
+}
+
+.trial-pack footer .trial-pack__footer__left span:nth-child(2) {
+  color: #333333;
+  font-size: medium;
+}
+
+.trial-pack footer .trial-pack__footer__right ul {
+  list-style-type: none;
+  display: block;
+  width: 20%;
+  margin: 0 0 10px 0;
+  padding: 0;
+  float: left;
+  //border: 1px solid orange;
+}
+
+.trial-pack footer .trial-pack__footer__right ul li {
+  margin-bottom: 10px;
+}
+
+.trial-pack footer .trial-pack__footer__right ul li:nth-child(1) {
+  color: darkslategrey;
+  font-size: medium;
+  font-weight: 400;
+  /*border: 1px solid red;*/
+}
+
+@media screen and (min-width: 800px) {
+  .trial-pack {
+    /*min-height: 100vh;*/
+    grid-template-areas:
+                    "header header header header header"
+                    ". . . . ."
+                    "menu . content . side"
+                    ". . . . ."
+                    "footer footer footer footer footer";
+    grid-template-columns: 320px 5px 1fr 5px 320px;
+    grid-template-rows: auto 5px auto 5px auto;
+  }
+
+  .trial-pack nav ul {
+    height: 13.5em;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .trial-pack nav ul li {
+    display: block;
+  }
+
+  .trial-pack nav ul li button {
+    height: 2.5em;
+    width: 100%;
+    padding: 0 0 0 20px;
+    border: 0;
+    font-size: 1em;
+    font-weight: bold;
+    text-align: left;
+  }
+
+  .trial-pack footer {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .trial-pack footer .footer-right {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+  }
+
+  .trial-pack footer .footer-right ul {
+    width: 32%;
+  }
+}
