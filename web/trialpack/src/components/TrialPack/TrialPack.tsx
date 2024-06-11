@@ -27,7 +27,7 @@ import Header from '../Header';
  * React GUI client calls custom hook represents stoplight finite state machine
 
  * @licence - GPLv3
- * @author - authored by Andrey Miroshnichenko (merzsh@gmail.com, https://github.com/merzsh)
+ * @author - Copyright (c) 2024 Andrey Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
  */
 function TrialPack() {
   const { store } = useStores();
