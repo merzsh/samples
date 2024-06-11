@@ -1,0 +1,7 @@
+/web/**/node_modules
+/web/**/.idea/
+/web/**/.directory
+/web/**/.env
+/web/**/npm-debug.log*
+/web/**/yarn-debug.log*
+/web/**/yarn-error.log*
