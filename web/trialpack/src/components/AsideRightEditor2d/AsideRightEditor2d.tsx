@@ -17,23 +17,23 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import * as styles from "./AsideRightEditor2d.modules.scss";
 import React from 'react';
-import { Route, Routes } from 'react-router-dom';
-import HeaderHome from '../HeaderHome';
-import useStores from "../../hooks/useStores";
 
-interface IHeader {
+interface IAsideRightEditor2d {
   title?: string;
 }
 
-export const Header: React.FC<IHeader> = ({title}): JSX.Element => {
-  const { store } = useStores();
+export const AsideRightEditor2d: React.FC<IAsideRightEditor2d> = ({title}): JSX.Element => {
 
-  return <Routes>
-    {[...store.appList.keys()].map((item, index) =>
-      <Route key={index} path={'/' + item} element={<HeaderHome title={store.appList.get(item)?.name ?? ''}/>} />)}
-      <Route path={'/'} element={<HeaderHome title={'TRIAL PACK'}/>} key={title} />
-    </Routes>;
+  return <div className={`${styles['aside-right-editor-2d']}`} key={title} >
+    <nav>
+      <button>Object options</button>
+      <button>Common settings</button>
+    </nav>
+    <h4>The standard Lorem Ipsum passage</h4>
+    <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</p>
+  </div>;
 }
 
-export default Header;
+export default AsideRightEditor2d;

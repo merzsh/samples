@@ -54,7 +54,7 @@ export function checkArgIs10DigitNumber(component: string, funcName: string, arg
 
   if (!/\d{10,}/.test(argValue)) {
     throw new RangeError(
-      `Internal error: argument '${argName}' is not a 8-digit number in function '${funcName}' (component '${component}')`
+      `Internal error: argument '${argName}' is not a 10-digit number in function '${funcName}' (component '${component}')`
     );
   }
 }

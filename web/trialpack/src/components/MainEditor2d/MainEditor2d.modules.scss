@@ -1,0 +1,68 @@
+/**
+ * TrialPack is web application contains several basic samples to ease web development experience.
+ * Copyright (c) 2024 Andrey Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
+ *
+ * This file is part of TrialPack.
+ *
+ * TrialPack is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+.main-editor2d {
+  height: 70vh;
+
+  nav {
+    border-left: 1px solid lightgray;
+    border-right: 1px solid lightgray;
+    border-bottom: 1px solid lightgray;
+    background-color: whitesmoke;
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: row;
+      justify-content: left;
+      height: auto;
+
+      li {
+        //display: flex;
+
+        div {
+          display: flex;
+          align-items: center;
+          justify-content: space-around;
+          padding: 3px 10px;
+          border-right: 1px solid lightgray;
+          cursor: default;
+
+          button {
+            height: 1.3em;
+            width: 1.3em;
+            margin-left: 5px;
+            padding-left: 3px;
+            padding-right: 3px;
+            border: 1px solid lightgray;
+            font-size: 1em;
+            font-weight: normal;
+            text-align: left;
+          }
+        }
+      }
+    }
+  }
+}
+
+.file-selected {
+  background-color: aqua;
+}

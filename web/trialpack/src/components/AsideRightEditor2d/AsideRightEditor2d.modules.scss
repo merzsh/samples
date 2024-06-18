@@ -17,23 +17,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { Route, Routes } from 'react-router-dom';
-import HeaderHome from '../HeaderHome';
-import useStores from "../../hooks/useStores";
+.aside-right-editor-2d {
+  nav {
+    //border: 1px solid orange;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
 
-interface IHeader {
-  title?: string;
+    button {
+      padding: 5px 15px;
+    }
+  }
 }
-
-export const Header: React.FC<IHeader> = ({title}): JSX.Element => {
-  const { store } = useStores();
-
-  return <Routes>
-    {[...store.appList.keys()].map((item, index) =>
-      <Route key={index} path={'/' + item} element={<HeaderHome title={store.appList.get(item)?.name ?? ''}/>} />)}
-      <Route path={'/'} element={<HeaderHome title={'TRIAL PACK'}/>} key={title} />
-    </Routes>;
-}
-
-export default Header;

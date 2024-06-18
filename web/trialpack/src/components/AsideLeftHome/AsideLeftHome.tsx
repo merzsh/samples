@@ -18,22 +18,14 @@
  */
 
 import React from 'react';
-import { Route, Routes } from 'react-router-dom';
-import HeaderHome from '../HeaderHome';
-import useStores from "../../hooks/useStores";
 
-interface IHeader {
+interface IAsideLeftHome {
   title?: string;
 }
 
-export const Header: React.FC<IHeader> = ({title}): JSX.Element => {
-  const { store } = useStores();
+export const AsideLeftHome: React.FC<IAsideLeftHome> = ({title}): JSX.Element => {
 
-  return <Routes>
-    {[...store.appList.keys()].map((item, index) =>
-      <Route key={index} path={'/' + item} element={<HeaderHome title={store.appList.get(item)?.name ?? ''}/>} />)}
-      <Route path={'/'} element={<HeaderHome title={'TRIAL PACK'}/>} key={title} />
-    </Routes>;
+  return <>{title}</>;
 }
 
-export default Header;
+export default AsideLeftHome;

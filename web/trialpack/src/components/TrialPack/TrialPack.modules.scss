@@ -26,10 +26,6 @@
 
   box-sizing: border-box;
   vertical-align: baseline;
-
-  /*vertical-align: baseline;
-  box-sizing: border-box;
-  background-color: whitesmoke;*/
 }
 
 .trial-pack h2, .trial-pack h3, .trial-pack h4, .trial-pack p {
@@ -75,47 +71,10 @@
 
   &__aside-left {
     grid-area: menu;
-
-    summary {
-      font-size: 1em;
-      border-radius: 5px;
-      //border: 1px solid #999;
-      cursor: pointer;
-      //margin: -1%;
-      padding: 3px 15px;
-      color: RGB(30, 30, 30);
-      background-image: linear-gradient(180deg, white, grey);
-    }
-
-    details[open] summary {
-      background: RGB(222, 222, 222);
-    }
-
-    details {
-      color: RGB(30, 30, 30);
-      cursor: pointer;
-      border: 1px solid grey;
-      //background: RGB(233, 233, 233);
-      border-radius: 5px;
-      //margin: 0 2em .4em 2em;
-      //padding-left: 10px;
-    }
   }
 
   &__aside-right {
     grid-area: side;
-
-    nav {
-      //border: 1px solid orange;
-      display: flex;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      justify-content: space-between;
-
-      button {
-        padding: 5px 15px;
-      }
-    }
   }
 
   main {
@@ -124,57 +83,7 @@
     padding-right: 1em;
     border: 1px solid lightgray;
     background-color: snow;
-
-    nav {
-      border-left: 1px solid lightgray;
-      border-right: 1px solid lightgray;
-      border-bottom: 1px solid lightgray;
-      background-color: whitesmoke;
-
-      ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: flex;
-        flex-direction: row;
-        justify-content: left;
-        height: auto;
-        //border: 1px solid red;
-        //flex-wrap: wrap;
-        /*justify-content: space-around;*/
-
-        li {
-          //display: flex;
-
-          div {
-            display: flex;
-            align-items: center;
-            justify-content: space-around;
-            padding: 3px 10px;
-            border-right: 1px solid lightgray;
-            cursor: default;
-            //background-color: snow;
-            //border: 1px solid orange;
-
-            button {
-              height: 1.3em;
-              width: 1.3em;
-              margin-left: 5px;
-              padding-left: 3px;
-              padding-right: 3px;
-              border: 1px solid lightgray;
-              font-size: 1em;
-              font-weight: normal;
-              text-align: left;
-            }
-          }
-        }
-
-      }
-    }
-
   }
-
 
   &__footer {
     grid-area: footer;
@@ -203,10 +112,6 @@
   }
 }
 
-.file-selected {
-  background-color: aqua;
-}
-
 .trial-pack aside div:nth-child(3) {
   width: 100%;
   margin-bottom: 10px;
@@ -228,8 +133,6 @@
   background-color: orange;
   background-size: 100% 100%;
 }
-
-
 
 .trial-pack footer > div {
   width: 100%;

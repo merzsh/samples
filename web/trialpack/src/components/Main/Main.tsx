@@ -19,21 +19,29 @@
 
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
-import HeaderHome from '../HeaderHome';
-import useStores from "../../hooks/useStores";
+import useStores from '../../hooks/useStores';
+import MainHome from '../MainHome';
+import {STR_ID_APP_EDITOR2D, STR_ID_APP_STOPLIGHT} from "../../utils/constants";
+import MainEditor2d from "../MainEditor2d";
 
-interface IHeader {
+interface IMain {
   title?: string;
 }
 
-export const Header: React.FC<IHeader> = ({title}): JSX.Element => {
+export const Main: React.FC<IMain> = ({title}): JSX.Element => {
   const { store } = useStores();
 
   return <Routes>
-    {[...store.appList.keys()].map((item, index) =>
-      <Route key={index} path={'/' + item} element={<HeaderHome title={store.appList.get(item)?.name ?? ''}/>} />)}
-      <Route path={'/'} element={<HeaderHome title={'TRIAL PACK'}/>} key={title} />
+    {[...store.appList.keys()].map((item, index) => {
+      switch (item) {
+        case STR_ID_APP_EDITOR2D:
+          return <Route key={index} path={'/' + item} element={<MainEditor2d title={store.appList.get(item)?.name ?? ''}/>} />;
+        case STR_ID_APP_STOPLIGHT:
+          return <Route key={index} path={'/' + item} element={<MainHome title={store.appList.get(item)?.name ?? ''}/>} />;
+      }
+    })}
+      <Route path={'/'} element={<MainHome />} key={title} />
     </Routes>;
 }
 
-export default Header;
+export default Main;

@@ -17,23 +17,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { Route, Routes } from 'react-router-dom';
-import HeaderHome from '../HeaderHome';
-import useStores from "../../hooks/useStores";
+import AsideRightEditor2d from './AsideRightEditor2d';
 
-interface IHeader {
-  title?: string;
-}
-
-export const Header: React.FC<IHeader> = ({title}): JSX.Element => {
-  const { store } = useStores();
-
-  return <Routes>
-    {[...store.appList.keys()].map((item, index) =>
-      <Route key={index} path={'/' + item} element={<HeaderHome title={store.appList.get(item)?.name ?? ''}/>} />)}
-      <Route path={'/'} element={<HeaderHome title={'TRIAL PACK'}/>} key={title} />
-    </Routes>;
-}
-
-export default Header;
+export default AsideRightEditor2d;

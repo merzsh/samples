@@ -19,21 +19,29 @@
 
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
-import HeaderHome from '../HeaderHome';
-import useStores from "../../hooks/useStores";
+import useStores from '../../hooks/useStores';
+import AsideRightHome from '../AsideRightHome';
+import AsideRightEditor2d from '../AsideRightEditor2d';
+import {STR_ID_APP_EDITOR2D, STR_ID_APP_STOPLIGHT} from '../../utils/constants';
 
-interface IHeader {
+interface IAsideRight {
   title?: string;
 }
 
-export const Header: React.FC<IHeader> = ({title}): JSX.Element => {
+export const AsideRight: React.FC<IAsideRight> = ({title}): JSX.Element => {
   const { store } = useStores();
 
   return <Routes>
-    {[...store.appList.keys()].map((item, index) =>
-      <Route key={index} path={'/' + item} element={<HeaderHome title={store.appList.get(item)?.name ?? ''}/>} />)}
-      <Route path={'/'} element={<HeaderHome title={'TRIAL PACK'}/>} key={title} />
-    </Routes>;
+    {[...store.appList.keys()].map((item, index) => {
+      switch(item) {
+        case STR_ID_APP_STOPLIGHT:
+          return (<Route key={index} path={'/' + item} element={<AsideRightHome />} />);
+        case STR_ID_APP_EDITOR2D:
+          return (<Route key={index} path={'/' + item} element={<AsideRightEditor2d />} />);
+      }
+    })}
+    <Route path={'/'} element={<AsideRightHome />} key={title} />
+  </Routes>;
 }
 
-export default Header;
+export default AsideRight;

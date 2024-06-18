@@ -18,9 +18,9 @@
  */
 
 import { makeAutoObservable } from 'mobx';
-import { Map, Record } from 'immutable';
-import {UseEditor2dInitProps, UseEditor2dResult} from '../hooks/useEditor2d';
-import {STR_ID_APP_EDITOR2D, STR_ID_APP_STOPLIGHT} from "../utils/constants";
+import { Map } from 'immutable';
+import { UseEditor2dResult } from '../hooks/useEditor2d';
+import { STR_ID_APP_EDITOR2D, STR_ID_APP_STOPLIGHT } from '../utils/constants';
 
 class MobxStore {
 
@@ -28,12 +28,14 @@ class MobxStore {
     makeAutoObservable(this);
   }
 
-  baseRoute = '';
+  //baseRoute = '';
   paymentController: UseEditor2dResult | null = null;
 
+  /*
   initProps: UseEditor2dInitProps = {
     fileName: '',
   };
+  */
 
   appList = this.initMapList();
 
@@ -42,8 +44,8 @@ class MobxStore {
   initMapList(): Map<string, { shortName: string; name: string }> {
     let result = Map<string, { shortName: string; name: string }>();
 
-    result = result.set(STR_ID_APP_STOPLIGHT, {shortName: 'State machine', name: 'State machine with stoplight sample'});
-    result = result.set(STR_ID_APP_EDITOR2D, {shortName: '2d graphics editor', name: '2d vector graphics web editor'});
+    result = result.set(STR_ID_APP_EDITOR2D, {shortName: '2d graphics editor', name: '2D VECTOR GRAPHICS WEB EDITOR'});
+    result = result.set(STR_ID_APP_STOPLIGHT, {shortName: 'State machine', name: 'STATE MACHINE WITH STOPLIGHT SAMPLE'});
     return result;
   }
 }

@@ -44,12 +44,16 @@
       }
 
       img {
-        height: 35px;
+        height: 31px;
+      }
+
+      img:active {
+        border: 1px solid cornflowerblue;
       }
     }
 
     &__between {
-      visibility: visible;
+      /*visibility: visible;*/
 
       &__top {
         width: 0;

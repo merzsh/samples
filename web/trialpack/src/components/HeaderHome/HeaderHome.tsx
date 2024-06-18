@@ -17,11 +17,30 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import * as styles from './HeaderHome.modules.scss';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import useStores from '../../hooks/useStores';
-import * as styles from './HeaderHome.modules.scss';
-require('../../resources/go.png');
+import {
+  STR_CLASS_HEADER,
+  STR_CLASS_HEADER__BACK, STR_CLASS_HEADER__BACK__BETWEEN,
+  STR_CLASS_HEADER__BACK__BETWEEN_BOTTOM, STR_CLASS_HEADER__BACK__BETWEEN_TOP,
+  STR_CLASS_HEADER__BACK__LEFT,
+  STR_CLASS_HEADER__BACK__LEFT__SELECTOR, STR_CLASS_HEADER__BACK__RIGHT,
+  STR_FILENAME_GO,
+  STR_FILENAME_GO_PNG,
+  STR_FILENAME_IMG,
+  STR_FILENAME_RESOURCES,
+  STR_FILENAME_UP,
+  STR_FILENAME_UP_PNG,
+  STR_ID_APP_SELECTOR,
+  STR_ID_HEADER,
+  STR_ID_HEADER_APP_SELECTOR,
+  STR_URL_EMPTY,
+  STR_URL_ROOT
+} from '../../utils/constants';
+require(`../../${STR_FILENAME_RESOURCES}/${STR_FILENAME_GO}/${STR_FILENAME_GO_PNG}`);
+require(`../../${STR_FILENAME_RESOURCES}/${STR_FILENAME_UP}/${STR_FILENAME_UP_PNG}`);
 
 interface IHeaderHome {
   title: string;
@@ -38,28 +57,33 @@ export const HeaderHome: React.FC<IHeaderHome> = ({title}): JSX.Element => {
   }
 
   function onClickGo() {
-    navigate('/' + selectedApp ?? '#');
-    //navigate('https://www.yandex.ru');
-    //navigate('/qwe');
+    navigate(`${STR_URL_ROOT}${selectedApp}` ?? STR_URL_EMPTY);
   }
 
-  return <div className={`${styles['header']}`}>
-    <div className={`${styles['header__back']}`}>
-      <div className={`${styles['header__back__left']}`}>
-        <select className={`${styles['header__back__left__selector']}`}
-                name={'app-selector'} defaultValue={'header'}
+  function onClickUp() {
+    navigate(STR_URL_ROOT);
+    const selector: any = document.getElementById(STR_ID_HEADER_APP_SELECTOR);
+    if (selector) selector.value = STR_ID_HEADER;
+  }
+
+  return <div className={`${styles[STR_CLASS_HEADER]}`} key={title}>
+    <div className={`${styles[STR_CLASS_HEADER__BACK]}`}>
+      <div className={`${styles[STR_CLASS_HEADER__BACK__LEFT]}`}>
+        <select id={STR_ID_HEADER_APP_SELECTOR} className={`${styles[STR_CLASS_HEADER__BACK__LEFT__SELECTOR]}`}
+                name={STR_ID_APP_SELECTOR} defaultValue={STR_ID_HEADER}
                 onChange={onSelectApp}>
-          <option value='header' disabled>Select application</option>
+          <option value={STR_ID_HEADER} disabled>Select application</option>
           {[...store.appList.keys()].map((item, index) =>
             <option key={index} value={item}>{store.appList.get(item)?.shortName}</option>)}
         </select>
-        <img src={'./img/go.png'} alt={'go'} onClick={onClickGo}/>
+        <img src={`./${STR_FILENAME_IMG}/${STR_FILENAME_GO_PNG}`} alt={STR_FILENAME_GO} onClick={onClickGo}/>
+        <img src={`./${STR_FILENAME_IMG}/${STR_FILENAME_UP_PNG}`} alt={STR_FILENAME_UP} onClick={onClickUp}/>
       </div>
-      <div className={`${styles['header__back__between']}`}>
-        <div className={`${styles['header__back__between__top']}`}></div>
-        <div className={`${styles['header__back__between__bottom']}`}></div>
+      <div className={`${styles[STR_CLASS_HEADER__BACK__BETWEEN]}`}>
+        <div className={`${styles[STR_CLASS_HEADER__BACK__BETWEEN_TOP]}`}></div>
+        <div className={`${styles[STR_CLASS_HEADER__BACK__BETWEEN_BOTTOM]}`}></div>
       </div>
-      <div className={`${styles['header__back__right']}`}></div>
+      <div className={`${styles[STR_CLASS_HEADER__BACK__RIGHT]}`}></div>
     </div>
     <h2>
       {title}
