@@ -67,7 +67,7 @@ function TrialPack() {
         <span>Merzsh Technologies</span> <span>is moving towards efficiency!</span><br/><br/><br/>
         All rights reserved &#xA9;
         <br/><br/>
-        Licensed under GPL version 3
+        Licensed under GPL v.3
       </div>
       <div className={`${styles['trial-pack__footer__right']}`}>
         <ul>
