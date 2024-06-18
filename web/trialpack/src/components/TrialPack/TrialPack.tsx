@@ -35,7 +35,7 @@ import {STR_URL_EMPTY} from '../../utils/constants';
  */
 function TrialPack() {
   const { store } = useStores();
-  store.paymentController = useEditor2d();
+  store.editor2dController = useEditor2d();
 
   React.useEffect(() => {
     return () => {};

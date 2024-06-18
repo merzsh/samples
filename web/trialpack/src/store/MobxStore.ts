@@ -21,6 +21,7 @@ import { makeAutoObservable } from 'mobx';
 import { Map } from 'immutable';
 import { UseEditor2dResult } from '../hooks/useEditor2d';
 import { STR_ID_APP_EDITOR2D, STR_ID_APP_STOPLIGHT } from '../utils/constants';
+import {StateNames} from "../hooks/useStoplight";
 
 class MobxStore {
 
@@ -28,18 +29,34 @@ class MobxStore {
     makeAutoObservable(this);
   }
 
+  /**
+   * Common cross-application section
+   */
   //baseRoute = '';
-  paymentController: UseEditor2dResult | null = null;
+
+  /**
+   * "Stoplight" application section
+   */
+
+  stateName = StateNames.INIT;
+  countdownStr = '';
+
+
+  /**
+   * "Editor 2d" application section
+   */
+
+  editor2dController: UseEditor2dResult | null = null;
+
+  appList = this.initMapList();
+
+  filesList = [] as string[];
 
   /*
   initProps: UseEditor2dInitProps = {
     fileName: '',
   };
   */
-
-  appList = this.initMapList();
-
-  filesList = [] as string[];
 
   initMapList(): Map<string, { shortName: string; name: string }> {
     let result = Map<string, { shortName: string; name: string }>();

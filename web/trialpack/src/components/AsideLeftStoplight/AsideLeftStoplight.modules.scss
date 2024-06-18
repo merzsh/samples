@@ -1,0 +1,105 @@
+/**
+ * TrialPack is web application contains several basic samples to ease web development experience.
+ * Copyright (c) 2024 Andrey Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
+ *
+ * This file is part of TrialPack.
+ *
+ * TrialPack is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+.stoplight-aside-left {
+  visibility: visible;
+
+  &__status {
+    border: 1px solid darkgrey;
+    margin: 15px;
+    padding: 15px;
+
+    legend {
+      font-weight: bold;
+    }
+
+    table {
+      margin-top: 7%;
+      width: 97%;
+
+      tr {
+        height: 45px;
+
+        th {
+          padding-top: 20px;
+          font-weight: normal;
+        }
+      }
+
+      td {
+        vertical-align: middle;
+      }
+    }
+
+    &__td-ptr {
+      font-weight: bold;
+      text-align: center;
+    }
+
+    &__td-pic {
+      display: flex;
+      justify-content: center;
+    }
+
+    &__td-state {
+      font-style: italic;
+      width: 75%;
+      padding-left: 7px;
+    }
+  }
+}
+
+#INIT {
+  width: 25px;
+  height: 25px;
+  background: lightgray;
+}
+
+#RED {
+  width: 25px;
+  height: 25px;
+  background: red;
+}
+
+#RED_YELLOW {
+  width: 0;
+  height: 0;
+  border-top: 24px solid red;
+  border-right: 24px solid transparent;
+  border-right: 24px solid yellow;
+}
+
+#GREEN {
+  width: 25px;
+  height: 25px;
+  background: green;
+}
+
+#GREEN_BLINKING {
+  width: 0;
+  height: 0;
+  border-top: 24px solid green;
+  border-right: 24px solid transparent;
+}
+
+#YELLOW {
+  width: 25px;
+  height: 25px;
+  background: yellow;
+}

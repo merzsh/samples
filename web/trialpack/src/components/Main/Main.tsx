@@ -21,8 +21,10 @@ import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import useStores from '../../hooks/useStores';
 import MainHome from '../MainHome';
-import {STR_ID_APP_EDITOR2D, STR_ID_APP_STOPLIGHT} from "../../utils/constants";
-import MainEditor2d from "../MainEditor2d";
+import MainStoplight from '../MainStoplight';
+import MainEditor2d from '../MainEditor2d';
+import {STR_ID_APP_EDITOR2D, STR_ID_APP_STOPLIGHT} from '../../utils/constants';
+
 
 interface IMain {
   title?: string;
@@ -37,7 +39,7 @@ export const Main: React.FC<IMain> = ({title}): JSX.Element => {
         case STR_ID_APP_EDITOR2D:
           return <Route key={index} path={'/' + item} element={<MainEditor2d title={store.appList.get(item)?.name ?? ''}/>} />;
         case STR_ID_APP_STOPLIGHT:
-          return <Route key={index} path={'/' + item} element={<MainHome title={store.appList.get(item)?.name ?? ''}/>} />;
+          return <Route key={index} path={'/' + item} element={<MainStoplight title={store.appList.get(item)?.name ?? ''}/>} />;
       }
     })}
       <Route path={'/'} element={<MainHome />} key={title} />

@@ -21,6 +21,7 @@ import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import useStores from '../../hooks/useStores';
 import AsideLeftHome from '../AsideLeftHome';
+import AsideLeftStoplight from '../AsideLeftStoplight';
 import AsideLeftEditor2d from '../AsideLeftEditor2d';
 import { STR_ID_APP_EDITOR2D, STR_ID_APP_STOPLIGHT } from '../../utils/constants';
 
@@ -35,7 +36,7 @@ export const AsideLeft: React.FC<IAsideLeft> = ({title}): JSX.Element => {
     {[...store.appList.keys()].map((item, index) => {
       switch(item) {
         case STR_ID_APP_STOPLIGHT:
-          return (<Route key={index} path={'/' + item} element={<AsideLeftHome />} />);
+          return (<Route key={index} path={'/' + item} element={<AsideLeftStoplight />} />);
         case STR_ID_APP_EDITOR2D:
           return (<Route key={index} path={'/' + item} element={<AsideLeftEditor2d />} />);
       }
