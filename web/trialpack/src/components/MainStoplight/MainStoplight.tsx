@@ -58,7 +58,6 @@ export const MainStoplight: React.FC<IAsideRightEditor2d> = ({title}): JSX.Eleme
     const countdownSec = Math.round(stateValue.countdownMs / 1000);
     const countdownSecStr = countdownSec < 10 ? '0' + countdownSec : countdownSec.toString();
 
-    console.log(12345, 'onStateChange', stateValue.stateName, stateValue.countdownMs);
     store.stlCountdownStr = stateValue.countdownMs >= 1000 ? countdownSecStr :
       (stateValue.countdownMs > 0 && stateValue.countdownMs < 1000 ? '--' : '');
 
