@@ -49,4 +49,29 @@ export const STR_CLASS_HEADER__BACK__BETWEEN_BOTTOM = `${STR_CLASS_HEADER__BACK_
 export const STR_CLASS_HEADER__BACK__RIGHT = `${STR_CLASS_HEADER__BACK}__right`;
 
 export const STR_CLASS_MAIN = 'main';
-export const STR_CLASS_MAIN_EDITOR_2D = `${STR_CLASS_MAIN}-editor2d`;
+
+/**
+ * Stoplight application section
+ */
+export const STL_STR_OPACITY_OFF = '0.3';
+export const STL_STR_OPACITY_ON = '0.8';
+export const STL_STR_CLASS_MAIN = `${STR_ID_APP_STOPLIGHT}-${STR_CLASS_MAIN}`;
+
+export const StoplightControls = {
+  FULL_CYCLE_TIME_SEC: 'fullCycleTimeSec', LIGHT_PERCENT_RED: 'lightPercentRed',
+  LIGHT_PERCENT_RED_YELLOW: 'lightPercentRedYellow', LIGHT_PERCENT_GREEN: 'lightPercentGreen',
+  LIGHT_PERCENT_GREEN_BLINKING: 'lightPercentGreenBlinking', LIGHT_PERCENT_YELLOW: 'lightPercentYellow'
+};
+export const initSettingsStoplight = {
+  [StoplightControls.FULL_CYCLE_TIME_SEC]: 15,
+  [StoplightControls.LIGHT_PERCENT_RED]: 39,
+  [StoplightControls.LIGHT_PERCENT_RED_YELLOW]: 11,
+  [StoplightControls.LIGHT_PERCENT_GREEN]: 21,
+  [StoplightControls.LIGHT_PERCENT_GREEN_BLINKING]: 17,
+  [StoplightControls.LIGHT_PERCENT_YELLOW]: 11,
+}
+
+/**
+ * 2d-Editor section
+ */
+export const E2D_STR_CLASS_MAIN = `${STR_ID_APP_EDITOR2D}-${STR_CLASS_MAIN}`;

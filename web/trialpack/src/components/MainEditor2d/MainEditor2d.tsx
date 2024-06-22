@@ -21,7 +21,7 @@ import * as styles from './MainEditor2d.modules.scss';
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import useStores from '../../hooks/useStores';
-import { STR_CLASS_MAIN_EDITOR_2D} from '../../utils/constants';
+import { E2D_STR_CLASS_MAIN} from '../../utils/constants';
 
 interface IMainEditor2d {
   title?: string;
@@ -52,7 +52,7 @@ export const MainEditor2d: React.FC<IMainEditor2d> = ({title}): JSX.Element => {
     }
   }
 
-  return <div className={`${styles[STR_CLASS_MAIN_EDITOR_2D]}`} key={title}>
+  return <div className={`${styles[E2D_STR_CLASS_MAIN]}`} key={title}>
     <nav>
       <ul>
         {

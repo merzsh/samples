@@ -17,16 +17,88 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-.aside-right-editor-2d {
-  nav {
-    //border: 1px solid orange;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
+.aside-right-stoplight {
+  visibility: visible;
 
-    button {
-      padding: 5px 15px;
+  &__status {
+    border: 1px solid darkgrey;
+    margin: 15px;
+    padding: 30px 15px;
+
+    legend {
+      font-weight: bold;
     }
+
+    &__pad {
+      visibility: visible;
+
+      &__btn {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 170px;
+        margin-bottom: 20px;
+
+        button {
+          padding: 5px 10px;
+          font-size: medium;
+          border: 1px solid whitesmoke;
+          border-radius: 7px;
+          background-color: #E5E4E2;
+        }
+
+        button:hover {
+          background-color: lightgray;
+        }
+
+        button:disabled {
+          color: gray;
+          background-color: snow;
+        }
+
+        button:active {
+            border: 1px solid darkgrey;
+        }
+      }
+
+      &__fld {
+        table {
+          width: 100%;
+          //table-layout: fixed;
+          border-spacing: 0 7px;
+          border-collapse: separate;
+          //border: 1px solid green;
+
+          td {
+            //padding-top: 10px;
+            font-size: small;
+            //border: 1px solid blue;
+          }
+        }
+
+        &__label {
+          text-align: left;
+          border-bottom: 1px solid lightgray;
+        }
+
+        &__input {
+          width: min-content;
+          text-align: right;
+          padding: 0;
+        }
+
+
+        label {
+          font-size: small;
+        }
+
+        input {
+          width: 4em;
+          border: 1px solid lightgray;
+        }
+
+      }
+    }
+
   }
 }

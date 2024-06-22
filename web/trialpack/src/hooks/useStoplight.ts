@@ -41,13 +41,15 @@ type StateValue = {
   stateName: StateNames
 }
 
-type StoplightResult = {
+type UseStoplightResult = {
   init: () => void,
   reset: (propsInitial: typeof initSettings) => void,
   next: () => void,
   run: () => void,
   nextTact: (idleRatioMs: number, idleRatioGreenMs: number) => void,
-  onStateChange: (stateValue: StateValue) => void
+  registerStateHandler: (onStateChange: (state: StateValue) => void) => void,
+  setProps: (settings: typeof initSettings) => void,
+  timestamp: string,
 }
 
 const Controls = { FULL_CYCLE_TIME_SEC: 'fullCycleTimeSec', LIGHT_PERCENT_RED: 'lightPercentRed',
@@ -67,14 +69,10 @@ const initSettings = {
 /**
  * Custom React hook represents finite state machine core based on stoplight (traffic lights) example.
  *
- * @param props - finite state machine settings
- *
  * @licence - GPLv3
  * @author - authored by Andrey Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
  */
-function useStoplight(props = initSettings): StoplightResult {
-  const strError = `Error: hook 'useStoplight' constructor argument 'props' is null or undefined!`;
-  if (!props) throw new ReferenceError(strError);
+function useStoplight(): UseStoplightResult {
 
   const initStoreObject = {
     currState: StateNames.INIT,
@@ -86,6 +84,8 @@ function useStoplight(props = initSettings): StoplightResult {
 
   const [store, dispatch] =
     useReducer<Reducer<State, Action>>(reducer, {...initStoreObject}, undefined);
+  const props = useRef<typeof initSettings>(initSettings);
+  const stateHandlers = useRef<((state: StateValue) => void)[]>([]);
   const counter = useRef(0);
   const countdownMs = useRef(0);
   const passedMs = useRef(0);
@@ -97,14 +97,16 @@ function useStoplight(props = initSettings): StoplightResult {
       isLightGreen: false, countdownMs: 0, stateName: StateNames.INIT});
 
   // exported hook result
-  const result: StoplightResult = {
+  const result = useRef<UseStoplightResult>({
     init: init,
     reset: reset,
     next: next,
     run: run,
     nextTact: nextTact,
-    onStateChange: (stateValue: StateValue) => { if(!stateValue) return; }
-  }
+    registerStateHandler: registerStateHandler,
+    setProps: setProps,
+    timestamp: Math.round(Math.random()*100).toString(),
+  });
 
   // constructor
   React.useEffect(() => {
@@ -120,10 +122,14 @@ function useStoplight(props = initSettings): StoplightResult {
     stateValue.current.isLightRed = store.lightRed;
     stateValue.current.isLightYellow = store.lightYellow;
     stateValue.current.isLightGreen = store.lightGreen;
-    stateValue.current.countdownMs = countdownMs.current;
     stateValue.current.stateName = store.currState;
 
-    result.onStateChange({...stateValue.current});
+    if (store.currState === StateNames.INIT) countdownMs.current = 0;
+    stateValue.current.countdownMs = countdownMs.current;
+
+    stateHandlers.current.forEach((item) => {
+      item({ ...stateValue.current });
+    });
   }, [store]);
 
   /**
@@ -175,6 +181,16 @@ function useStoplight(props = initSettings): StoplightResult {
     throw new Error(STR_UNACCEPTABLE_STATE + action.type + '; current state is: ' + state.currState);
   }
 
+  function registerStateHandler(onStateChange: (state: StateValue) => void) {
+    if (!onStateChange) {
+      return;
+    }
+
+    if (!stateHandlers.current.find((item) => item.toString() === onStateChange.toString())) {
+      stateHandlers.current.push(onStateChange);
+    }
+  }
+
   /**
    * Gets stoplight current state due time flow period.
    *
@@ -194,34 +210,34 @@ function useStoplight(props = initSettings): StoplightResult {
         break;
       case StateNames.RED:
         if(currTimeMs === idleRatioMs) {
-          countdownMs.current = (props[Controls.LIGHT_PERCENT_RED] / 100) * maxTimeMs;
+          countdownMs.current = (props.current[Controls.LIGHT_PERCENT_RED] / 100) * maxTimeMs;
         }
-        if (percent <= props[Controls.LIGHT_PERCENT_RED]) {
+        if (percent <= props.current[Controls.LIGHT_PERCENT_RED]) {
           countdownMs.current -= idleRatioMs;
           return StateNames.RED;
         }
         countdownMs.current = 0;
         break;
       case StateNames.RED_YELLOW:
-        if (percent <= props[Controls.LIGHT_PERCENT_RED_YELLOW]) return StateNames.RED_YELLOW;
+        if (percent <= props.current[Controls.LIGHT_PERCENT_RED_YELLOW]) return StateNames.RED_YELLOW;
         break;
       case StateNames.GREEN:
-        if(currTimeMs === idleRatioMs) countdownMs.current = (props[Controls.LIGHT_PERCENT_GREEN]/100 +
-          props[Controls.LIGHT_PERCENT_GREEN_BLINKING]/100)*maxTimeMs;
-        if (percent <= props[Controls.LIGHT_PERCENT_GREEN]) {
+        if(currTimeMs === idleRatioMs) countdownMs.current = (props.current[Controls.LIGHT_PERCENT_GREEN]/100 +
+          props.current[Controls.LIGHT_PERCENT_GREEN_BLINKING]/100)*maxTimeMs;
+        if (percent <= props.current[Controls.LIGHT_PERCENT_GREEN]) {
           countdownMs.current -= idleRatioMs;
           return StateNames.GREEN;
         }
         break;
       case StateNames.GREEN_BLINKING:
-        if (percent <= props[Controls.LIGHT_PERCENT_GREEN_BLINKING]) {
+        if (percent <= props.current[Controls.LIGHT_PERCENT_GREEN_BLINKING]) {
           countdownMs.current -= idleRatioMs;
           return StateNames.GREEN_BLINKING;
         }
         countdownMs.current = 0;
         break;
       case StateNames.YELLOW:
-        if (percent <= props[Controls.LIGHT_PERCENT_YELLOW]) return StateNames.YELLOW;
+        if (percent <= props.current[Controls.LIGHT_PERCENT_YELLOW]) return StateNames.YELLOW;
         break;
       default:
         throw new Error(`Internal error: unknown state ${currState.current}`);
@@ -259,6 +275,17 @@ function useStoplight(props = initSettings): StoplightResult {
   }
 
   /**
+   * Set properties
+   *
+   * @param settings - user custom settings to override initial settings
+   */
+  function setProps(settings: typeof initSettings) {
+    if (settings) {
+      props.current = settings;
+    }
+  }
+
+  /**
    * Guides stoplight machine to its initial state.
    */
   function init() {
@@ -273,12 +300,12 @@ function useStoplight(props = initSettings): StoplightResult {
   function reset(propsInitial: typeof initSettings) {
     if(!propsInitial) throw new ReferenceError('Internal error: argument propsInitial is null!');
 
-    props[Controls.FULL_CYCLE_TIME_SEC] = propsInitial[Controls.FULL_CYCLE_TIME_SEC];
-    props[Controls.LIGHT_PERCENT_RED] = propsInitial[Controls.LIGHT_PERCENT_RED];
-    props[Controls.LIGHT_PERCENT_RED_YELLOW] = propsInitial[Controls.LIGHT_PERCENT_RED_YELLOW];
-    props[Controls.LIGHT_PERCENT_GREEN] = propsInitial[Controls.LIGHT_PERCENT_GREEN];
-    props[Controls.LIGHT_PERCENT_GREEN_BLINKING] = propsInitial[Controls.LIGHT_PERCENT_GREEN_BLINKING];
-    props[Controls.LIGHT_PERCENT_YELLOW] = propsInitial[Controls.LIGHT_PERCENT_YELLOW];
+    props.current[Controls.FULL_CYCLE_TIME_SEC] = propsInitial[Controls.FULL_CYCLE_TIME_SEC];
+    props.current[Controls.LIGHT_PERCENT_RED] = propsInitial[Controls.LIGHT_PERCENT_RED];
+    props.current[Controls.LIGHT_PERCENT_RED_YELLOW] = propsInitial[Controls.LIGHT_PERCENT_RED_YELLOW];
+    props.current[Controls.LIGHT_PERCENT_GREEN] = propsInitial[Controls.LIGHT_PERCENT_GREEN];
+    props.current[Controls.LIGHT_PERCENT_GREEN_BLINKING] = propsInitial[Controls.LIGHT_PERCENT_GREEN_BLINKING];
+    props.current[Controls.LIGHT_PERCENT_YELLOW] = propsInitial[Controls.LIGHT_PERCENT_YELLOW];
   }
 
   /**
@@ -310,7 +337,7 @@ function useStoplight(props = initSettings): StoplightResult {
 
     passedMs.current += idleRatioMs;
     counter.current++;
-    const st = getStateByTimeInMs(props[Controls.FULL_CYCLE_TIME_SEC] * 1000,
+    const st = getStateByTimeInMs(props.current[Controls.FULL_CYCLE_TIME_SEC] * 1000,
       passedMs.current, idleRatioMs);
 
     if (st === StateNames.INIT) {
@@ -327,10 +354,12 @@ function useStoplight(props = initSettings): StoplightResult {
       passedMsGreenBlink.current = passedMs.current;
     }
 
-    result.onStateChange({...stateValue.current});
+    stateHandlers.current.forEach((item) => {
+      item({ ...stateValue.current });
+    });
   }
 
-  return result;
+  return result.current;
 }
 
-export { useStoplight, StateNames };
+export { useStoplight, UseStoplightResult, StateNames, StateValue };

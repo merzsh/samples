@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import * as styles from "./AsideRightEditor2d.modules.scss";
+import * as styles from './AsideRightEditor2d.modules.scss';
 import React from 'react';
 
 interface IAsideRightEditor2d {

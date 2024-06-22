@@ -20,8 +20,13 @@
 import { makeAutoObservable } from 'mobx';
 import { Map } from 'immutable';
 import { UseEditor2dResult } from '../hooks/useEditor2d';
-import { STR_ID_APP_EDITOR2D, STR_ID_APP_STOPLIGHT } from '../utils/constants';
-import {StateNames} from "../hooks/useStoplight";
+import {
+  initSettingsStoplight,
+  STL_STR_OPACITY_OFF,
+  STR_ID_APP_EDITOR2D,
+  STR_ID_APP_STOPLIGHT
+} from '../utils/constants';
+import {StateNames, UseStoplightResult} from '../hooks/useStoplight';
 
 class MobxStore {
 
@@ -37,16 +42,22 @@ class MobxStore {
   /**
    * "Stoplight" application section
    */
-
-  stateName = StateNames.INIT;
-  countdownStr = '';
+  stlController: UseStoplightResult | null = null;
+  stlStateName = StateNames.INIT;
+  stlCountdownStr = '';
+  stlSettings = initSettingsStoplight;
+  stlIsSettingsDisabled = false;
+  stlMessage = '';
+  stlOpacityRed = STL_STR_OPACITY_OFF;
+  stlOpacityYellow = STL_STR_OPACITY_OFF;
+  stlOpacityGreen = STL_STR_OPACITY_OFF;
 
 
   /**
    * "Editor 2d" application section
    */
 
-  editor2dController: UseEditor2dResult | null = null;
+  e2dController: UseEditor2dResult | null = null;
 
   appList = this.initMapList();
 

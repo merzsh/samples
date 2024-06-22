@@ -20,12 +20,13 @@
 import * as styles from './TrialPack.modules.scss';
 import React from 'react';
 import useStores from '../../hooks/useStores';
-import { useEditor2d } from '../../hooks/useEditor2d';
 import Header from '../Header';
 import AsideLeft from '../AsideLeft';
 import AsideRight from '../AsideRight';
 import Main from '../Main';
-import {STR_URL_EMPTY} from '../../utils/constants';
+import { useStoplight, UseStoplightResult } from '../../hooks/useStoplight';
+import { useEditor2d, UseEditor2dResult } from '../../hooks/useEditor2d';
+import { STR_URL_EMPTY } from '../../utils/constants';
 
 /**
  * React GUI client calls custom hook represents controller
@@ -34,12 +35,25 @@ import {STR_URL_EMPTY} from '../../utils/constants';
  * @author - Copyright (c) 2024 Andrey Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
  */
 function TrialPack() {
+
   const { store } = useStores();
-  store.editor2dController = useEditor2d();
+  const stlController = React.useRef<UseStoplightResult>(useStoplight());
+  const e2dController = React.useRef<UseEditor2dResult>(useEditor2d());
 
   React.useEffect(() => {
+    initControllers();
+
     return () => {};
   }, []);
+
+  function initControllers() {
+    if (!store?.stlController) {
+      store.stlController = stlController.current;
+    }
+    if (!store?.e2dController) {
+      store.e2dController = e2dController.current;
+    }
+  }
 
   /*function onClickTest() {
   }*/
@@ -64,9 +78,9 @@ function TrialPack() {
 
     <footer className={`${styles['trial-pack__footer']}`}>
       <div className={`${styles['trial-pack__footer__left']}`}>
-        <span>Merzsh Technologies</span> <span>is moving towards efficiency!</span><br/><br/><br/>
+        <span>Merzsh Technologies</span> <span>is moving toward efficiency!</span><br/><br/><br/>
         All rights reserved &#xA9;
-        <br/><br/>
+        <br/>
         Licensed under GPL v.3
       </div>
       <div className={`${styles['trial-pack__footer__right']}`}>

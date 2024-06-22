@@ -17,10 +17,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import * as styles from "./AsideLeftStoplight.modules.scss";
+import * as styles from './AsideLeftStoplight.modules.scss';
 import React from 'react';
-import useStores from "../../hooks/useStores";
-import {StateNames} from "../../hooks/useStoplight";
+import { observer } from 'mobx-react-lite';
+import useStores from '../../hooks/useStores';
+import { StateNames } from '../../hooks/useStoplight';
 
 interface IAsideRightEditor2d {
   title?: string;
@@ -34,9 +35,9 @@ export const AsideLeftStoplight: React.FC<IAsideRightEditor2d> = ({title}): JSX.
       <legend>State diagram</legend>
       <table>
         <tbody>
-        <tr style={store.stateName === StateNames.INIT ? {background: "wheat"} : {}}>
+        <tr style={store.stlStateName === StateNames.INIT ? {background: "wheat"} : {}}>
           <td className={`${styles['stoplight-aside-left__status__td-ptr']}`}>
-             {store.stateName === StateNames.INIT ? '>' : ''}
+             {store.stlStateName === StateNames.INIT ? '>' : ''}
           </td>
           <td>
               <div className={`${styles['stoplight-aside-left__status__td-pic']}`}>
@@ -45,9 +46,9 @@ export const AsideLeftStoplight: React.FC<IAsideRightEditor2d> = ({title}): JSX.
           </td>
           <td className={`${styles['stoplight-aside-left__status__td-state']}`}>INIT</td>
         </tr>
-        <tr style={store.stateName === StateNames.RED ? {background: "wheat"} : {}}>
+        <tr style={store.stlStateName === StateNames.RED ? {background: "wheat"} : {}}>
           <td className={`${styles['stoplight-aside-left__status__td-ptr']}`}>
-            {store.stateName === StateNames.RED ? '>' : ''}
+            {store.stlStateName === StateNames.RED ? '>' : ''}
           </td>
           <td>
             <div className={`${styles['stoplight-aside-left__status__td-pic']}`}>
@@ -56,9 +57,9 @@ export const AsideLeftStoplight: React.FC<IAsideRightEditor2d> = ({title}): JSX.
           </td>
           <td className={`${styles['stoplight-aside-left__status__td-state']}`}>RED</td>
         </tr>
-        <tr style={store.stateName === StateNames.RED_YELLOW ? {background: "wheat"} : {}}>
+        <tr style={store.stlStateName === StateNames.RED_YELLOW ? {background: "wheat"} : {}}>
           <td className={`${styles['stoplight-aside-left__status__td-ptr']}`}>
-            {store.stateName === StateNames.RED_YELLOW ? '>' : ''}
+            {store.stlStateName === StateNames.RED_YELLOW ? '>' : ''}
           </td>
           <td>
             <div className={`${styles['stoplight-aside-left__status__td-pic']}`}>
@@ -67,9 +68,9 @@ export const AsideLeftStoplight: React.FC<IAsideRightEditor2d> = ({title}): JSX.
           </td>
           <td className={`${styles['stoplight-aside-left__status__td-state']}`}>RED_YELLOW</td>
         </tr>
-        <tr style={store.stateName === StateNames.GREEN ? {background: "wheat"} : {}}>
+        <tr style={store.stlStateName === StateNames.GREEN ? {background: "wheat"} : {}}>
           <td className={`${styles['stoplight-aside-left__status__td-ptr']}`}>
-            {store.stateName === StateNames.GREEN ? '>' : ''}
+            {store.stlStateName === StateNames.GREEN ? '>' : ''}
           </td>
           <td>
             <div className={`${styles['stoplight-aside-left__status__td-pic']}`}>
@@ -78,9 +79,9 @@ export const AsideLeftStoplight: React.FC<IAsideRightEditor2d> = ({title}): JSX.
           </td>
           <td className={`${styles['stoplight-aside-left__status__td-state']}`}>GREEN</td>
         </tr>
-        <tr style={store.stateName === StateNames.GREEN_BLINKING ? {background: "wheat"} : {}}>
+        <tr style={store.stlStateName === StateNames.GREEN_BLINKING ? {background: "wheat"} : {}}>
           <td className={`${styles['stoplight-aside-left__status__td-ptr']}`}>
-            {store.stateName === StateNames.GREEN_BLINKING ? '>' : ''}
+            {store.stlStateName === StateNames.GREEN_BLINKING ? '>' : ''}
           </td>
           <td>
             <div className={`${styles['stoplight-aside-left__status__td-pic']}`}>
@@ -89,9 +90,9 @@ export const AsideLeftStoplight: React.FC<IAsideRightEditor2d> = ({title}): JSX.
           </td>
           <td className={`${styles['stoplight-aside-left__status__td-state']}`}>GREEN_BLINKING</td>
         </tr>
-        <tr style={store.stateName === StateNames.YELLOW ? {background: "wheat"} : {}}>
+        <tr style={store.stlStateName === StateNames.YELLOW ? {background: "wheat"} : {}}>
           <td className={`${styles['stoplight-aside-left__status__td-ptr']}`}>
-            {store.stateName === StateNames.YELLOW ? '>' : ''}
+            {store.stlStateName === StateNames.YELLOW ? '>' : ''}
           </td>
           <td>
             <div className={`${styles['stoplight-aside-left__status__td-pic']}`}>
@@ -103,7 +104,7 @@ export const AsideLeftStoplight: React.FC<IAsideRightEditor2d> = ({title}): JSX.
         </tbody>
         <tfoot>
         <tr>
-          <th colSpan={3} style={{textAlign: "left"}}>Timer value: {store.countdownStr}</th>
+          <th colSpan={3} style={{textAlign: "left"}}>Timer value: {store.stlCountdownStr}</th>
         </tr>
         </tfoot>
       </table>
@@ -111,4 +112,4 @@ export const AsideLeftStoplight: React.FC<IAsideRightEditor2d> = ({title}): JSX.
   </div>;
 }
 
-export default AsideLeftStoplight;
+export default observer(AsideLeftStoplight);
