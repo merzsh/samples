@@ -2,5 +2,6 @@ Here stated repository available branches:
 
 main - master main repository with final stable release
 
+br/samples/go - GoLang samples branch
 trialpack - Trial Pack application consolidation branch for merging into main one
 trialpack-1001 - Stoplight (state machine demo) application transfer into Trial Pack application
