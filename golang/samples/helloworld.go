@@ -1,5 +1,16 @@
 package main
-import "fmt"
+
+import (
+	"fmt"
+	"os"
+)
+
 func main() {
-	fmt.Println("Hello, Мир!")
+	arg := ""
+
+	for i := 1; i < len(os.Args); i++ {
+		arg += os.Args[i] + " "
+	}
+
+	fmt.Printf("Hello, Мир! %v\n", arg)
 }
