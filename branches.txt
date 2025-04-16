@@ -3,5 +3,6 @@ Here stated repository available branches:
 main - master main repository with final stable release
 
 go/basic - GoLang samples branch
-trialpack - Trial Pack application consolidation branch for merging into main one
-trialpack-1001 - Stoplight (state machine demo) application transfer into Trial Pack application
+trialpack - Trial Pack web application (aka portal) consolidation branch for merging into main one
+trialpack/stoplight - Stoplight (state machine demo) application transfer into Trial Pack application
+trialpack/atm - Automated Teller Machine (cash mashin) emulator
