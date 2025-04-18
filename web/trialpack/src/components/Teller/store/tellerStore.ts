@@ -17,22 +17,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import { makeServer } from './server';
-import TrialPack from './components/Main/TrialPack/TrialPack';
+import {combineReducers, configureStore} from '@reduxjs/toolkit';
+import tellerDefaultSlice, {STR_TELLER_DEFAULT_QUERY_ID, useGetBalanceQuery, tellerDefaultQuery} from './tellerReducers';
 
-if (process.env.USE_MIRAGE) {
-  makeServer();
-}
+const reducer = combineReducers({
+  tellerDefaultSlice,
+  [STR_TELLER_DEFAULT_QUERY_ID]: tellerDefaultQuery.reducer,
+})
 
-const htmlElement = document.getElementById('root');
-if (htmlElement) {
-  const root = createRoot(htmlElement);
-  root.render(
-    <BrowserRouter>
-      <TrialPack />
-    </BrowserRouter>
-  );
-}
+const store = configureStore({
+  reducer: reducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(tellerDefaultQuery.middleware),
+});
+
+export default store;

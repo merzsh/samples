@@ -18,21 +18,22 @@
  */
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import { makeServer } from './server';
-import TrialPack from './components/Main/TrialPack/TrialPack';
+import { Route, Routes } from 'react-router-dom';
+import MainHeaderHome from './MainHeaderHome/MainHeaderHome';
+import useStores from '../../../hooks/useStores';
 
-if (process.env.USE_MIRAGE) {
-  makeServer();
+interface IMainHeader {
+  title?: string;
 }
 
-const htmlElement = document.getElementById('root');
-if (htmlElement) {
-  const root = createRoot(htmlElement);
-  root.render(
-    <BrowserRouter>
-      <TrialPack />
-    </BrowserRouter>
-  );
+export const MainHeader: React.FC<IMainHeader> = ({title}): JSX.Element => {
+  const { store } = useStores();
+
+  return <Routes>
+    {[...store.appList.keys()].map((item, index) =>
+      <Route key={index} path={'/' + item} element={<MainHeaderHome title={store.appList.get(item)?.name ?? ''}/>} />)}
+      <Route path={'/'} element={<MainHeaderHome title={'TRIAL PACK'}/>} key={title} />
+    </Routes>;
 }
+
+export default MainHeader;

@@ -18,21 +18,14 @@
  */
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import { makeServer } from './server';
-import TrialPack from './components/Main/TrialPack/TrialPack';
 
-if (process.env.USE_MIRAGE) {
-  makeServer();
+interface IMainHomeAsideRight {
+  title?: string;
 }
 
-const htmlElement = document.getElementById('root');
-if (htmlElement) {
-  const root = createRoot(htmlElement);
-  root.render(
-    <BrowserRouter>
-      <TrialPack />
-    </BrowserRouter>
-  );
+export const MainHomeAsideRight: React.FC<IMainHomeAsideRight> = ({title}): JSX.Element => {
+
+  return <>{title}</>;
 }
+
+export default MainHomeAsideRight;

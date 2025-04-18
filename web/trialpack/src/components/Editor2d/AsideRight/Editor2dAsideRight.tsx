@@ -17,22 +17,23 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import * as styles from './Editor2dAsideRight.modules.scss';
 import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import { makeServer } from './server';
-import TrialPack from './components/Main/TrialPack/TrialPack';
 
-if (process.env.USE_MIRAGE) {
-  makeServer();
+interface IEditor2dAsideRight {
+  title?: string;
 }
 
-const htmlElement = document.getElementById('root');
-if (htmlElement) {
-  const root = createRoot(htmlElement);
-  root.render(
-    <BrowserRouter>
-      <TrialPack />
-    </BrowserRouter>
-  );
+export const Editor2dAsideRight: React.FC<IEditor2dAsideRight> = ({title}): JSX.Element => {
+
+  return <div className={`${styles['aside-right-editor-2d']}`} key={title} >
+    <nav>
+      <button>Object options</button>
+      <button>Common settings</button>
+    </nav>
+    <h4>The standard Lorem Ipsum passage</h4>
+    <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</p>
+  </div>;
 }
+
+export default Editor2dAsideRight;

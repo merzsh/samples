@@ -17,22 +17,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import { makeServer } from './server';
-import TrialPack from './components/Main/TrialPack/TrialPack';
+import Stoplight from './Stoplight';
 
-if (process.env.USE_MIRAGE) {
-  makeServer();
-}
-
-const htmlElement = document.getElementById('root');
-if (htmlElement) {
-  const root = createRoot(htmlElement);
-  root.render(
-    <BrowserRouter>
-      <TrialPack />
-    </BrowserRouter>
-  );
-}
+export default Stoplight;

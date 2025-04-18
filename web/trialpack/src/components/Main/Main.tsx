@@ -19,12 +19,14 @@
 
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
+import {Provider} from 'react-redux';
+import tellerStore from '../Teller/store/tellerStore';
 import useStores from '../../hooks/useStores';
-import MainHome from '../MainHome';
-import MainStoplight from '../MainStoplight';
-import MainEditor2d from '../MainEditor2d';
-import {STR_ID_APP_EDITOR2D, STR_ID_APP_STOPLIGHT} from '../../utils/constants';
-
+import MainHome from './MainHome';
+import MainStoplight from '../Stoplight';
+import MainEditor2d from '../Editor2d';
+import {STR_ID_APP_TELLER, STR_ID_APP_EDITOR2D, STR_ID_APP_STOPLIGHT} from '../../utils/constants';
+import Teller from '../Teller';
 
 interface IMain {
   title?: string;
@@ -40,6 +42,12 @@ export const Main: React.FC<IMain> = ({title}): JSX.Element => {
           return <Route key={index} path={'/' + item} element={<MainEditor2d title={store.appList.get(item)?.name ?? ''}/>} />;
         case STR_ID_APP_STOPLIGHT:
           return <Route key={index} path={'/' + item} element={<MainStoplight title={store.appList.get(item)?.name ?? ''}/>} />;
+        case STR_ID_APP_TELLER:
+          return <Route key={index} path={'/' + item} element={
+            <Provider store={tellerStore}>
+              <Teller title={store.appList.get(item)?.name ?? ''}/>
+            </Provider>
+          } />;
       }
     })}
       <Route path={'/'} element={<MainHome />} key={title} />

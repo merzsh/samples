@@ -17,8 +17,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+export const STR_TRAILPACK_VERSION = '1.0.1';
+
 export const STR_ID_APP_EDITOR2D = 'editor2d';
 export const STR_ID_APP_STOPLIGHT = 'stoplight';
+export const STR_ID_APP_TELLER = 'teller';
 
 export const STR_FILE_EXT_PNG = 'png';
 export const STR_FILENAME_RESOURCES = 'resources';
