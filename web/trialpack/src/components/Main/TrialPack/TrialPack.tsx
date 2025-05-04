@@ -1,6 +1,6 @@
 /**
  * TrialPack is web application contains several basic samples to ease web development experience.
- * Copyright (c) 2024 Andrey Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
+ * Copyright (c) 2024-2025 Andrew Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
  *
  * This file is part of TrialPack.
  *
@@ -21,8 +21,8 @@ import * as styles from './TrialPack.modules.scss';
 import React from 'react';
 import useStores from '../../../hooks/useStores';
 import MainHeader from '../MainHeader';
-import MainAsideLeft from '../AsideLeft/MainAsideLeft';
-import MainAsideRight from '../AsideRight/MainAsideRight';
+import MainAsideLeft from '../AsideLeft';
+import MainAsideRight from '../AsideRight';
 import Main from '../index';
 import { useStoplight, UseStoplightResult } from '../../../hooks/useStoplight';
 import { useEditor2d, UseEditor2dResult } from '../../../hooks/useEditor2d';

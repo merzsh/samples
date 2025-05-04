@@ -17,6 +17,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Teller from './Teller';
+export const STR_ATM_CLS_DEFAULT_METH_ARG_NAME = 'value';
+export const STR_ATM_CLS_ID_METH_ARG_NAME = 'value';
+export const STR_ATM_UNDEFINED = 'undefined';
 
-export default Teller;
+export const NUM_ONE_DOLLAR = 1;

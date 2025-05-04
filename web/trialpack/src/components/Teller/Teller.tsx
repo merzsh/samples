@@ -1,6 +1,6 @@
 /**
  * TrialPack is web application contains several basic samples to ease web development experience.
- * Copyright (c) 2024 Andrey Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
+ * Copyright (c) 2024-2025 Andrew Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
  *
  * This file is part of TrialPack.
  *
@@ -18,9 +18,9 @@
  */
 
 import React, {useEffect, useState} from 'react';
-import * as styles from './Teller.modules.scss';
 import {useSelector} from 'react-redux';
-import {STR_TELLER_DEFAULT_SLICE_ID, TellerState} from "./store/tellerReducers";
+import {STR_TELLER_DEFAULT_SLICE_ID, TellerState} from './store/tellerReducers';
+import createIbsObject from './tellerFactory';
 
 interface ITeller {
   title?: string;
@@ -36,7 +36,7 @@ export const Teller: React.FC<ITeller> = ({title}): JSX.Element => {
     console.log(12345, 'Teller.useEffect[defaultState]', defaultState);
   }, [defaultState]);
 
-  async function onClick() {
+  async function fetchQuery() {
     let response: Response;
     try {
       response = await fetch('/api/trialpack/teller/some_endpoint?arg=123');
@@ -55,6 +55,16 @@ export const Teller: React.FC<ITeller> = ({title}): JSX.Element => {
     } catch (ex) {
       console.log(12345, 'Teller.onClick(): fetch error', ex);
     }
+  }
+
+  function testATM() {
+    const ibs = createIbsObject();
+    console.log(12345, 'createIbsObject()', ibs);
+  }
+
+  async function onClick() {
+    testATM();
+    //await fetchQuery();
   }
 
   return (

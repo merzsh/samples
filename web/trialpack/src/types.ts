@@ -17,6 +17,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Teller from './Teller';
-
-export default Teller;
+export enum EType {
+  NUM = 'number', // represents an integer numbers in ±(2^53-1) range include floating point numbers
+  BNT = 'bigint', // represents a variable length integer
+  STR = 'string', // represents a string consists of zero or more symbols
+  BOL = 'boolean', // represents a boolean value equals 'true' or 'false'
+  NUL = 'null', // represents a 'null' value
+  UDF = 'undefined', // represents an 'undefined' value
+  SMB = 'symbol', // represents for unique identifiers
+  OBJ = 'object' // represents complex data structure known as classic object in JS
+}

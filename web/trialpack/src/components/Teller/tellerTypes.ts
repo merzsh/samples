@@ -17,6 +17,43 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Teller from './Teller';
+/**
+ * Enum of class hierarchy entities, for which meaningful ids needed.
+ * Key is entity type for associated class uses in constructor,
+ * value is start number to generate new id
+ */
+export enum EAtmEntity {
+  DF = '0', // Default entity
+  BS = '100', // Information banking system
+  CL = '1000', // Client
+  AC = '2000', // Account
+  BR = '3000', // Branch
+  ST = '4000', // Treasure store
+  NT = 'note' // Note
+}
 
-export default Teller;
+export enum EAtmEntityNames {
+  DF = 'default',
+  BS = 'information banking system',
+  CL = 'client',
+  AC = 'account',
+  BR = 'branch',
+  ST = 'treasure store',
+  NT = 'note'
+}
+
+export enum EAtmUserRole {
+  DEFAULT,
+  ADMIN,
+  USER
+}
+
+export enum EAtmNoteNominal {
+  ONE = '1',
+  TWO = '2',
+  FIV = '5',
+  TEN = '10',
+  TTY = '20',
+  FTY = '50',
+  HDR = '100'
+}

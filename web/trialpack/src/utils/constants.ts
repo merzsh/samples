@@ -1,6 +1,6 @@
 /**
  * TrialPack is web application contains several basic samples to ease web development experience.
- * Copyright (c) 2024 Andrey Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
+ * Copyright (c) 2024-2025 Andrew Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
  *
  * This file is part of TrialPack.
  *
@@ -16,6 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
+import AtmInfoBankSystem from '../components/Teller/classes/AtmInfoBankSystem';
+
+declare global {
+  interface Window {
+    variables: AtmInfoBankSystem;
+  }
+}
 
 export const STR_TRAILPACK_VERSION = '1.0.1';
 
@@ -32,6 +39,8 @@ export const STR_FILENAME_BACKGROUND = 'background';
 export const STR_FILENAME_GO_PNG = `${STR_FILENAME_GO}.${STR_FILE_EXT_PNG}`;
 export const STR_FILENAME_UP_PNG = `${STR_FILENAME_UP}.${STR_FILE_EXT_PNG}`;
 export const STR_FILENAME_BACKGROUND_PNG = `${STR_FILENAME_BACKGROUND}.${STR_FILE_EXT_PNG}`;
+
+export const STR_NAME_COMPONENT_UTILS = 'utils';
 
 export const STR_URL_EMPTY = '#';
 export const STR_URL_ROOT = '/';
@@ -50,8 +59,19 @@ export const STR_CLASS_HEADER__BACK__BETWEEN = `${STR_CLASS_HEADER__BACK}__betwe
 export const STR_CLASS_HEADER__BACK__BETWEEN_TOP = `${STR_CLASS_HEADER__BACK__BETWEEN}__top`;
 export const STR_CLASS_HEADER__BACK__BETWEEN_BOTTOM = `${STR_CLASS_HEADER__BACK__BETWEEN}__bottom`;
 export const STR_CLASS_HEADER__BACK__RIGHT = `${STR_CLASS_HEADER__BACK}__right`;
-
 export const STR_CLASS_MAIN = 'main';
+
+export const STR_ABC_DIGITS = '0123456789';
+export const STR_ABC_LETTERS_CAP = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+export const STR_ABC_LETTERS_REG = 'abcdefghijklmnopqrstuvwxyz';
+export const STR_ABC_ALL_LETTERS_DIGITS = STR_ABC_LETTERS_CAP + STR_ABC_LETTERS_REG + STR_ABC_DIGITS;
+
+export const STR_MSG_COMPONENT = 'component';
+export const STR_MSG_CLASS = 'class';
+export const STR_MSG_FUNCTION = 'function';
+export const STR_MSG_METHOD = 'method';
+export const STR_MSG_ARGUMENT = 'argument';
+export const STR_MSG_ENUM_KEY_FOR_VALUE_NOT_FOUND = 'Enum key with associated value was not found';
 
 /**
  * Stoplight application section
