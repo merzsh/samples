@@ -59,7 +59,7 @@ export const Teller: React.FC<ITeller> = ({title}): JSX.Element => {
 
   function testATM() {
     const ibs = createIbsObject();
-    console.log(12345, 'createIbsObject()', ibs);
+    console.log(12345, 'createIbsObject():', ibs);
   }
 
   async function onClick() {
