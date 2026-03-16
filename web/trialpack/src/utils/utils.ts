@@ -201,3 +201,111 @@ export function generateId(idLen: number, abc = STR_ABC_ALL_LETTERS_DIGITS, comp
 export async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+/**
+ * Tests for logical AND object property values for it accordance to value set of search criteria properties
+ * (include many properties of testing object). Equation occurs by identical property names.
+ * Next types presents in comparison: string, number, object (string и number types checks for object sub-hierarchically).
+ *
+ * @param object2Check - testing object
+ * @param criteria - testing criteria for object object2Check, includes testing object properties (such as simple number / string types, so on objects)
+ * @return boolean - returns true, if checking passed; false in another case
+ */
+function checkCriteria<T, V extends keyof T>(
+  object2Check: T,
+  criteria: Pick<T, V>,
+): boolean {
+  if (
+    !object2Check ||
+    typeof object2Check !== "object" ||
+    !criteria ||
+    typeof criteria !== "object"
+  ) {
+    return false;
+  }
+
+  let result = false;
+
+  for (const prop of Object.getOwnPropertyNames(criteria)) {
+    if (
+        (typeof object2Check[prop as keyof T] === "string" &&
+            typeof criteria[prop as V] === "string") ||
+        (typeof object2Check[prop as keyof T] === "number" &&
+            typeof criteria[prop as V] === "number")
+    ) {
+      result = object2Check[prop as keyof T] === criteria[prop as V];
+    } else if (
+        typeof object2Check[prop as keyof T] === "object" &&
+        typeof criteria[prop as V] === "object"
+    ) {
+      result = checkCriteria(object2Check, criteria);
+    } else {
+      result = false;
+    }
+
+    if (!result) {
+      break;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Makes recursive element search in abstract tree by preset criteria.
+ *
+ * @template N - tree node type
+ * @template K - node tree property name which search performs for
+ * @param startSearchNode - tree node object (any leaf) which search began for
+ * @param searchCriteria - search criteria object contains name of any tree node property
+ * @param childrenNodes - tree node name contains same type children elements such begin search node (startSearchNode)
+ * @param onNodeFound - event triggered found node for: performed to first match if not specified,
+ *  full tree traverse if set
+ * @return - found element or undefined if missing
+ */
+function findTreeNode<N, K extends keyof N>(
+  startSearchNode: N,
+  searchCriteria: Pick<N, K>,
+  childrenNodes: keyof N,
+  onNodeFound?: (node: N) => void,
+): N | undefined {
+  if (
+    !startSearchNode ||
+    typeof startSearchNode !== "object" ||
+    !searchCriteria ||
+    typeof searchCriteria !== "object" ||
+    !childrenNodes ||
+    typeof childrenNodes !== "string"
+  ) {
+    return undefined;
+  }
+
+  if (checkCriteria(startSearchNode, searchCriteria)) {
+    // current node adjusts with search criteria
+    if (onNodeFound) {
+      onNodeFound(startSearchNode);
+    } else {
+      return startSearchNode;
+    }
+  }
+
+  let result: N | undefined = undefined;
+
+  if (
+    startSearchNode[childrenNodes] &&
+    Array.isArray(startSearchNode[childrenNodes]) &&
+    (startSearchNode[childrenNodes] as N[]).length
+  ) {
+    // go through children nodes
+    const children = startSearchNode[childrenNodes] as N[];
+    for (const node of children) {
+      result = findTreeNode(node, searchCriteria, childrenNodes, onNodeFound);
+      if (result && !onNodeFound) {
+        break;
+      }
+      result = undefined;
+    }
+  }
+
+  return result;
+}
