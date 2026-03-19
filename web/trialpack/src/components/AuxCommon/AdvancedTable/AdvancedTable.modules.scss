@@ -17,6 +17,46 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Main from './Main';
+.adv-table {
+  border-collapse: collapse;
+  table-layout: fixed;
 
-export default Main;
+  &__cell {
+    padding-left: 3px;
+    user-select: none;
+
+    &-resizer {
+      cursor: col-resize;
+      width: 3px;
+    }
+
+    &_headed {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    &_dated {
+      padding-right: 3px;
+    }
+
+    &_back-light-grayed {
+      background-color: AliceBlue;
+    }
+
+    &_border-left {
+      border-left: 1px solid lightgrey;
+    }
+
+    &_border-right {
+      border-right: 1px solid lightgrey;
+    }
+
+    &_border-top {
+      border-top: 1px solid lightgrey;
+    }
+
+    &_border-bottom {
+      border-bottom: 1px solid lightgrey;
+    }
+  }
+}

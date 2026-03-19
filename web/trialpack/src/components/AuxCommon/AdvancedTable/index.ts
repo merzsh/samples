@@ -17,6 +17,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Main from './Main';
+import AdvancedTable from './AdvancedTable';
 
-export default Main;
+export default AdvancedTable;

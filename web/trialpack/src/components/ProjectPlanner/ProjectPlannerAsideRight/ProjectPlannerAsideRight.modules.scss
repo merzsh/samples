@@ -17,6 +17,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Main from './Main';
+.aside-right-editor-2d {
+  nav {
+    //border: 1px solid orange;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
 
-export default Main;
+    button {
+      padding: 5px 15px;
+    }
+  }
+}

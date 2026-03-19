@@ -1,6 +1,6 @@
 /**
  * TrialPack is web application contains several basic samples to ease web development experience.
- * Copyright (c) 2024-2025 Andrew Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
+ * Copyright (c) 2024-2026 Andrew Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
  *
  * This file is part of TrialPack.
  *
@@ -29,6 +29,7 @@ export const STR_TRAILPACK_VERSION = '1.0.1';
 export const STR_ID_APP_EDITOR2D = 'editor2d';
 export const STR_ID_APP_STOPLIGHT = 'stoplight';
 export const STR_ID_APP_TELLER = 'teller';
+export const STR_ID_APP_PROJ_PLAN = 'projplan';
 
 export const STR_FILE_EXT_PNG = 'png';
 export const STR_FILENAME_RESOURCES = 'resources';

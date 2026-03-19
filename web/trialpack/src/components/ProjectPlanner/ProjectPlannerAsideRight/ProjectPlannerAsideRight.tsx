@@ -17,6 +17,23 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Main from './Main';
+import * as styles from './ProjectPlannerAsideRight.modules.scss';
+import React from 'react';
 
-export default Main;
+interface IEditor2dAsideRight {
+  title?: string;
+}
+
+export const ProjectPlannerAsideRight: React.FC<IEditor2dAsideRight> = ({title}): JSX.Element => {
+
+  return <div className={`${styles['aside-right-editor-2d']}`} key={title} >
+    <nav>
+      <button>Object options</button>
+      <button>Common settings</button>
+    </nav>
+    <h4>The standard Lorem Ipsum passage</h4>
+    <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</p>
+  </div>;
+}
+
+export default ProjectPlannerAsideRight;

@@ -1,6 +1,6 @@
 /**
  * TrialPack is web application contains several basic samples to ease web development experience.
- * Copyright (c) 2024-2025 Andrew Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
+ * Copyright (c) 2024-2026 Andrew Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
  *
  * This file is part of TrialPack.
  *
@@ -25,7 +25,8 @@ import {
   STL_STR_OPACITY_OFF,
   STR_ID_APP_TELLER,
   STR_ID_APP_EDITOR2D,
-  STR_ID_APP_STOPLIGHT
+  STR_ID_APP_STOPLIGHT,
+  STR_ID_APP_PROJ_PLAN
 } from '../utils/constants';
 import { StateNames, UseStoplightResult } from '../hooks/useStoplight';
 
@@ -76,6 +77,7 @@ class MobxStore {
     result = result.set(STR_ID_APP_EDITOR2D, {shortName: '2d graphics editor', name: '2D VECTOR GRAPHICS WEB EDITOR'});
     result = result.set(STR_ID_APP_STOPLIGHT, {shortName: 'Stoplight', name: 'STATE MACHINE WITH STOPLIGHT SAMPLE'});
     result = result.set(STR_ID_APP_TELLER, {shortName: 'Teller machine', name: 'AUTOMATED TELLER MACHINE EMULATOR'});
+    result = result.set(STR_ID_APP_PROJ_PLAN, {shortName: 'Project planner', name: 'PROJECT PLANNER'});
     return result;
   }
 }

@@ -1,6 +1,6 @@
 /**
  * TrialPack is web application contains several basic samples to ease web development experience.
- * Copyright (c) 2024-2025 Andrew Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
+ * Copyright (c) 2024-2026 Andrew Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
  *
  * This file is part of TrialPack.
  *
@@ -25,7 +25,13 @@ import useStores from '../../hooks/useStores';
 import MainHome from './MainHome';
 import MainStoplight from '../Stoplight';
 import MainEditor2d from '../Editor2d';
-import {STR_ID_APP_TELLER, STR_ID_APP_EDITOR2D, STR_ID_APP_STOPLIGHT} from '../../utils/constants';
+import MainProjectPlanner from '../ProjectPlanner';
+import {
+  STR_ID_APP_TELLER,
+  STR_ID_APP_EDITOR2D,
+  STR_ID_APP_STOPLIGHT,
+  STR_ID_APP_PROJ_PLAN
+} from '../../utils/constants';
 import Teller from '../Teller';
 
 interface IMain {
@@ -42,6 +48,8 @@ export const Main: React.FC<IMain> = ({title}): JSX.Element => {
           return <Route key={index} path={'/' + item} element={<MainEditor2d title={store.appList.get(item)?.name ?? ''}/>} />;
         case STR_ID_APP_STOPLIGHT:
           return <Route key={index} path={'/' + item} element={<MainStoplight title={store.appList.get(item)?.name ?? ''}/>} />;
+        case STR_ID_APP_PROJ_PLAN:
+          return <Route key={index} path={'/' + item} element={<MainProjectPlanner title={store.appList.get(item)?.name ?? ''}/>} />;
         case STR_ID_APP_TELLER:
           return <Route key={index} path={'/' + item} element={
             <Provider store={tellerStore}>

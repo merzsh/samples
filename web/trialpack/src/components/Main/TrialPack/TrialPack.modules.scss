@@ -1,6 +1,6 @@
 /**
  * TrialPack is web application contains several basic samples to ease web development experience.
- * Copyright (c) 2024-2025 Andrew Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
+ * Copyright (c) 2024-2026 Andrew Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
  *
  * This file is part of TrialPack.
  *
@@ -99,15 +99,12 @@
     background-color: whitesmoke;
 
     &__left {
-      //border: 1px solid red;
     }
 
     &__right {
       display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
-      //justify-content: space-around;
-      //border: 1px solid blue;
     }
   }
 }
@@ -136,7 +133,7 @@
 
 .trial-pack footer > div {
   width: 100%;
-  padding: 1.5em;
+  padding: 0.7em 1em;
 }
 
 .trial-pack footer .trial-pack__footer__left span:nth-child(1) {
@@ -157,7 +154,6 @@
   margin: 0 0 1px 0;
   padding: 0;
   float: left;
-  //border: 1px solid orange;
 }
 
 .trial-pack footer .trial-pack__footer__right ul li {
@@ -168,7 +164,6 @@
   color: darkslategrey;
   font-size: medium;
   font-weight: 400;
-  /*border: 1px solid red;*/
 }
 
 @media screen and (min-width: 800px) {

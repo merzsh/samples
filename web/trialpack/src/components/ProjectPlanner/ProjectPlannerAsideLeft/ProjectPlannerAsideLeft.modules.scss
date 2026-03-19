@@ -17,6 +17,30 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Main from './Main';
+.aside-left-editor-2d {
 
-export default Main;
+  summary {
+    font-size: 1em;
+    border-radius: 5px;
+    //border: 1px solid #999;
+    cursor: pointer;
+    //margin: -1%;
+    padding: 3px 15px;
+    color: RGB(30, 30, 30);
+    background-image: linear-gradient(180deg, white, grey);
+  }
+
+  details[open] summary {
+    background: RGB(222, 222, 222);
+  }
+
+  details {
+    color: RGB(30, 30, 30);
+    cursor: pointer;
+    border: 1px solid grey;
+    //background: RGB(233, 233, 233);
+    border-radius: 5px;
+    //margin: 0 2em .4em 2em;
+    //padding-left: 10px;
+  }
+}

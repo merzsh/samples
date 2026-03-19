@@ -1,6 +1,6 @@
 /**
  * TrialPack is web application contains several basic samples to ease web development experience.
- * Copyright (c) 2024-2025 Andrew Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
+ * Copyright (c) 2024-2026 Andrew Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
  *
  * This file is part of TrialPack.
  *
@@ -23,7 +23,8 @@ import useStores from '../../../hooks/useStores';
 import MainHomeAsideLeft from '../MainHome/AsideLeft';
 import StoplightAsideLeft from '../../Stoplight/AsideLeft';
 import Editor2dAsideLeft from '../../Editor2d/AsideLeft';
-import { STR_ID_APP_EDITOR2D, STR_ID_APP_STOPLIGHT } from '../../../utils/constants';
+import ProjectPlannerAsideLeft from '../../ProjectPlanner/ProjectPlannerAsideLeft';
+import {STR_ID_APP_EDITOR2D, STR_ID_APP_PROJ_PLAN, STR_ID_APP_STOPLIGHT} from '../../../utils/constants';
 
 interface IMainAsideLeft {
   title?: string;
@@ -39,6 +40,8 @@ export const MainAsideLeft: React.FC<IMainAsideLeft> = ({title}): JSX.Element =>
           return (<Route key={index} path={'/' + item} element={<StoplightAsideLeft />} />);
         case STR_ID_APP_EDITOR2D:
           return (<Route key={index} path={'/' + item} element={<Editor2dAsideLeft />} />);
+        case STR_ID_APP_PROJ_PLAN:
+          return (<Route key={index} path={'/' + item} element={<ProjectPlannerAsideLeft />} />);
       }
     })}
     <Route path={'/'} element={<MainHomeAsideLeft />} key={title} />
