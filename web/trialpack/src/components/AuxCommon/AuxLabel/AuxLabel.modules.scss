@@ -17,14 +17,30 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-.proj-plan {
-  height: 77vh;
+.aux-label {
+  font-weight: normal;
 
-  &__table {
-    margin-top: 10px;
+  &_is-weighted {
+    font-weight: bold;
+  }
 
-    &-cell-component {
-      width: 100%;
-    }
+  &_is-small-sized {
+    font-size: small;
+  }
+
+  &_is-medium-sized {
+    font-size: smaller;
+  }
+
+  &_non-selectable {
+    user-select: none;
+  }
+
+  &_left_aligned {
+    text-align: left;
+  }
+
+  &_right_aligned {
+    text-align: right;
   }
 }

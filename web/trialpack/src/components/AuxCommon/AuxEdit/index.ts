@@ -17,14 +17,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-.proj-plan {
-  height: 77vh;
+import AuxEdit from './AuxEdit';
 
-  &__table {
-    margin-top: 10px;
-
-    &-cell-component {
-      width: 100%;
-    }
-  }
-}
+export default AuxEdit;

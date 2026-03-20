@@ -18,72 +18,51 @@
  */
 
 import * as s from './ProjectPlanner.modules.scss';
-import React, { useRef} from 'react';
+import React, {useRef} from 'react';
 import AdvancedTable from "../AuxCommon/AdvancedTable";
 import {AdvTblCellProps, EAdvTblBackground} from "../AuxCommon/AdvancedTable/types";
 import {EProjPlannerColIds} from "./types";
-import {BORDER_FULL, BORDER_ROW} from "./constants";
+import {BORDER_FULL} from "./constants";
+import AuxLabel from "../AuxCommon/AuxLabel";
+import {EAuxAlignH, EAuxSize} from "../AuxCommon/types";
+import {dataSample} from "./fixtures";
 
 type ProjectPlannerProps = {
   title?: string;
 };
 
-export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({title}) => {
-  const headerColsListRef = useRef(new Map<string, AdvTblCellProps>([
-    [EProjPlannerColIds.COL1,
-      {
-        id: EProjPlannerColIds.COL1,
-        component: <span>Cell head - 1</span>,
-        border: BORDER_FULL,
-        background: EAdvTblBackground.HEADER,
-      }],
-    [EProjPlannerColIds.COL2,
-      {
-        id: EProjPlannerColIds.COL2,
-        component: <span>Cell head - 2</span>,
-        border: BORDER_FULL,
-        background: EAdvTblBackground.HEADER,
-      }]
-  ]));
+export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
 
-  const bodyColsListRef = useRef(new Map<number, Map<string, AdvTblCellProps>>([
-    [1, new Map([
-      [
-        EProjPlannerColIds.COL1,
-        {
-          id: `${EProjPlannerColIds.COL1}1`,
-          component: <span>Cell data - A1</span>,
+  const headerColsListRef = useRef<Map<string, AdvTblCellProps>>(new Map<string, AdvTblCellProps>(
+    dataSample[0].map((item, index) => {
+      const colId: string = Object.values(EProjPlannerColIds)[index];
+      return [colId, {
+        id: colId,
+        component: <AuxLabel className={`${s['proj-plan__table-cell-component']}`} text={item}
+                             props={{ isNonSelectable: true, fontSize: EAuxSize.M, alignH: EAuxAlignH.L, isBold: true }} />,
+        border:  BORDER_FULL,
+        background: EAdvTblBackground.HEADER,
+      }];
+    })
+  ));
+
+  const bodyColsListRef = useRef<Map<string, AdvTblCellProps>[]>(
+    dataSample.slice(1).map((row, rowIndex) => {
+      return new Map<string, AdvTblCellProps>(row.map((col, colIndex) => {
+        const cellId = `${Object.values(EProjPlannerColIds)[colIndex]}${rowIndex+1}`;
+        return [cellId, {
+          id: cellId,
+          component: <AuxLabel className={`${s['proj-plan__table-cell-component']}`} text={col}
+                               props={{ isNonSelectable: true, fontSize: EAuxSize.M, alignH: EAuxAlignH.L, }} />,
           border: BORDER_FULL,
-        }],
-      [
-        EProjPlannerColIds.COL2,
-        {
-          id: `${EProjPlannerColIds.COL2}1`,
-          component: <span>Cell data - B1</span>,
-          border: BORDER_FULL,
-        }]
-    ])],
-    [2, new Map([
-      [
-        EProjPlannerColIds.COL1,
-        {
-          id: `${EProjPlannerColIds.COL1}2`,
-          component: <span>Cell data - A2</span>,
-          border: BORDER_FULL,
-        }],
-      [
-        EProjPlannerColIds.COL2,
-        {
-          id: `${EProjPlannerColIds.COL2}2`,
-          component: <span>Cell data - B2</span>,
-          border: BORDER_FULL,
-        }]
-    ])]
-  ]));
+        }];
+      }))
+    })
+  );
 
   return (
     <div className={`${s['proj-plan']}`}>
-      <AdvancedTable className={`${s['proj-table']}`} header={headerColsListRef.current}
+      <AdvancedTable className={`${s['proj-plan__table']}`} header={headerColsListRef.current}
                      body={bodyColsListRef.current} />
     </div>
   );

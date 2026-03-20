@@ -21,9 +21,13 @@
   border-collapse: collapse;
   table-layout: fixed;
 
+  &__th {
+    vertical-align: middle;
+  }
+
   &__cell {
     padding-left: 3px;
-    user-select: none;
+    cursor: default;
 
     &-resizer {
       cursor: col-resize;
@@ -32,11 +36,14 @@
 
     &_headed {
       display: flex;
-      justify-content: space-between;
     }
 
     &_dated {
       padding-right: 3px;
+    }
+
+    &_selected {
+      background-color: LemonChiffon;
     }
 
     &_back-light-grayed {
@@ -58,5 +65,24 @@
     &_border-bottom {
       border-bottom: 1px solid lightgrey;
     }
+  }
+}
+
+.debug {
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin-top: 30px;
+
+  &__td {
+    height: 32px;
+    width: 64px;
+    border: 1px solid lightgrey;
+    vertical-align: middle;
+    //text-align: center;
+  }
+
+  &__content {
+    border: 1px solid limegreen;
+    font-size: small;
   }
 }

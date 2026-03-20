@@ -17,14 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-.proj-plan {
-  height: 77vh;
-
-  &__table {
-    margin-top: 10px;
-
-    &-cell-component {
-      width: 100%;
-    }
-  }
+.aux-edit {
+  visibility: visible;
+  color: orange;
 }

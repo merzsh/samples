@@ -18,17 +18,19 @@
  */
 
 import * as s from './AdvancedTable.modules.scss';
-import React from 'react';
+import React, {useRef} from 'react';
 import clsx from 'clsx';
 import {AdvTblCellProps, EAdvTblBackground} from "./types";
 
 type AdvancedTableProps = {
   header: Map<string, AdvTblCellProps>;
-  body: Map<number, Map<string, AdvTblCellProps>>;
+  body: Map<string, AdvTblCellProps>[];
   className?: string;
 };
 
 export const AdvancedTable: React.FC<AdvancedTableProps> = ({header, body, className}) => {
+  const currCellIdRef = useRef('');
+  const debugArr = useRef(['aaa', 'bbb', 'ccc']);
 
   function onColumnResize(e: React.MouseEvent<HTMLDivElement>) {
     e.preventDefault();
@@ -71,50 +73,91 @@ export const AdvancedTable: React.FC<AdvancedTableProps> = ({header, body, class
     target.parentElement.style.width = '';
   }
 
+  function onDataCellClick(e: React.MouseEvent<HTMLDivElement>) {
+    e.preventDefault();
+
+    const target = e.target as HTMLDivElement;
+    if (!target.parentElement) return;
+
+    if (currCellIdRef.current) {
+      const prevCell = document.getElementById(currCellIdRef.current);
+      if (prevCell && prevCell instanceof HTMLTableCellElement) {
+        prevCell.classList.remove(s['adv-table__cell_selected']);
+      }
+    }
+
+    const currCell = document.getElementById(target.parentElement.id);
+    if (!currCell || !(currCell instanceof HTMLTableCellElement)) return;
+
+    currCell.classList.add(s['adv-table__cell_selected']);
+    currCellIdRef.current = target.parentElement.id;
+  }
+
   return (
-    <table className={clsx(className, s['adv-table'])}>
-      <thead>
-      <tr>
-        {[...header.values()].map(col => {
+    <div>
+      <table className={clsx(className, s['adv-table'])}>
+        <thead>
+        <tr>
+          {[...header.values()].map(col => {
+            return (
+              <th id={col.id} key={col.id} className={clsx(s['adv-table__th'], {
+                [`${s['adv-table__cell_back-light-grayed']}`]: col.background === EAdvTblBackground.HEADER,
+                [`${s['adv-table__cell_border-left']}`]: col.border.left,
+                [`${s['adv-table__cell_border-right']}`]: col.border.right,
+                [`${s['adv-table__cell_border-top']}`]: col.border.top,
+                [`${s['adv-table__cell_border-bottom']}`]: col.border.bottom
+              })}>
+                <div className={clsx(s['adv-table__cell'], s['adv-table__cell_headed'])}>
+                  {col.component}
+                  <div className={`${s['adv-table__cell-resizer']}`} onMouseDown={onColumnResize}
+                       onDoubleClick={onColumnInitSize}/>
+                </div>
+              </th>
+            );
+          })}
+        </tr>
+        </thead>
+        <tbody>
+        {body.map((row, rowIndex) => {
           return (
-            <th className={clsx({
-              [`${s['adv-table__cell_back-light-grayed']}`]: col.background === EAdvTblBackground.HEADER,
-              [`${s['adv-table__cell_border-left']}`]: col.border.left,
-              [`${s['adv-table__cell_border-right']}`]: col.border.right,
-              [`${s['adv-table__cell_border-top']}`]: col.border.top,
-              [`${s['adv-table__cell_border-bottom']}`]: col.border.bottom
-            })}>
-              <div id={col.id} className={clsx(s['adv-table__cell'], s['adv-table__cell_headed'])}>
-                {col.component}
-                <div className={`${s['adv-table__cell-resizer']}`} onMouseDown={onColumnResize}
-                     onDoubleClick={onColumnInitSize}/>
-              </div>
-            </th>
+            <tr key={`${rowIndex}`}>
+              {[...row.values()].map(col => {
+                return (
+                  <td id={col.id} key={col.id}
+                      className={clsx(s['adv-table__th'], s['adv-table__cell'], s['adv-table__cell_dated'], {
+                        [`${s['adv-table__cell_border-left']}`]: col.border.left,
+                        [`${s['adv-table__cell_border-right']}`]: col.border.right,
+                        [`${s['adv-table__cell_border-top']}`]: col.border.top,
+                        [`${s['adv-table__cell_border-bottom']}`]: col.border.bottom
+                      })}
+                      onClick={onDataCellClick}>
+                    {col.component}
+                  </td>
+                );
+              })}
+            </tr>
           );
         })}
-      </tr>
-      </thead>
-      <tbody>
-      {[...body.keys()].map(rowId => {
-        const column = body.get(rowId);
+        </tbody>
+      </table>
 
-        return column ? (
-          <tr id={`${rowId}`}>
-            {[...column.values()].map(col => {
-              return (
-                <td className={clsx(s['adv-table__cell'], s['adv-table__cell_dated'], {
-                  [`${s['adv-table__cell_border-left']}`]: col.border.left,
-                  [`${s['adv-table__cell_border-right']}`]: col.border.right,
-                  [`${s['adv-table__cell_border-top']}`]: col.border.top,
-                  [`${s['adv-table__cell_border-bottom']}`]: col.border.bottom
-                })}>{`Cell data - ${col.id}`}</td>
-              );
-            })}
-          </tr>
-        ) : undefined;
-      })}
-      </tbody>
-    </table>
+      <table className={clsx(s['debug'])}>
+        <thead>
+        <tr>
+          {debugArr.current.map((item, index) => {
+            return (
+              <td key={`td${index}`} className={clsx(s['debug__td'])} onClick={() => {
+                debugArr.current[index] += '@';
+                console.log(12345, "DebugTable.td.onClick");
+              }}>
+                <div className={clsx(s['debug__content'])}>{item}</div>
+              </td>
+            );
+          })}
+        </tr>
+        </thead>
+      </table>
+    </div>
   );
 };
 
