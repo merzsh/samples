@@ -23,7 +23,7 @@ import clsx from 'clsx';
 import {AdvTblCellProps, EAdvTblBackground} from "./types";
 import AuxTextBox from "../AuxTextBox";
 import {EAuxSize} from "../types";
-import {EProjPlannerColIds} from "../../ProjectPlanner/types";
+import {COLUMN_IDS} from "../constants";
 
 type AdvancedTableProps = {
   header: Map<string, AdvTblCellProps>;
@@ -148,9 +148,9 @@ function setRowSelection(rowNumCellId: string, is2SelectRow?: boolean) {
   rowNum = isNaN(rowNum) ? 0 : rowNum;
   if (!rowNum) return;
 
-  const count = Object.values(EProjPlannerColIds).length;
+  const count = COLUMN_IDS.length;
   for (let i = 0; i < count; i++) {
-    const cell = document.getElementById(`${Object.values(EProjPlannerColIds)[i]}${rowNum}`);
+    const cell = document.getElementById(`${COLUMN_IDS[i]}${rowNum}`);
     if (cell && cell instanceof HTMLTableCellElement) {
       if (is2SelectRow && !cell.classList.contains(s['adv-table__cell_selected'])) {
         cell.classList.add(s['adv-table__cell_selected']);

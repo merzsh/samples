@@ -1,5 +1,5 @@
 export const dataSample: string[][] = [
-  ["Theme", "Activities"],
-  ["market", "to buy groceries"],
-  ["car", "go to service"],
+  ["Theme", "Activities", "Date"],
+  ["market", "to buy groceries", "2026/05/11"],
+  ["car", "go to service", "2026/08/20"],
 ];

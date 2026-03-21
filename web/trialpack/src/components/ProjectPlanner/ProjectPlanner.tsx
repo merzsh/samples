@@ -21,7 +21,7 @@ import * as s from './ProjectPlanner.modules.scss';
 import React, {useRef} from 'react';
 import AdvancedTable from "../AuxCommon/AdvancedTable";
 import {AdvTblCellProps, EAdvTblBackground} from "../AuxCommon/AdvancedTable/types";
-import {EProjPlannerColIds} from "./types";
+import {COLUMN_IDS} from "../AuxCommon/constants";
 import {BORDER_FULL} from "./constants";
 import AuxTextBox from "../AuxCommon/AuxTextBox";
 import {EAuxAlignH, EAuxSize} from "../AuxCommon/types";
@@ -35,7 +35,7 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
 
   const headerColsListRef = useRef<Map<string, AdvTblCellProps>>(new Map<string, AdvTblCellProps>(
     dataSample[0].map((item, index) => {
-      const colId: string = Object.values(EProjPlannerColIds)[index];
+      const colId: string = COLUMN_IDS[index];
       return [colId, {
         id: colId,
         component: <AuxTextBox className={`${s['proj-plan__table-cell-component']}`} text={item}
@@ -54,7 +54,7 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
   const bodyColsListRef = useRef<Map<string, AdvTblCellProps>[]>(
     dataSample.slice(1).map((row, rowIndex) => {
       return new Map<string, AdvTblCellProps>(row.map((col, colIndex) => {
-        const cellId = `${Object.values(EProjPlannerColIds)[colIndex]}${rowIndex+1}`;
+        const cellId = `${COLUMN_IDS[colIndex]}${rowIndex+1}`;
         return [cellId, {
           id: cellId,
           component: <AuxTextBox id={`atb${cellId}`} className={`${s['proj-plan__table-cell-component']}`} text={col}
