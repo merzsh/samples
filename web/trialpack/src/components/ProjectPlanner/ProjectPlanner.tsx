@@ -23,7 +23,7 @@ import AdvancedTable from "../AuxCommon/AdvancedTable";
 import {AdvTblCellProps, EAdvTblBackground} from "../AuxCommon/AdvancedTable/types";
 import {EProjPlannerColIds} from "./types";
 import {BORDER_FULL} from "./constants";
-import AuxLabel from "../AuxCommon/AuxLabel";
+import AuxTextBox from "../AuxCommon/AuxTextBox";
 import {EAuxAlignH, EAuxSize} from "../AuxCommon/types";
 import {dataSample} from "./fixtures";
 
@@ -38,8 +38,13 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
       const colId: string = Object.values(EProjPlannerColIds)[index];
       return [colId, {
         id: colId,
-        component: <AuxLabel className={`${s['proj-plan__table-cell-component']}`} text={item}
-                             props={{ isNonSelectable: true, fontSize: EAuxSize.M, alignH: EAuxAlignH.L, isBold: true }} />,
+        component: <AuxTextBox className={`${s['proj-plan__table-cell-component']}`} text={item}
+                               props={{
+                                 isNonSelectable: true,
+                                 fontSize: EAuxSize.M,
+                                 alignH: EAuxAlignH.L,
+                                 isBold: true,
+                               }}/>,
         border:  BORDER_FULL,
         background: EAdvTblBackground.HEADER,
       }];
@@ -52,8 +57,13 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
         const cellId = `${Object.values(EProjPlannerColIds)[colIndex]}${rowIndex+1}`;
         return [cellId, {
           id: cellId,
-          component: <AuxLabel className={`${s['proj-plan__table-cell-component']}`} text={col}
-                               props={{ isNonSelectable: true, fontSize: EAuxSize.M, alignH: EAuxAlignH.L, }} />,
+          component: <AuxTextBox id={`atb${cellId}`} className={`${s['proj-plan__table-cell-component']}`} text={col}
+                                 props={{
+                                   isNonSelectable: true,
+                                   isEditable: true,
+                                   fontSize: EAuxSize.M,
+                                   alignH: EAuxAlignH.L,
+                                 }}/>,
           border: BORDER_FULL,
         }];
       }))
@@ -63,7 +73,7 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
   return (
     <div className={`${s['proj-plan']}`}>
       <AdvancedTable className={`${s['proj-plan__table']}`} header={headerColsListRef.current}
-                     body={bodyColsListRef.current} />
+                     body={bodyColsListRef.current} isWithRowNums />
     </div>
   );
 };

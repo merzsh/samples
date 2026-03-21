@@ -26,8 +26,7 @@
   }
 
   &__cell {
-    padding-left: 3px;
-    cursor: default;
+    padding: 1px 0 1px 3px;
 
     &-resizer {
       cursor: col-resize;
@@ -40,14 +39,25 @@
 
     &_dated {
       padding-right: 3px;
+      cursor: cell;
+    }
+
+    &_dated-row-num {
+      padding-left: 3px;
+      padding-right: 3px;
+      cursor: cell;
     }
 
     &_selected {
       background-color: LemonChiffon;
     }
 
-    &_back-light-grayed {
+    &_background-head-colored {
       background-color: AliceBlue;
+    }
+
+    &_background-head-select-colored {
+      background-color: PaleTurquoise;
     }
 
     &_border-left {
@@ -66,6 +76,10 @@
       border-bottom: 1px solid lightgrey;
     }
   }
+}
+
+.row-num-comp {
+  padding: 0 3px;
 }
 
 .debug {

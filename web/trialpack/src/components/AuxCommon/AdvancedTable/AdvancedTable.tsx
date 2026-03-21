@@ -18,90 +18,65 @@
  */
 
 import * as s from './AdvancedTable.modules.scss';
-import React, {useRef} from 'react';
+import React, {useCallback, useRef} from 'react';
 import clsx from 'clsx';
 import {AdvTblCellProps, EAdvTblBackground} from "./types";
+import AuxTextBox from "../AuxTextBox";
+import {EAuxSize} from "../types";
+import {EProjPlannerColIds} from "../../ProjectPlanner/types";
 
 type AdvancedTableProps = {
   header: Map<string, AdvTblCellProps>;
   body: Map<string, AdvTblCellProps>[];
+  isWithRowNums?: boolean;
   className?: string;
 };
 
-export const AdvancedTable: React.FC<AdvancedTableProps> = ({header, body, className}) => {
+export const AdvancedTable: React.FC<AdvancedTableProps> = ({header, body,
+                                                              isWithRowNums, className}) => {
   const currCellIdRef = useRef('');
   const debugArr = useRef(['aaa', 'bbb', 'ccc']);
 
-  function onColumnResize(e: React.MouseEvent<HTMLDivElement>) {
-    e.preventDefault();
+  const onDataCellClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const target = e.target as HTMLElement;
+    if (!(target instanceof HTMLDivElement) || !target.parentElement?.id) return;
 
-    const target = e.target as HTMLDivElement;
-    if (!target.parentElement) return;
-
-    let startX = e.pageX;
-    let startWidth = target.parentElement.offsetWidth;
-
-    // Function to handle mouse movement during drag
-    function onMouseMove(e: any) {
-      if (!target.parentElement) return;
-
-      const diffX = e.pageX - startX;
-      // Calculate new width, preventing columns from becoming too small
-      const newWidth = Math.max(50, startWidth + diffX);
-      target.parentElement.style.width = newWidth + 'px';
-    }
-
-    // Function to stop resizing on mouse up
-    function onMouseUp() {
-      if (!target.parentElement) return;
-
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-      target.parentElement.classList.remove('active');
-    }
-
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-  }
-
-  function onColumnInitSize(e: React.MouseEvent<HTMLDivElement>) {
-    e.preventDefault();
-
-    const target = e.target as HTMLDivElement;
-    if (!target.parentElement) return;
-
-    target.parentElement.style.width = '';
-  }
-
-  function onDataCellClick(e: React.MouseEvent<HTMLDivElement>) {
-    e.preventDefault();
-
-    const target = e.target as HTMLDivElement;
-    if (!target.parentElement) return;
-
+    // deselect previous cell
     if (currCellIdRef.current) {
-      const prevCell = document.getElementById(currCellIdRef.current);
-      if (prevCell && prevCell instanceof HTMLTableCellElement) {
-        prevCell.classList.remove(s['adv-table__cell_selected']);
+      if (currCellIdRef.current.startsWith('_')) {
+        setRowSelection(currCellIdRef.current);
+      } else {
+        const prevCell = document.getElementById(currCellIdRef.current);
+        if (prevCell && prevCell instanceof HTMLTableCellElement) {
+          prevCell.classList.remove(s['adv-table__cell_selected']);
+        }
       }
     }
 
+    // select current cell
     const currCell = document.getElementById(target.parentElement.id);
     if (!currCell || !(currCell instanceof HTMLTableCellElement)) return;
 
-    currCell.classList.add(s['adv-table__cell_selected']);
-    currCellIdRef.current = target.parentElement.id;
-  }
+    if (currCell.id.startsWith('_')) {
+      setRowSelection(currCell.id, true);
+    } else {
+      currCell.classList.add(s['adv-table__cell_selected']);
+    }
+
+    currCellIdRef.current = currCell.id;
+  }, []);
+
+  if (!header.size) return ;
 
   return (
     <div>
-      <table className={clsx(className, s['adv-table'])}>
+      <table className={clsx(className, s['adv-table'])} >
         <thead>
         <tr>
-          {[...header.values()].map(col => {
+          {getColsRow(header, isWithRowNums).map(col => {
             return (
               <th id={col.id} key={col.id} className={clsx(s['adv-table__th'], {
-                [`${s['adv-table__cell_back-light-grayed']}`]: col.background === EAdvTblBackground.HEADER,
+                [`${s['adv-table__cell_background-head-colored']}`]: col.background === EAdvTblBackground.HEADER,
                 [`${s['adv-table__cell_border-left']}`]: col.border.left,
                 [`${s['adv-table__cell_border-right']}`]: col.border.right,
                 [`${s['adv-table__cell_border-top']}`]: col.border.top,
@@ -109,8 +84,10 @@ export const AdvancedTable: React.FC<AdvancedTableProps> = ({header, body, class
               })}>
                 <div className={clsx(s['adv-table__cell'], s['adv-table__cell_headed'])}>
                   {col.component}
-                  <div className={`${s['adv-table__cell-resizer']}`} onMouseDown={onColumnResize}
-                       onDoubleClick={onColumnInitSize}/>
+                  {col.id !== '_'
+                    ? (<div className={`${s['adv-table__cell-resizer']}`} onMouseDown={onColumnResize}
+                            onDoubleClick={onColumnInitSize}/>)
+                    : undefined}
                 </div>
               </th>
             );
@@ -121,10 +98,13 @@ export const AdvancedTable: React.FC<AdvancedTableProps> = ({header, body, class
         {body.map((row, rowIndex) => {
           return (
             <tr key={`${rowIndex}`}>
-              {[...row.values()].map(col => {
+              {getColsRow(row, isWithRowNums, rowIndex + 1).map(col => {
                 return (
                   <td id={col.id} key={col.id}
-                      className={clsx(s['adv-table__th'], s['adv-table__cell'], s['adv-table__cell_dated'], {
+                      className={clsx(s['adv-table__th'], s['adv-table__cell'], {
+                        [`${s['adv-table__cell_dated-row-num']}`]: col.id.startsWith('_'),
+                        [`${s['adv-table__cell_dated']}`]: !col.id.startsWith('_'),
+                        [`${s['adv-table__cell_background-head-colored']}`]: col.background === EAdvTblBackground.HEADER,
                         [`${s['adv-table__cell_border-left']}`]: col.border.left,
                         [`${s['adv-table__cell_border-right']}`]: col.border.right,
                         [`${s['adv-table__cell_border-top']}`]: col.border.top,
@@ -160,5 +140,92 @@ export const AdvancedTable: React.FC<AdvancedTableProps> = ({header, body, class
     </div>
   );
 };
+
+function setRowSelection(rowNumCellId: string, is2SelectRow?: boolean) {
+  if (!rowNumCellId) return;
+
+  let rowNum = parseInt(rowNumCellId.substring(1));
+  rowNum = isNaN(rowNum) ? 0 : rowNum;
+  if (!rowNum) return;
+
+  const count = Object.values(EProjPlannerColIds).length;
+  for (let i = 0; i < count; i++) {
+    const cell = document.getElementById(`${Object.values(EProjPlannerColIds)[i]}${rowNum}`);
+    if (cell && cell instanceof HTMLTableCellElement) {
+      if (is2SelectRow && !cell.classList.contains(s['adv-table__cell_selected'])) {
+        cell.classList.add(s['adv-table__cell_selected']);
+      } else {
+        cell.classList.remove(s['adv-table__cell_selected']);
+      }
+    }
+  }
+
+  const rowNumCell = document.getElementById(rowNumCellId);
+  if (rowNumCell && rowNumCell instanceof HTMLTableCellElement) {
+    if (is2SelectRow) {
+      rowNumCell.classList.remove(s['adv-table__cell_background-head-colored']);
+      rowNumCell.classList.add(s['adv-table__cell_background-head-select-colored']);
+    } else {
+      rowNumCell.classList.remove(s['adv-table__cell_background-head-select-colored']);
+      rowNumCell.classList.add(s['adv-table__cell_background-head-colored']);
+    }
+  }
+}
+
+function getColsRow(colsRow: Map<string, AdvTblCellProps>, isWithRowNums?: boolean, rowNum?: number): AdvTblCellProps[] {
+  const result = [...colsRow.values()];
+
+  if (isWithRowNums && result.length) {
+    const [firstCol] = result;
+
+    result.unshift({
+      id: `_${rowNum ?? ''}`,
+      border: firstCol.border,
+      background: EAdvTblBackground.HEADER,
+      component: <AuxTextBox id={`atb_`} className={s['row-num-comp']}
+                             text={`${rowNum ?? ''}`}
+                             props={{ isNonSelectable: true, fontSize: EAuxSize.M }} />,
+    });
+  }
+
+  return result;
+}
+
+function onColumnInitSize(e: React.MouseEvent<HTMLDivElement>) {
+  const target = e.target as HTMLDivElement;
+  if (!target.parentElement) return;
+
+  target.parentElement.style.width = '';
+}
+
+function onColumnResize(e: React.MouseEvent<HTMLDivElement>) {
+  const target = e.target as HTMLDivElement;
+  if (!target.parentElement) return;
+
+  let startX = e.pageX;
+  let startWidth = target.parentElement.offsetWidth;
+
+  // Function to handle mouse movement during drag
+  function onMouseMove(e: any) {
+    if (!target.parentElement) return;
+
+    const diffX = e.pageX - startX;
+    // Calculate new width, preventing columns from becoming too small
+    const newWidth = Math.max(50, startWidth + diffX);
+    target.parentElement.style.width = newWidth + 'px';
+  }
+
+  // Function to stop resizing on mouse up
+  function onMouseUp() {
+    if (!target.parentElement) return;
+
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+    target.parentElement.classList.remove('active');
+  }
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+}
 
 export default AdvancedTable;

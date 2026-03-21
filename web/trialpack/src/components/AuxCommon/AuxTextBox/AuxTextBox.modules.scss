@@ -17,6 +17,34 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import AuxLabel from './AuxLabel';
+.aux-text-box {
+  font-weight: normal;
 
-export default AuxLabel;
+  &-input {
+    background: transparent;
+  }
+
+  &_is-weighted {
+    font-weight: bold;
+  }
+
+  &_is-small-sized {
+    font-size: small;
+  }
+
+  &_is-medium-sized {
+    font-size: smaller;
+  }
+
+  &_non-selectable {
+    user-select: none;
+  }
+
+  &_left_aligned {
+    text-align: left;
+  }
+
+  &_right_aligned {
+    text-align: right;
+  }
+}

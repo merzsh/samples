@@ -17,30 +17,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-.aux-label {
-  font-weight: normal;
+import AuxTextBox from './AuxTextBox';
 
-  &_is-weighted {
-    font-weight: bold;
-  }
-
-  &_is-small-sized {
-    font-size: small;
-  }
-
-  &_is-medium-sized {
-    font-size: smaller;
-  }
-
-  &_non-selectable {
-    user-select: none;
-  }
-
-  &_left_aligned {
-    text-align: left;
-  }
-
-  &_right_aligned {
-    text-align: right;
-  }
-}
+export default AuxTextBox;
