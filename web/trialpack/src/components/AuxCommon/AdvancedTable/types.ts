@@ -1,4 +1,5 @@
-import {ReactElement} from "react";
+import React from "react";
+import {AuxTextBoxProps} from "../AuxTextBox/AuxTextBox";
 
 export enum EAdvTblBackground { HEADER }
 
@@ -11,7 +12,8 @@ export type AdvTblCellBorder = {
 
 export type AdvTblCellProps = {
   id: string;
-  component: ReactElement;
   border: AdvTblCellBorder;
+  component: React.FC<any>;
+  componentProps: AuxTextBoxProps,
   background?: EAdvTblBackground;
 }

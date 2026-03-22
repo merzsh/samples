@@ -38,13 +38,16 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
       const colId: string = COLUMN_IDS[index];
       return [colId, {
         id: colId,
-        component: <AuxTextBox className={`${s['proj-plan__table-cell-component']}`} text={item}
-                               props={{
-                                 isNonSelectable: true,
-                                 fontSize: EAuxSize.M,
-                                 alignH: EAuxAlignH.L,
-                                 isBold: true,
-                               }}/>,
+        component: AuxTextBox,
+        componentProps: {
+          text: item,
+          props: {
+            isNonSelectable: true,
+            fontSize: EAuxSize.M,
+            alignH: EAuxAlignH.L,
+            isBold: true,
+          }
+        },
         border:  BORDER_FULL,
         background: EAdvTblBackground.HEADER,
       }];
@@ -57,13 +60,16 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
         const cellId = `${COLUMN_IDS[colIndex]}${rowIndex+1}`;
         return [cellId, {
           id: cellId,
-          component: <AuxTextBox id={`atb${cellId}`} className={`${s['proj-plan__table-cell-component']}`} text={col}
-                                 props={{
-                                   isNonSelectable: true,
-                                   isEditable: true,
-                                   fontSize: EAuxSize.M,
-                                   alignH: EAuxAlignH.L,
-                                 }}/>,
+          component: AuxTextBox,
+          componentProps: {
+            text: col,
+            props: {
+              isNonSelectable: true,
+              isEditable: true,
+              fontSize: EAuxSize.M,
+              alignH: EAuxAlignH.L,
+            }
+          },
           border: BORDER_FULL,
         }];
       }))
@@ -73,7 +79,7 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
   return (
     <div className={`${s['proj-plan']}`}>
       <AdvancedTable className={`${s['proj-plan__table']}`} header={headerColsListRef.current}
-                     body={bodyColsListRef.current} isWithRowNums />
+                     body={bodyColsListRef.current} isWithRowNums freeRowsCount={3} />
     </div>
   );
 };

@@ -18,12 +18,12 @@
  */
 
 import * as s from './AuxTextBox.modules.scss';
-import React, {FocusEvent, SyntheticEvent, useCallback, useRef} from 'react';
+import React, {useCallback, useRef} from 'react';
 import clsx from 'clsx';
 import {AuxTextBoxConfig} from "./types";
 import {EAuxAlignH, EAuxSize} from "../types";
 
-type AuxTextBoxProps = {
+export type AuxTextBoxProps = {
   text: string;
   props?: AuxTextBoxConfig;
   id?: string;
@@ -61,7 +61,7 @@ export const AuxTextBox: React.FC<AuxTextBoxProps> = ({text, props, id, classNam
         }} autoFocus onBlur={() => {
           setIsEditable(!isEditable);
         }} />
-      ) : `${textInt}`}
+      ) : (textInt ? textInt : '\u00A0')}
     </div>
   );
 };

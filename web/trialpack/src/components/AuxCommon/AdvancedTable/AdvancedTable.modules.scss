@@ -31,10 +31,12 @@
     &-resizer {
       cursor: col-resize;
       width: 3px;
+      background-color: lightgrey;
     }
 
     &_headed {
       display: flex;
+      justify-content: space-between;
     }
 
     &_dated {
@@ -78,8 +80,12 @@
   }
 }
 
-.row-num-comp {
+.comp-row-num {
   padding: 0 3px;
+}
+
+.comp-row-regular {
+  width: 100%;
 }
 
 .debug {
@@ -92,7 +98,6 @@
     width: 64px;
     border: 1px solid lightgrey;
     vertical-align: middle;
-    //text-align: center;
   }
 
   &__content {
