@@ -20,29 +20,30 @@
 import * as s from './AdvancedTable.modules.scss';
 import React, {ReactElement, useCallback, useRef} from 'react';
 import clsx from 'clsx';
-import {AdvTblCellProps, EAdvTblBackground} from "./types";
+import {AdvTblCellProps, AdvTblCellPropsAbstract, AuxCompsProps, EAdvTblBackground} from "./types";
 import AuxTextBox from "../AuxTextBox";
-import {EAuxAlignH, EAuxSize} from "../types";
+import {AuxLevelTextBoxProps, AuxTextBoxProps} from "../types";
 import {COLUMN_IDS} from "../constants";
-import {AuxTextBoxProps} from "../AuxTextBox/AuxTextBox";
+import AuxLevelTextBox from "../AuxLevelTextBox";
 
 type AdvancedTableProps = {
-  header: Map<string, AdvTblCellProps>;
-  body: Map<string, AdvTblCellProps>[];
+  header: Map<string, AdvTblCellPropsAbstract<AuxTextBoxProps>>;
+  body: Map<string, AdvTblCellProps<AuxCompsProps>>[];
   isWithRowNums?: boolean;
   freeRowsCount?: number;
   className?: string;
 };
 
-export const AdvancedTable: React.FC<AdvancedTableProps> = ({header, body,
-                                                              isWithRowNums, freeRowsCount,
-                                                              className}) => {
+export const AdvancedTable: React.FC<AdvancedTableProps> =
+  ({header, body, isWithRowNums,
+     freeRowsCount, className}) => {
+
   const currCellIdRef = useRef('');
   const debugArr = useRef(['aaa', 'bbb', 'ccc']);
 
   const onDataCellClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const target = e.target as HTMLElement;
-    if (!(target instanceof HTMLDivElement) || !target.parentElement?.id) return;
+    if (!(target instanceof HTMLDivElement) || !e.currentTarget.id) return;
 
     // deselect previous cell
     if (currCellIdRef.current) {
@@ -57,7 +58,7 @@ export const AdvancedTable: React.FC<AdvancedTableProps> = ({header, body,
     }
 
     // select current cell
-    const currCell = document.getElementById(target.parentElement.id);
+    const currCell = document.getElementById(e.currentTarget.id);
     if (!currCell || !(currCell instanceof HTMLTableCellElement)) return;
 
     if (currCell.id.startsWith('_')) {
@@ -76,7 +77,7 @@ export const AdvancedTable: React.FC<AdvancedTableProps> = ({header, body,
       <table className={clsx(className, s['adv-table'])} >
         <thead>
         <tr>
-          {getColsRow(header, isWithRowNums).map(col => {
+          {getColsRow(header, isWithRowNums ? 0 : undefined).map(col => {
             return (
               <th id={col.id} key={col.id} className={clsx(s['adv-table__th'], {
                 [`${s['adv-table__cell_background-head-colored']}`]: col.background === EAdvTblBackground.HEADER,
@@ -84,17 +85,19 @@ export const AdvancedTable: React.FC<AdvancedTableProps> = ({header, body,
                 [`${s['adv-table__cell_border-right']}`]: col.border.right,
                 [`${s['adv-table__cell_border-top']}`]: col.border.top,
                 [`${s['adv-table__cell_border-bottom']}`]: col.border.bottom
-              })}>
-                <div className={clsx(s['adv-table__cell'], s['adv-table__cell_headed'])}>
-                  {generateComponent(AuxTextBox, {
-                    id: col.id,
-                    className: col.id.startsWith('_') ? s['comp-row-num'] : s['comp-row-regular'],
-                    text: col.componentProps.text,
-                    props: col.componentProps.props,
-                  })}
+              })} >
+                <div className={clsx(s['adv-table__cell'], s['adv-table__cell_headed'])}
+                     onDoubleClick={onColumnInitSize} onMouseDown={onColumnResize}>
+                  {generateComponent<AuxTextBoxProps>({
+                    component: AuxTextBox,
+                    componentProps: {
+                      id: col.id,
+                      className: col.id.startsWith('_') ? s['comp-row-num'] : s['comp-row-regular'],
+                      text: col.componentProps.text,
+                      props: col.componentProps.props,
+                    }})}
                   {col.id !== '_'
-                    ? (<div className={`${s['adv-table__cell-resizer']}`} onMouseDown={onColumnResize}
-                            onDoubleClick={onColumnInitSize}/>)
+                    ? (<div className={`${s['adv-table__cell-resizer']}`} />)
                     : undefined}
                 </div>
               </th>
@@ -106,7 +109,33 @@ export const AdvancedTable: React.FC<AdvancedTableProps> = ({header, body,
         {addEmptyRows(body, freeRowsCount ?? 1).map((row, rowIndex) => {
           return (
             <tr key={`${rowIndex}`}>
-              {getColsRow(row, isWithRowNums, rowIndex + 1).map(col => {
+              {getColsRow(row, isWithRowNums ? (rowIndex + 1) : undefined).map((col) => {
+                let comp: ReactElement | undefined;
+                const compClassName = col.id.startsWith('_') ? s['comp-row-num'] : s['comp-row-regular'];
+
+                switch(col.component) {
+                  case AuxTextBox:
+                    comp = generateComponent<AuxTextBoxProps>({
+                      ...col,
+                      componentProps: {
+                        ...col.componentProps,
+                        className: compClassName,
+                      }
+                    });
+                    break;
+                  case AuxLevelTextBox:
+                    comp = generateComponent<AuxLevelTextBoxProps>({
+                      ...col,
+                      componentProps: {
+                        ...col.componentProps,
+                        className: compClassName,
+                      }
+                    });
+                    break;
+                  default:
+                    comp = undefined;
+                }
+
                 return (
                   <td id={col.id} key={col.id}
                       className={clsx(s['adv-table__th'], s['adv-table__cell'], {
@@ -119,12 +148,7 @@ export const AdvancedTable: React.FC<AdvancedTableProps> = ({header, body,
                         [`${s['adv-table__cell_border-bottom']}`]: col.border.bottom
                       })}
                       onClick={onDataCellClick}>
-                    {generateComponent(AuxTextBox, {
-                      id: col.id,
-                      className: col.id.startsWith('_') ? s['comp-row-num'] : s['comp-row-regular'],
-                      text: col.componentProps.text,
-                      props: col.componentProps.props,
-                    })}
+                    {comp}
                   </td>
                 );
               })}
@@ -141,7 +165,6 @@ export const AdvancedTable: React.FC<AdvancedTableProps> = ({header, body,
             return (
               <td key={`td${index}`} className={clsx(s['debug__td'])} onClick={() => {
                 debugArr.current[index] += '@';
-                console.log(12345, "DebugTable.td.onClick");
               }}>
                 <div className={clsx(s['debug__content'])}>{item}</div>
               </td>
@@ -154,51 +177,54 @@ export const AdvancedTable: React.FC<AdvancedTableProps> = ({header, body,
   );
 };
 
-function generateComponent (comp: React.FC<any>, compProps: AuxTextBoxProps):
+function generateComponent <T extends AuxCompsProps>(comp: Pick<AdvTblCellPropsAbstract<T>, 'component' | 'componentProps'>):
   ReactElement | undefined {
-  let result: ReactElement | undefined;
 
-  switch (comp) {
+  let result: ReactElement | undefined = undefined;
+
+  switch (comp.component) {
     case AuxTextBox:
-      result = <AuxTextBox id={`atb${compProps.id}`}
-                           className={compProps.className}
-                           text={compProps.text}
-                           props={compProps.props} />
+      result = <AuxTextBox {...{
+        ...comp.componentProps,
+      }} />
       break;
-    default:
-      result = undefined;
+    case AuxLevelTextBox:
+      result = <AuxLevelTextBox {...{
+        ...comp.componentProps,
+      }} />
+      break;
   }
-
   return result;
 }
 
-function addEmptyRows(array: Map<string, AdvTblCellProps>[], addedRowsCount: number): Map<string, AdvTblCellProps>[] {
-  if (array.length < 2 || !addedRowsCount) return [];
+function addEmptyRows(array: Map<string, AdvTblCellProps<AuxCompsProps>>[], addedRowsCount: number):
+  Map<string, AdvTblCellProps<AuxCompsProps>>[] {
 
-  const [_, row] = array;
+  if (!array.length || !addedRowsCount) return [];
+
+  const [row] = array;
   const cols = [...row.values()];
-  const result: Map<string, AdvTblCellProps>[] = array.slice();
+  const result = array.slice();
 
   for (let i = 0; i < addedRowsCount; i++) {
-    const colsCopy: Map<string, AdvTblCellProps> = new Map<string, AdvTblCellProps>();
+    const colsCopy = new Map<string, AdvTblCellProps<AuxCompsProps>>();
+
     cols.forEach((col, ind) => {
-      const id = `${COLUMN_IDS[ind]}${array.length+i+1}`;
-      colsCopy.set(id, {
+      const id = `${COLUMN_IDS[ind]}${array.length + i + 1}`;
+
+      const newCellProps = {
+        ...col,
         id,
-        background: col.background,
-        border: {...col.border},
-        component: AuxTextBox,
         componentProps: {
+          ...col.componentProps,
+          id,
           text: '',
-          props: {
-            isNonSelectable: true,
-            isEditable: true,
-            fontSize: EAuxSize.M,
-            alignH: EAuxAlignH.L,
-          }
         },
-      });
+      }
+
+      colsCopy.set(id, newCellProps);
     })
+
     result.push(colsCopy);
   }
 
@@ -236,35 +262,34 @@ function setRowSelection(rowNumCellId: string, is2SelectRow?: boolean) {
   }
 }
 
-function getColsRow(colsRow: Map<string, AdvTblCellProps>, isWithRowNums?: boolean, rowNum?: number): AdvTblCellProps[] {
+function getColsRow<T extends AdvTblCellProps<AuxCompsProps>>(colsRow: Map<string, T> , rowNum?: number): (T)[] {
+  if (!colsRow.size) return [];
+
   const result = [...colsRow.values()];
 
-  if (isWithRowNums && result.length) {
-    const [firstCol] = result;
+  if (rowNum !== undefined && result.length) {
+    const templateCol = result.find(item => item.component === AuxTextBox);
 
-    result.unshift({
-      id: `_${rowNum ?? ''}`,
-      border: firstCol.border,
-      background: EAdvTblBackground.HEADER,
-      component: AuxTextBox,
-      componentProps: {
-        text: `${rowNum ?? ''}`,
-        props: {
-          isNonSelectable: true,
-          fontSize: EAuxSize.M,
+    if (templateCol) {
+      const rowNumCol = {
+        ...templateCol,
+        id: `_${rowNum ? rowNum : ''}`,
+        background: EAdvTblBackground.HEADER,
+        componentProps: {
+          ...templateCol.componentProps,
+          text: `${rowNum ? rowNum : ''}`,
         }
-      },
-    });
+      };
+
+      result.unshift(rowNumCol);
+    }
   }
 
   return result;
 }
 
 function onColumnInitSize(e: React.MouseEvent<HTMLDivElement>) {
-  const target = e.target as HTMLDivElement;
-  if (!target.parentElement) return;
-
-  target.parentElement.style.width = '';
+  e.currentTarget.style.width = '';
 }
 
 function onColumnResize(e: React.MouseEvent<HTMLDivElement>) {

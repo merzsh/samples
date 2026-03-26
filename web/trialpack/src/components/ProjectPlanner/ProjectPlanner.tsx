@@ -20,12 +20,19 @@
 import * as s from './ProjectPlanner.modules.scss';
 import React, {useRef} from 'react';
 import AdvancedTable from "../AuxCommon/AdvancedTable";
-import {AdvTblCellProps, EAdvTblBackground} from "../AuxCommon/AdvancedTable/types";
+import {
+  AdvTblCellProps,
+  AdvTblCellPropsAbstract,
+  AuxCompsProps,
+  EAdvTblBackground
+} from "../AuxCommon/AdvancedTable/types";
 import {COLUMN_IDS} from "../AuxCommon/constants";
 import {BORDER_FULL} from "./constants";
 import AuxTextBox from "../AuxCommon/AuxTextBox";
-import {EAuxAlignH, EAuxSize} from "../AuxCommon/types";
+import {AuxTextBoxProps, EAuxAlignH, EAuxSize} from "../AuxCommon/types";
 import {dataSample} from "./fixtures";
+import AuxLevelTextBox from "../AuxCommon/AuxLevelTextBox";
+import {AuxTextBoxConfig} from "../AuxCommon/AuxTextBox/types";
 
 type ProjectPlannerProps = {
   title?: string;
@@ -33,46 +40,63 @@ type ProjectPlannerProps = {
 
 export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
 
-  const headerColsListRef = useRef<Map<string, AdvTblCellProps>>(new Map<string, AdvTblCellProps>(
-    dataSample[0].map((item, index) => {
-      const colId: string = COLUMN_IDS[index];
-      return [colId, {
-        id: colId,
-        component: AuxTextBox,
-        componentProps: {
-          text: item,
-          props: {
-            isNonSelectable: true,
-            fontSize: EAuxSize.M,
-            alignH: EAuxAlignH.L,
-            isBold: true,
-          }
-        },
-        border:  BORDER_FULL,
-        background: EAdvTblBackground.HEADER,
-      }];
-    })
-  ));
-
-  const bodyColsListRef = useRef<Map<string, AdvTblCellProps>[]>(
-    dataSample.slice(1).map((row, rowIndex) => {
-      return new Map<string, AdvTblCellProps>(row.map((col, colIndex) => {
-        const cellId = `${COLUMN_IDS[colIndex]}${rowIndex+1}`;
-        return [cellId, {
-          id: cellId,
+  const headerColsListRef = useRef<Map<string, AdvTblCellPropsAbstract<AuxTextBoxProps>>>(
+    new Map<string, AdvTblCellPropsAbstract<AuxTextBoxProps>>(
+      dataSample[0].map((item, index) => {
+        const colId: string = COLUMN_IDS[index];
+        return [colId, {
+          id: colId,
           component: AuxTextBox,
           componentProps: {
-            text: col,
+            text: item,
             props: {
               isNonSelectable: true,
-              isEditable: true,
               fontSize: EAuxSize.M,
               alignH: EAuxAlignH.L,
+              isBold: true,
             }
           },
-          border: BORDER_FULL,
+          border:  BORDER_FULL,
+          background: EAdvTblBackground.HEADER,
         }];
-      }))
+      })
+    ));
+
+  const bodyColsListRef = useRef<Map<string, AdvTblCellProps<AuxCompsProps>>[]>(
+    dataSample.slice(1).map((row, rowIndex) => {
+      const colNumB = COLUMN_IDS.indexOf('B');
+
+      return new Map<string, AdvTblCellProps<AuxCompsProps>>(row.map((col, colIndex) => {
+        const colId = `${COLUMN_IDS[colIndex]}${rowIndex+1}`;
+        const colCommon = {
+          id: colId,
+          border:  BORDER_FULL,
+        };
+        const cellProps: AuxTextBoxConfig = {
+          isNonSelectable: true,
+          isEditable: true,
+          fontSize: EAuxSize.M,
+          alignH: EAuxAlignH.L,
+        };
+        const componentProps = {
+          id: colId,
+          text: col,
+          props: cellProps,
+        };
+
+        return [colId, colIndex === colNumB ? {
+          ...colCommon,
+          component: AuxLevelTextBox,
+          componentProps: {
+            ...componentProps,
+            isExpanderVisible: true,
+          },
+        } : {
+          ...colCommon,
+          component: AuxTextBox,
+          componentProps,
+        }];
+      }));
     })
   );
 

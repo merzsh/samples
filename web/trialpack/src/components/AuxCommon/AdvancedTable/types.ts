@@ -1,5 +1,5 @@
 import React from "react";
-import {AuxTextBoxProps} from "../AuxTextBox/AuxTextBox";
+import {AuxTextBoxProps, AuxLevelTextBoxProps} from "../types";
 
 export enum EAdvTblBackground { HEADER }
 
@@ -10,10 +10,14 @@ export type AdvTblCellBorder = {
   bottom?: boolean;
 }
 
-export type AdvTblCellProps = {
+export type AuxCompsProps = AuxTextBoxProps | AuxLevelTextBoxProps;
+
+export type AdvTblCellPropsAbstract<T extends AuxCompsProps> = {
   id: string;
   border: AdvTblCellBorder;
-  component: React.FC<any>;
-  componentProps: AuxTextBoxProps,
+  component: React.FC<T>;
+  componentProps: T;
   background?: EAdvTblBackground;
 }
+
+export type AdvTblCellProps<T> = T extends AuxCompsProps ? AdvTblCellPropsAbstract<T> : never;

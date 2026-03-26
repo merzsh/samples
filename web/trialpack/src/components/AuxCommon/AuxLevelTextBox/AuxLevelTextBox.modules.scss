@@ -17,7 +17,38 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-.aux-edit {
-  visibility: visible;
-  color: orange;
+.aux-level-text-box {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding-left: 1rem;
+
+  &-expander {
+    padding: 2px;
+    border-radius: 3px;
+    border: 1px solid gray;
+    cursor: pointer;
+
+    &_opened {
+      transform: rotate(90deg);
+      transition: transform 0.2s ease-in;
+    }
+
+    &_closed {
+      transform: rotate(0deg);
+      transition: transform 0.2s ease-in;
+    }
+
+    &__arrow {
+      width: 0;
+      height: 0;
+      border-top: 4px solid transparent;
+      border-left: 8px solid gray;
+      border-bottom: 4px solid transparent;
+    }
+  }
+
+  &__inner-text-box {
+    width: 100%;
+  }
 }

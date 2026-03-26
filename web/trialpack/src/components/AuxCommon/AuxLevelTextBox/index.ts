@@ -17,21 +17,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import * as s from './AuxEdit.modules.scss';
-import React from 'react';
-import clsx from 'clsx';
-import {AuxEditConfig} from "./types";
+import AuxLevelTextBox from './AuxLevelTextBox';
 
-type AuxEditProps = {
-  text: string;
-  props?: AuxEditConfig;
-  className?: string;
-};
-
-export const AuxEdit: React.FC<AuxEditProps> = ({text, className}) => {
-  return (
-    <input className={clsx(className, s['aux-edit'])} type={'text'} value={`${text}`} />
-  );
-};
-
-export default AuxEdit;
+export default AuxLevelTextBox;

@@ -20,15 +20,7 @@
 import * as s from './AuxTextBox.modules.scss';
 import React, {useCallback, useRef} from 'react';
 import clsx from 'clsx';
-import {AuxTextBoxConfig} from "./types";
-import {EAuxAlignH, EAuxSize} from "../types";
-
-export type AuxTextBoxProps = {
-  text: string;
-  props?: AuxTextBoxConfig;
-  id?: string;
-  className?: string;
-};
+import {AuxTextBoxProps, EAuxAlignH, EAuxSize} from "../types";
 
 export const AuxTextBox: React.FC<AuxTextBoxProps> = ({text, props, id, className}) => {
   const [isEditable, setIsEditable] = React.useState(false);
@@ -46,7 +38,7 @@ export const AuxTextBox: React.FC<AuxTextBoxProps> = ({text, props, id, classNam
   }, [isEditable]);
 
   return (
-    <div id={id} className={clsx(className, s['aux-text-box'], {
+    <div id={`atb${id}`} className={clsx(className, s['aux-text-box'], {
       [`${s['aux-text-box_non-selectable']}`]: props?.isNonSelectable,
       [`${s['aux-text-box_is-weighted']}`]: props?.isBold,
       [`${s['aux-text-box_is-medium-sized']}`]: props?.fontSize === EAuxSize.M,
