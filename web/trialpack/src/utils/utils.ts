@@ -208,12 +208,13 @@ export async function sleep(ms: number) {
  * Next types presents in comparison: string, number, object (string и number types checks for object sub-hierarchically).
  *
  * @param object2Check - testing object
- * @param criteria - testing criteria for object object2Check, includes testing object properties (such as simple number / string types, so on objects)
- * @return boolean - returns true, if checking passed; false in another case
+ * @param criteria - testing criteria for object object2Check,
+ *                   includes testing object properties (such as simple number / string types, so on objects)
+ * @return boolean - returns 'true', if checking passed (empty criteria object { } including); 'false' in another case
  */
-function checkCriteria<T, V extends keyof T>(
+export function checkCriteria<T, V extends keyof T>(
   object2Check: T,
-  criteria: Pick<T, V>,
+  criteria: Partial<Pick <T, keyof T>>,
 ): boolean {
   if (
     !object2Check ||
@@ -225,8 +226,11 @@ function checkCriteria<T, V extends keyof T>(
   }
 
   let result = false;
+  const props = Object.getOwnPropertyNames(criteria);
 
-  for (const prop of Object.getOwnPropertyNames(criteria)) {
+  if (!props.length) return true;
+
+  for (const prop of props) {
     if (
         (typeof object2Check[prop as keyof T] === "string" &&
             typeof criteria[prop as V] === "string") ||
@@ -255,23 +259,24 @@ function checkCriteria<T, V extends keyof T>(
  * Makes recursive element search in abstract tree by preset criteria.
  *
  * @template N - tree node type
- * @template K - node tree property name which search performs for
- * @param startSearchNode - tree node object (any leaf) which search began for
+ * @param rootSearchNode - tree node object (any leaf) which search began for
  * @param searchCriteria - search criteria object contains name of any tree node property
  * @param childrenNodes - tree node name contains same type children elements such begin search node (startSearchNode)
- * @param onNodeFound - event triggered found node for: performed to first match if not specified,
- *  full tree traverse if set
+ * @param currTreeLevel - level for current rootSearchNode (top of tree has level 0)
+ * @param onNodeFound - 'node is found' event handler: performed to first match and return if not specified,
+ *  and full tree traverse if defined one (set searchCriteria as empty object, {}, to check every node)
  * @return - found element or undefined if missing
  */
-function findTreeNode<N, K extends keyof N>(
-  startSearchNode: N,
-  searchCriteria: Pick<N, K>,
+export function findTreeNode<N>(
+  rootSearchNode: N,
+  searchCriteria: Partial<Pick<N, keyof N>>,
   childrenNodes: keyof N,
-  onNodeFound?: (node: N) => void,
+  currTreeLevel?: number,
+  onNodeFound?: (node: N, level?: number, isLastLevel?: boolean) => void,
 ): N | undefined {
   if (
-    !startSearchNode ||
-    typeof startSearchNode !== "object" ||
+    !rootSearchNode ||
+    typeof rootSearchNode !== "object" ||
     !searchCriteria ||
     typeof searchCriteria !== "object" ||
     !childrenNodes ||
@@ -280,26 +285,29 @@ function findTreeNode<N, K extends keyof N>(
     return undefined;
   }
 
-  if (checkCriteria(startSearchNode, searchCriteria)) {
+  const array = rootSearchNode[childrenNodes];
+  let children: N[] = [];
+
+  if (array && Array.isArray(array)) {
+    children = array as N[];
+  }
+
+  if (checkCriteria(rootSearchNode, searchCriteria)) {
     // current node adjusts with search criteria
     if (onNodeFound) {
-      onNodeFound(startSearchNode);
+      onNodeFound(rootSearchNode, currTreeLevel, !children.length);
     } else {
-      return startSearchNode;
+      return rootSearchNode;
     }
   }
 
   let result: N | undefined = undefined;
 
-  if (
-    startSearchNode[childrenNodes] &&
-    Array.isArray(startSearchNode[childrenNodes]) &&
-    (startSearchNode[childrenNodes] as N[]).length
-  ) {
+  if (children.length) {
     // go through children nodes
-    const children = startSearchNode[childrenNodes] as N[];
     for (const node of children) {
-      result = findTreeNode(node, searchCriteria, childrenNodes, onNodeFound);
+      result = findTreeNode(node, searchCriteria, childrenNodes,
+        currTreeLevel !== undefined ? currTreeLevel + 1 : undefined, onNodeFound);
       if (result && !onNodeFound) {
         break;
       }
@@ -308,4 +316,39 @@ function findTreeNode<N, K extends keyof N>(
   }
 
   return result;
+}
+
+/**
+ * Add node to abstract tree by specified parent node reference.
+ *
+ * @template N - child node type to add
+ * @param rootNode - tree root node
+ * @param nodeToAdd - node to add to tree
+ * @param parentNodeSearchCriteria - parent node props / vals search criteria object which nodeToAdd link to
+ * @param childrenNodesProp - tree node field name (of array type) contains same type children elements such root node
+ * @return - parent node for nodeToAdd was linked with
+ */
+export function addTreeNode<N>(rootNode: N, nodeToAdd: N, parentNodeSearchCriteria: Partial<Pick<N, keyof N>>,
+                                     childrenNodesProp: keyof N): N | undefined {
+  if (!rootNode || typeof rootNode !== "object" ||
+    !nodeToAdd || typeof nodeToAdd !== "object" ||
+    !childrenNodesProp || typeof childrenNodesProp !== "string"
+  ) {
+    throw new Error('Some argument has wrong value!');
+  }
+
+  const parent = findTreeNode(rootNode, parentNodeSearchCriteria, childrenNodesProp);
+
+  if (parent && parent[childrenNodesProp]) {
+    const children = parent[childrenNodesProp];
+    if (Array.isArray(children)) {
+      children.push(nodeToAdd);
+      children.sort((a,b) => {
+        const [prop] = Object.getOwnPropertyNames(parentNodeSearchCriteria);
+        return a[prop] < b[prop] ? -1 : a[prop] > b[prop] ? 1 : 0;
+      });
+    }
+  }
+
+  return parent;
 }

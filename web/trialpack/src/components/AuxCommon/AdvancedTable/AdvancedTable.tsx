@@ -25,6 +25,7 @@ import AuxTextBox from "../AuxTextBox";
 import {AuxLevelTextBoxProps, AuxTextBoxProps} from "../types";
 import {COLUMN_IDS} from "../constants";
 import AuxLevelTextBox from "../AuxLevelTextBox";
+import {addEmptyRows, getColsRow, getComponentClass, onColumnResize} from "./utils";
 
 type AdvancedTableProps = {
   header: Map<string, AdvTblCellPropsAbstract<AuxTextBoxProps>>;
@@ -87,17 +88,17 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
                 [`${s['adv-table__cell_border-bottom']}`]: col.border.bottom
               })} >
                 <div className={clsx(s['adv-table__cell'], s['adv-table__cell_headed'])}
-                     onDoubleClick={onColumnInitSize} onMouseDown={onColumnResize}>
+                     onDoubleClick={(event) => {
+                       event.currentTarget.style.width = '';
+                     }}>
                   {generateComponent<AuxTextBoxProps>({
                     component: AuxTextBox,
                     componentProps: {
-                      id: col.id,
-                      className: col.id.startsWith('_') ? s['comp-row-num'] : s['comp-row-regular'],
-                      text: col.componentProps.text,
-                      props: col.componentProps.props,
+                      ...col.componentProps,
+                      className: s[getComponentClass(col.id)],
                     }})}
                   {col.id !== '_'
-                    ? (<div className={`${s['adv-table__cell-resizer']}`} />)
+                    ? (<div className={`${s['adv-table__cell-resizer']}`} onMouseDown={onColumnResize} />)
                     : undefined}
                 </div>
               </th>
@@ -108,10 +109,9 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
         <tbody>
         {addEmptyRows(body, freeRowsCount ?? 1).map((row, rowIndex) => {
           return (
-            <tr key={`${rowIndex}`}>
+            <tr id={`${rowIndex+1}`} key={`${rowIndex+1}`}>
               {getColsRow(row, isWithRowNums ? (rowIndex + 1) : undefined).map((col) => {
                 let comp: ReactElement | undefined;
-                const compClassName = col.id.startsWith('_') ? s['comp-row-num'] : s['comp-row-regular'];
 
                 switch(col.component) {
                   case AuxTextBox:
@@ -119,7 +119,7 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
                       ...col,
                       componentProps: {
                         ...col.componentProps,
-                        className: compClassName,
+                        className: s[getComponentClass(col.id)],
                       }
                     });
                     break;
@@ -128,7 +128,7 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
                       ...col,
                       componentProps: {
                         ...col.componentProps,
-                        className: compClassName,
+                        className: s[getComponentClass(col.id)],
                       }
                     });
                     break;
@@ -191,43 +191,18 @@ function generateComponent <T extends AuxCompsProps>(comp: Pick<AdvTblCellPropsA
     case AuxLevelTextBox:
       result = <AuxLevelTextBox {...{
         ...comp.componentProps,
+      }} onExpanderRows={(rowNums, isExpanded) => {
+        if (rowNums.length <= 1) return;
+
+        for (let i = 1; i < rowNums.length; i++) {
+          const row = document.getElementById(`${rowNums[i].toString()}`);
+          if (row) {
+            row.style.display = isExpanded ? 'table-row' : 'none';
+          }
+        }
       }} />
       break;
   }
-  return result;
-}
-
-function addEmptyRows(array: Map<string, AdvTblCellProps<AuxCompsProps>>[], addedRowsCount: number):
-  Map<string, AdvTblCellProps<AuxCompsProps>>[] {
-
-  if (!array.length || !addedRowsCount) return [];
-
-  const [row] = array;
-  const cols = [...row.values()];
-  const result = array.slice();
-
-  for (let i = 0; i < addedRowsCount; i++) {
-    const colsCopy = new Map<string, AdvTblCellProps<AuxCompsProps>>();
-
-    cols.forEach((col, ind) => {
-      const id = `${COLUMN_IDS[ind]}${array.length + i + 1}`;
-
-      const newCellProps = {
-        ...col,
-        id,
-        componentProps: {
-          ...col.componentProps,
-          id,
-          text: '',
-        },
-      }
-
-      colsCopy.set(id, newCellProps);
-    })
-
-    result.push(colsCopy);
-  }
-
   return result;
 }
 
@@ -260,66 +235,6 @@ function setRowSelection(rowNumCellId: string, is2SelectRow?: boolean) {
       rowNumCell.classList.add(s['adv-table__cell_background-head-colored']);
     }
   }
-}
-
-function getColsRow<T extends AdvTblCellProps<AuxCompsProps>>(colsRow: Map<string, T> , rowNum?: number): (T)[] {
-  if (!colsRow.size) return [];
-
-  const result = [...colsRow.values()];
-
-  if (rowNum !== undefined && result.length) {
-    const templateCol = result.find(item => item.component === AuxTextBox);
-
-    if (templateCol) {
-      const rowNumCol = {
-        ...templateCol,
-        id: `_${rowNum ? rowNum : ''}`,
-        background: EAdvTblBackground.HEADER,
-        componentProps: {
-          ...templateCol.componentProps,
-          text: `${rowNum ? rowNum : ''}`,
-        }
-      };
-
-      result.unshift(rowNumCol);
-    }
-  }
-
-  return result;
-}
-
-function onColumnInitSize(e: React.MouseEvent<HTMLDivElement>) {
-  e.currentTarget.style.width = '';
-}
-
-function onColumnResize(e: React.MouseEvent<HTMLDivElement>) {
-  const target = e.target as HTMLDivElement;
-  if (!target.parentElement) return;
-
-  let startX = e.pageX;
-  let startWidth = target.parentElement.offsetWidth;
-
-  // Function to handle mouse movement during drag
-  function onMouseMove(e: any) {
-    if (!target.parentElement) return;
-
-    const diffX = e.pageX - startX;
-    // Calculate new width, preventing columns from becoming too small
-    const newWidth = Math.max(50, startWidth + diffX);
-    target.parentElement.style.width = newWidth + 'px';
-  }
-
-  // Function to stop resizing on mouse up
-  function onMouseUp() {
-    if (!target.parentElement) return;
-
-    document.removeEventListener('mousemove', onMouseMove);
-    document.removeEventListener('mouseup', onMouseUp);
-    target.parentElement.classList.remove('active');
-  }
-
-  document.addEventListener('mousemove', onMouseMove);
-  document.addEventListener('mouseup', onMouseUp);
 }
 
 export default AdvancedTable;
