@@ -263,16 +263,16 @@ export function checkCriteria<T, V extends keyof T>(
  * @param searchCriteria - search criteria object contains name of any tree node property
  * @param childrenNodes - tree node name contains same type children elements such begin search node (startSearchNode)
  * @param currTreeLevel - level for current rootSearchNode (top of tree has level 0)
- * @param onNodeFound - 'node is found' event handler: performed to first match and return if not specified,
- *  and full tree traverse if defined one (set searchCriteria as empty object, {}, to check every node)
+ * @param onNodeFound - 'node is found' event handler triggered on every condition match
+ *                      (useful for multiple search; set searchCriteria as empty object, {}, to check every node forcibly)
  * @return - found element or undefined if missing
  */
 export function findTreeNode<N>(
   rootSearchNode: N,
   searchCriteria: Partial<Pick<N, keyof N>>,
   childrenNodes: keyof N,
-  currTreeLevel?: number,
   onNodeFound?: (node: N, level?: number, isLastLevel?: boolean) => void,
+  currTreeLevel = 0,
 ): N | undefined {
   if (
     !rootSearchNode ||
@@ -292,6 +292,16 @@ export function findTreeNode<N>(
     children = array as N[];
   }
 
+  if (children.length) {
+    // go through children nodes
+    for (const node of children) {
+      const found = findTreeNode(node, searchCriteria, childrenNodes, onNodeFound, currTreeLevel + 1);
+      if (found && !onNodeFound) {
+        return found;
+      }
+    }
+  }
+
   if (checkCriteria(rootSearchNode, searchCriteria)) {
     // current node adjusts with search criteria
     if (onNodeFound) {
@@ -301,21 +311,7 @@ export function findTreeNode<N>(
     }
   }
 
-  let result: N | undefined = undefined;
-
-  if (children.length) {
-    // go through children nodes
-    for (const node of children) {
-      result = findTreeNode(node, searchCriteria, childrenNodes,
-        currTreeLevel !== undefined ? currTreeLevel + 1 : undefined, onNodeFound);
-      if (result && !onNodeFound) {
-        break;
-      }
-      result = undefined;
-    }
-  }
-
-  return result;
+  return undefined;
 }
 
 /**
@@ -343,10 +339,6 @@ export function addTreeNode<N>(rootNode: N, nodeToAdd: N, parentNodeSearchCriter
     const children = parent[childrenNodesProp];
     if (Array.isArray(children)) {
       children.push(nodeToAdd);
-      children.sort((a,b) => {
-        const [prop] = Object.getOwnPropertyNames(parentNodeSearchCriteria);
-        return a[prop] < b[prop] ? -1 : a[prop] > b[prop] ? 1 : 0;
-      });
     }
   }
 

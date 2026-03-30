@@ -27,13 +27,13 @@ import {
   EAdvTblBackground
 } from "../AuxCommon/AdvancedTable/types";
 import {COLUMN_IDS} from "../AuxCommon/constants";
-import {BORDER_FULL} from "./constants";
+import {BORDER_FULL, ROOT_WBS_CODE} from "./constants";
 import AuxTextBox from "../AuxCommon/AuxTextBox";
 import {AuxLevelTextBoxProps, AuxTextBoxProps, EAuxAlignH, EAuxSize} from "../AuxCommon/types";
 import {projectSampleData} from "./fixtures";
 import AuxLevelTextBox from "../AuxCommon/AuxLevelTextBox";
 import {AuxTextBoxConfig} from "../AuxCommon/AuxTextBox/types";
-import {ApiProjectAttribAllIds, ApiProjectWork, ProjectWorkNode} from "./types";
+import {ApiProjectAttribAllIds, ProjectWorkNode} from "./types";
 import {addTreeNode, findTreeNode} from "../../utils/utils";
 import {getParentWbs} from "./utils";
 import {getColNameByCellId, getRowNumByCellId} from "../AuxCommon/AdvancedTable/utils";
@@ -46,11 +46,16 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
 
   const headerColsListRef = useRef<Map<string, AdvTblCellPropsAbstract<AuxTextBoxProps>>>();
   const bodyColsListRef = useRef<Map<string, AdvTblCellProps<AuxCompsProps>>[]>();
-  const projectWorksTree = useRef<ProjectWorkNode>({
-    wbs_code: '',
-    work_name: projectSampleData.projectTitle,
-    children: [],
-  });
+  const projectWorksTree = useRef<ProjectWorkNode>(
+    projectSampleData.projectWorksList
+      .filter(item => (item.wbs_code === ROOT_WBS_CODE))
+      .map(item => ({
+        wbs_code: item.wbs_code,
+        work_name: item.work_name,
+        children: [],
+      }))[0]
+  );
+  const [isLoading, setIsLoading] = React.useState(true);
 
   useEffect(() => {
     if (!projectSampleData.projectHeaderAttributes.length) return;
@@ -88,8 +93,6 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
     const childrenProp: keyof ProjectWorkNode = 'children';
 
     projectSampleData.projectWorksList
-      .sort((a, b) => (
-        a[parentAttr] < b[parentAttr] ? -1 : a[parentAttr] > b[parentAttr] ? 1 : 0))
       .forEach(row => {
         const newNode: ProjectWorkNode = {
           ...row,
@@ -98,22 +101,25 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
 
         addTreeNode(projectWorksTree.current, newNode, {
           [parentAttr]: getParentWbs(newNode[parentAttr].toString())
-        }, childrenProp);
+        }, childrenProp)
       });
 
     // build works list for UI table layout from project tree by each node traversing
-    let rowIndex = 0;
-
-    findTreeNode(projectWorksTree.current, {}, childrenProp, 0,
+    findTreeNode(projectWorksTree.current, {}, childrenProp,
       (node, level, isLastLevel) => {
         if (!bodyColsListRef.current) return;
 
         const row = new Map<string, AdvTblCellProps<AuxCompsProps>>(
           projectSampleData.projectHeaderAttributes
             .map((prop, colIndex) => {
-              const attr = prop.attrId as keyof typeof node;
+              let result: [string, AdvTblCellProps<AuxCompsProps>];
 
-              const colId = `${COLUMN_IDS[colIndex]}${rowIndex+1}`;
+              const attr = prop.attrId as keyof typeof node;
+              const colId =  `${COLUMN_IDS[colIndex]}`;
+              const extData = {
+                [attr]: '',
+                [parentAttr]: node[parentAttr],
+              };
               const colCommon = {
                 id: colId,
                 border:  BORDER_FULL,
@@ -123,22 +129,13 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
                 isEditable: true,
                 fontSize: EAuxSize.M,
                 alignH: EAuxAlignH.L,
+                isBold: !isLastLevel,
               };
               const value = node[attr];
               const componentProps = {
-                id: colId,
                 text: value ? value.toString() : '',
                 props: cellProps,
               };
-
-              let result: [string, AdvTblCellProps<AuxCompsProps>];
-              const extDataObj: Partial<ApiProjectWork> = {
-                [parentAttr]: node[parentAttr].toString(),
-                [attr]: '',
-              };
-              const extData = JSON.stringify(extDataObj);
-
-              console.log(12345, 'ProjectPlanner', extDataObj[parentAttr], value);
 
               if (attr === 'work_name') {
                 const colProps: AdvTblCellPropsAbstract<AuxLevelTextBoxProps> = {
@@ -148,27 +145,19 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
                     ...componentProps,
                     extData,
                     level,
-                    isExpanded: !!extDataObj[parentAttr] ? true : undefined,
-                    isExpanderVisible: !isLastLevel && !!extDataObj[parentAttr],
+                    isExpanded: !!node[parentAttr] ? true : undefined,
+                    isExpanderVisible: !isLastLevel && !!node[parentAttr],
                     onExpanderClick: (id, extData) => {
                       const result: number[] = [];
-                      if (!bodyColsListRef.current?.length || !extData || !id) return result;
-
-                      let exdDataObj: Partial<ApiProjectWork> | undefined = undefined;
-                      try {
-                        exdDataObj = JSON.parse(extData);
-                      } catch (error) {
-                        console.warn(`Json parsing error: ${(error as Error).message}`, error);
-                      }
-
-                      if (!exdDataObj) return result;
+                      if (!bodyColsListRef.current?.length ||
+                        !(extData && parentAttr in extData && extData[parentAttr]) || !id) return result;
 
                       const rowNum = getRowNumByCellId(id);
                       if (!rowNum) return result;
 
                       const row = bodyColsListRef.current[rowNum-1];
                       const col = [...row.values()]
-                        .find(item => (item.componentProps.text === exdDataObj[parentAttr]));
+                        .find(item => (item.componentProps.text === extData[parentAttr]));
 
                       if (!col) return result;
 
@@ -179,7 +168,7 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
                         const colItem = rowItem.get(`${colName}${rowIndex+1}`);
                         if (!colItem) return;
 
-                        const id = exdDataObj[parentAttr];
+                        const id = extData[parentAttr];
                         if (!id) return;
 
                         if (colItem.componentProps.text?.startsWith(id.toString())) {
@@ -201,6 +190,16 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
                     extData,
                   }
                 };
+
+                if ((attr === 'length') && !isLastLevel) {
+                  const sumLen = node.children.reduce((accum, curr) => {
+                    let len = typeof curr.length === 'number' && !isNaN(curr.length) ? curr.length : 0;
+                    return accum + len;
+                  }, 0);
+                  node.length = sumLen;
+                  colProps.componentProps.text = sumLen.toString();
+                }
+
                 result = [colId, colProps];
               }
 
@@ -209,13 +208,50 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
         );
 
         bodyColsListRef.current.push(row);
-
-        rowIndex++;
       });
+
+    // prepare data for view layout
+    bodyColsListRef.current = bodyColsListRef.current
+      .sort((a, b) => {
+        const [firstCol] = COLUMN_IDS;
+
+        const colA = a.get(firstCol);
+        if (!colA) return 0;
+
+        const colB = b.get(firstCol);
+        if (!colB) return 0;
+
+        const colAid = parentAttr in colA.componentProps.extData && colA.componentProps.extData[parentAttr] ?
+          colA.componentProps.extData[parentAttr].toString() : '';
+        if (!colAid) return 0;
+
+        const colBid = parentAttr in colB.componentProps.extData && colB.componentProps.extData[parentAttr] ?
+          colB.componentProps.extData[parentAttr].toString() : '';
+        if (!colBid) return 0;
+
+        return colAid < colBid ? -1 : colAid > colBid ? 1 : 0;
+      })
+      .map((row, rowIndex) => {
+        return new Map<string, AdvTblCellProps<AuxCompsProps>>(
+          [...row.values()].map(col => {
+            const rowId = `${col.id}${rowIndex+1}`;
+            return [rowId, {
+              ...col,
+              id: rowId,
+              componentProps: {
+                ...col.componentProps,
+                id: rowId,
+              }
+            }];
+          })
+        );
+      });
+
+    setIsLoading(false);
 
   }, []);
 
-  if (!headerColsListRef.current || !bodyColsListRef.current) return;
+  if (isLoading || !headerColsListRef.current || !bodyColsListRef.current) return undefined;
 
   return (
     <div className={`${s['proj-plan']}`}>

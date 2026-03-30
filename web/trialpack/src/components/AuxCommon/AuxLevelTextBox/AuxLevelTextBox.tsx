@@ -63,7 +63,7 @@ export const AuxLevelTextBox: React.FC<AuxLevelTextBoxProps> = ({ level, isExpan
                   className={clsx(s['aux-level-text-box__inner-text-box'], {
                     [`${s['aux-level-text-box__inner-text-box_tabbed']}`]: !isExpanderVisible && isExpanded !== undefined,
                   })}
-                  text={text} props={{...props, isBold: isExpanderVisible || isExpanded === undefined}}/>
+                  text={text} props={{...props}}/>
     </div>
   );
 };

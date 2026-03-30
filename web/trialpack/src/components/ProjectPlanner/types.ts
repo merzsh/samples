@@ -1,6 +1,6 @@
 export type ApiProjectAttribValueTypes = string | number;
 export type ApiProjectAttribNodeSpecIds = 'wbs_code' | 'work_name';
-export type ApiProjectAttribLeafSpecIds = 'duration' | 'percent_complete';
+export type ApiProjectAttribLeafSpecIds = 'length' | 'percent_complete';
 export type ApiProjectAttribAllIds = ApiProjectAttribNodeSpecIds | ApiProjectAttribLeafSpecIds;
 
 export type ApiProjectHeaderAttribute = {
@@ -13,7 +13,6 @@ export type ApiProjectWork = Record<ApiProjectAttribNodeSpecIds, ApiProjectAttri
   Partial<Record<ApiProjectAttribLeafSpecIds, ApiProjectAttribValueTypes>>;
 
 export type ApiProject = {
-  projectTitle: string;
   projectStartDate: string;
   projectCurrDate?: string;
   dateDisplayTemplate?: string;

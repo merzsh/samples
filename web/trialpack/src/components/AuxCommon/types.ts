@@ -6,7 +6,7 @@ export enum EAuxAlignV { T, M, B }
 
 export type AuxCommonProps = {
   id?: string;
-  extData?: string;
+  extData?: any;
   className?: string;
 };
 
@@ -22,6 +22,6 @@ export type AuxLevelTextBoxProps = AuxTextBoxProps & {
   level?: number;
   isExpanded?: boolean;
   isExpanderVisible?: boolean;
-  onExpanderClick?: (id?: string, extData?: string, isExpanded?: boolean) => number[];
+  onExpanderClick?: (id?: string, extData?: any, isExpanded?: boolean) => number[];
   onExpanderRows?: (rowNums: number[], isExpanded?: boolean) => void;
 };
