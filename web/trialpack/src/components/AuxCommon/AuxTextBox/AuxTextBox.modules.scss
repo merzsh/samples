@@ -24,6 +24,16 @@
     background: transparent;
   }
 
+  &-text {
+    &_as-center {
+      text-align: center;
+    }
+
+    &_as-right {
+      text-align: right;
+    }
+  }
+
   &_is-weighted {
     font-weight: bold;
   }

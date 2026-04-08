@@ -24,7 +24,7 @@ import AuxTextBox from "../AuxTextBox";
 import {AuxLevelTextBoxProps} from "../types";
 
 export const AuxLevelTextBox: React.FC<AuxLevelTextBoxProps> = ({ level, isExpanderVisible,
-                                                                  text, props,
+                                                                  value, props,
                                                                   id, extData,
                                                                   isExpanded, className,
                                                                   onExpanderClick, onExpanderRows}) => {
@@ -33,16 +33,20 @@ export const AuxLevelTextBox: React.FC<AuxLevelTextBoxProps> = ({ level, isExpan
   function onExpand(e: React.MouseEvent<HTMLDivElement>) {
     e.stopPropagation();
 
-    const isExp = !(isExpandedState ?? false);
+    const isExpanded = !(isExpandedState ?? false);
 
     if (onExpanderClick) {
-      const arr = onExpanderClick(id, extData, isExp);
+      const rowNums = id ? onExpanderClick(id) : [];
+
       if (onExpanderRows) {
-        onExpanderRows(arr, isExp);
+        onExpanderRows({
+          rowNums,
+          isExpanded,
+        });
       }
     }
 
-    setExpandedState(isExp);
+    setExpandedState(isExpanded);
   }
 
   return (
@@ -63,7 +67,7 @@ export const AuxLevelTextBox: React.FC<AuxLevelTextBoxProps> = ({ level, isExpan
                   className={clsx(s['aux-level-text-box__inner-text-box'], {
                     [`${s['aux-level-text-box__inner-text-box_tabbed']}`]: !isExpanderVisible && isExpanded !== undefined,
                   })}
-                  text={text} props={{...props}}/>
+                  value={value} props={{...props}}/>
     </div>
   );
 };

@@ -20,24 +20,42 @@
 import * as s from './AdvancedTable.modules.scss';
 import React, {ReactElement, useCallback, useRef} from 'react';
 import clsx from 'clsx';
-import {AdvTblCellProps, AdvTblCellPropsAbstract, AuxCompsProps, EAdvTblBackground} from "./types";
+import {
+  AdvTblCellProps,
+  AuxCompsProps,
+  EAdvTblBackground
+} from "./types";
 import AuxTextBox from "../AuxTextBox";
-import {AuxLevelTextBoxProps, AuxTextBoxProps} from "../types";
-import {COLUMN_IDS} from "../constants";
+import {AuxLevelTextBoxProps, AuxTextBoxProps, EColID} from "../types";
 import AuxLevelTextBox from "../AuxLevelTextBox";
-import {addEmptyRows, getColsRow, getComponentClass, onColumnResize} from "./utils";
+import {
+  addEmptyRows,
+  getColsRow,
+  getComponentClass,
+  getTableChildrenRows,
+  onColumnResize,
+  onExpanderRows,
+  setRowSelection, sortWorks
+} from "./utils";
 
 type AdvancedTableProps = {
-  header: Map<string, AdvTblCellPropsAbstract<AuxTextBoxProps>>;
-  body: Map<string, AdvTblCellProps<AuxCompsProps>>[];
+  header: AdvTblCellProps<AuxTextBoxProps>[];
+  works: AdvTblCellProps<AuxCompsProps>[][];
+  defaultSortColumn?: EColID;
   isWithRowNums?: boolean;
   freeRowsCount?: number;
   className?: string;
 };
 
+const ROW_SELECTION_STYLES = {
+  dataCellBackSelected: s['adv-table__cell_selected'],
+  headerCellBackSelected: s['adv-table__cell_background-head-select-colored'],
+  headerCellBackUnselected: s['adv-table__cell_background-head-colored'],
+};
+
 export const AdvancedTable: React.FC<AdvancedTableProps> =
-  ({header, body, isWithRowNums,
-     freeRowsCount, className}) => {
+  ({header, works, defaultSortColumn = EColID.A,
+     isWithRowNums, freeRowsCount, className}) => {
 
   const currCellIdRef = useRef('');
   const debugArr = useRef(['aaa', 'bbb', 'ccc']);
@@ -49,7 +67,7 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
     // deselect previous cell
     if (currCellIdRef.current) {
       if (currCellIdRef.current.startsWith('_')) {
-        setRowSelection(currCellIdRef.current);
+        setRowSelection(currCellIdRef.current, ROW_SELECTION_STYLES);
       } else {
         const prevCell = document.getElementById(currCellIdRef.current);
         if (prevCell && prevCell instanceof HTMLTableCellElement) {
@@ -63,7 +81,7 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
     if (!currCell || !(currCell instanceof HTMLTableCellElement)) return;
 
     if (currCell.id.startsWith('_')) {
-      setRowSelection(currCell.id, true);
+      setRowSelection(currCell.id, ROW_SELECTION_STYLES, true);
     } else {
       currCell.classList.add(s['adv-table__cell_selected']);
     }
@@ -71,7 +89,7 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
     currCellIdRef.current = currCell.id;
   }, []);
 
-  if (!header.size) return ;
+  if (!header.length) return;
 
   return (
     <div>
@@ -107,54 +125,59 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
         </tr>
         </thead>
         <tbody>
-        {addEmptyRows(body, freeRowsCount ?? 1).map((row, rowIndex) => {
-          return (
-            <tr id={`${rowIndex+1}`} key={`${rowIndex+1}`}>
-              {getColsRow(row, isWithRowNums ? (rowIndex + 1) : undefined).map((col) => {
-                let comp: ReactElement | undefined;
+        {addEmptyRows(
+          works.sort((a, b) =>
+            sortWorks(a, b, defaultSortColumn)), freeRowsCount ?? 1)
+          .map((row, rowIndex) => {
+            return (
+              <tr id={`${rowIndex+1}`} key={`${rowIndex+1}`}>
+                {getColsRow(row, isWithRowNums ? (rowIndex + 1) : undefined).map((col) => {
+                  let comp: ReactElement | undefined;
+                  const props: AdvTblCellProps<AuxCompsProps> = {
+                    ...col,
+                    componentProps: {
+                      ...col.componentProps,
+                      className: s[getComponentClass(col.id)],
+                    }
+                  };
 
-                switch(col.component) {
-                  case AuxTextBox:
-                    comp = generateComponent<AuxTextBoxProps>({
-                      ...col,
-                      componentProps: {
-                        ...col.componentProps,
-                        className: s[getComponentClass(col.id)],
-                      }
-                    });
-                    break;
-                  case AuxLevelTextBox:
-                    comp = generateComponent<AuxLevelTextBoxProps>({
-                      ...col,
-                      componentProps: {
-                        ...col.componentProps,
-                        className: s[getComponentClass(col.id)],
-                      }
-                    });
-                    break;
-                  default:
-                    comp = undefined;
-                }
+                  if (!col.id.startsWith('_')) {
+                    const cellId = `${col.id}${rowIndex+1}`;
+                    props.id = cellId;
+                    props.componentProps.id = cellId;
+                  }
 
-                return (
-                  <td id={col.id} key={col.id}
-                      className={clsx(s['adv-table__th'], s['adv-table__cell'], {
-                        [`${s['adv-table__cell_dated-row-num']}`]: col.id.startsWith('_'),
-                        [`${s['adv-table__cell_dated']}`]: !col.id.startsWith('_'),
-                        [`${s['adv-table__cell_background-head-colored']}`]: col.background === EAdvTblBackground.HEADER,
-                        [`${s['adv-table__cell_border-left']}`]: col.border.left,
-                        [`${s['adv-table__cell_border-right']}`]: col.border.right,
-                        [`${s['adv-table__cell_border-top']}`]: col.border.top,
-                        [`${s['adv-table__cell_border-bottom']}`]: col.border.bottom
-                      })}
-                      onClick={onDataCellClick}>
-                    {comp}
-                  </td>
-                );
-              })}
-            </tr>
-          );
-        })}
+                  switch(col.component) {
+                    case AuxTextBox:
+                      comp = generateComponent<AuxTextBoxProps>(props);
+                      break;
+                    case AuxLevelTextBox:
+                      comp = generateComponent<AuxLevelTextBoxProps>(props, works, defaultSortColumn);
+                      break;
+                    default:
+                      comp = undefined;
+                  }
+
+                  return (
+                    <td id={props.id} key={props.id}
+                        className={clsx(s['adv-table__th'], s['adv-table__cell'], {
+                          [`${s['adv-table__cell_dated-row-num']}`]: col.id.startsWith('_'),
+                          [`${s['adv-table__cell_dated']}`]: !col.id.startsWith('_'),
+                          [`${s['adv-table__cell_background-head-colored']}`]: col.background === EAdvTblBackground.HEADER,
+                          [`${s['adv-table__cell_border-left']}`]: col.border.left,
+                          [`${s['adv-table__cell_border-right']}`]: col.border.right,
+                          [`${s['adv-table__cell_border-top']}`]: col.border.top,
+                          [`${s['adv-table__cell_border-bottom']}`]: col.border.bottom
+                        })}
+                        onClick={onDataCellClick}>
+                      {comp}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })
+        }
         </tbody>
       </table>
 
@@ -177,7 +200,8 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
   );
 };
 
-function generateComponent <T extends AuxCompsProps>(comp: Pick<AdvTblCellPropsAbstract<T>, 'component' | 'componentProps'>):
+function generateComponent <T extends AuxCompsProps>(comp: Pick<AdvTblCellProps<T>, 'component' | 'componentProps'>,
+                                                     works?: AdvTblCellProps<AuxCompsProps>[][], defaultSortColumn?: EColID):
   ReactElement | undefined {
 
   let result: ReactElement | undefined = undefined;
@@ -189,52 +213,20 @@ function generateComponent <T extends AuxCompsProps>(comp: Pick<AdvTblCellPropsA
       }} />
       break;
     case AuxLevelTextBox:
-      result = <AuxLevelTextBox {...{
-        ...comp.componentProps,
-      }} onExpanderRows={(rowNums, isExpanded) => {
-        if (rowNums.length <= 1) return;
-
-        for (let i = 1; i < rowNums.length; i++) {
-          const row = document.getElementById(`${rowNums[i].toString()}`);
-          if (row) {
-            row.style.display = isExpanded ? 'table-row' : 'none';
-          }
-        }
-      }} />
+      result = <AuxLevelTextBox
+        {...{...comp.componentProps,}}
+        onExpanderClick={(id) => works && defaultSortColumn ? getTableChildrenRows(works, id, defaultSortColumn) : []}
+        onExpanderRows={(props) => {
+          onExpanderRows({
+            ...props,
+            works: works,
+            defaultSortColumn,
+          })
+        }}
+      />
       break;
   }
   return result;
-}
-
-function setRowSelection(rowNumCellId: string, is2SelectRow?: boolean) {
-  if (!rowNumCellId) return;
-
-  let rowNum = parseInt(rowNumCellId.substring(1));
-  rowNum = isNaN(rowNum) ? 0 : rowNum;
-  if (!rowNum) return;
-
-  const count = COLUMN_IDS.length;
-  for (let i = 0; i < count; i++) {
-    const cell = document.getElementById(`${COLUMN_IDS[i]}${rowNum}`);
-    if (cell && cell instanceof HTMLTableCellElement) {
-      if (is2SelectRow && !cell.classList.contains(s['adv-table__cell_selected'])) {
-        cell.classList.add(s['adv-table__cell_selected']);
-      } else {
-        cell.classList.remove(s['adv-table__cell_selected']);
-      }
-    }
-  }
-
-  const rowNumCell = document.getElementById(rowNumCellId);
-  if (rowNumCell && rowNumCell instanceof HTMLTableCellElement) {
-    if (is2SelectRow) {
-      rowNumCell.classList.remove(s['adv-table__cell_background-head-colored']);
-      rowNumCell.classList.add(s['adv-table__cell_background-head-select-colored']);
-    } else {
-      rowNumCell.classList.remove(s['adv-table__cell_background-head-select-colored']);
-      rowNumCell.classList.add(s['adv-table__cell_background-head-colored']);
-    }
-  }
 }
 
 export default AdvancedTable;

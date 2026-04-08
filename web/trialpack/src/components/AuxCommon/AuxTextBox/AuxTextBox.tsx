@@ -22,10 +22,10 @@ import React, {useCallback, useRef} from 'react';
 import clsx from 'clsx';
 import {AuxTextBoxProps, EAuxAlignH, EAuxSize} from "../types";
 
-export const AuxTextBox: React.FC<AuxTextBoxProps> = ({text, props,
+export const AuxTextBox: React.FC<AuxTextBoxProps> = ({value, props,
                                                         id, className}) => {
   const [isEditable, setIsEditable] = React.useState(false);
-  const [textInt, setTextInt] = React.useState(text);
+  const [valueInt, setValueInt] = React.useState(value);
   const colWidthRef = useRef(0);
 
   const onGoToEditMode = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -49,12 +49,19 @@ export const AuxTextBox: React.FC<AuxTextBoxProps> = ({text, props,
     })} onDoubleClick={onGoToEditMode}>
       {isEditable ? (
         <input style={{width: `${colWidthRef.current-2}px`}} className={s['aux-text-box-input']}
-          type={'text'} value={textInt} onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          setTextInt(e.target.value);
+          type={'text'} value={valueInt} onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          setValueInt(e.target.value);
         }} autoFocus onBlur={() => {
           setIsEditable(!isEditable);
         }} />
-      ) : (textInt ? textInt : '\u00A0')}
+      ) : (
+        <div className={clsx({
+          [`${s['aux-text-box-text_as-center']}`]: props?.alignH === EAuxAlignH.C,
+          [`${s['aux-text-box-text_as-right']}`]: props?.alignH === EAuxAlignH.R,
+        })}>
+          {valueInt ? valueInt : '\u00A0'}
+        </div>
+      )}
     </div>
   );
 };

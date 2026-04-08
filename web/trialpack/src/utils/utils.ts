@@ -154,6 +154,25 @@ export function copyObj(target: any, source: any, compName?: string): void {
 }
 
 /**
+ * Read property typed value from raw (any) object.
+ *
+ * @template T - record like type
+ * @template V - value types scope
+ * @param obj - object property to read from
+ * @param prop - read property name
+ * @param out - expected 'prop' property type
+ * @return - value of 'out' type if requested type cast was successful
+ */
+export function prop<
+  T extends Record<string, unknown>,
+  V extends T | string | number | boolean | ArrayLike<unknown>
+>(obj: T, prop: keyof T, out: V): V | undefined {
+  return prop in obj && obj[prop] && typeof obj[prop] === typeof out
+    ? (obj[prop] as V)
+    : undefined;
+}
+
+/**
  * Capitalize first character of string
  * @param str - provided string
  * @return - result string
