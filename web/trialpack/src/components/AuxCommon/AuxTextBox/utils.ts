@@ -16,19 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
+import {STR_HTML_SPACE} from "../constants";
 
-import {AdvTblCellBorder} from "../AuxCommon/AdvancedTable/types";
-import {
-  ApiProjectWork,
-} from "./types";
-
-export const BORDER_FULL: AdvTblCellBorder = { left: true, right: true, top: true, bottom: true };
-
-export const ROOT_WBS_CODE = '';
-
-export const PROJECT_DEFAULT_WBS = '';
-export const PROJECT_DEFAULT_NAME = 'Untitled work';
-export const DEFAULT_WORK: ApiProjectWork = {
-  wbs_code: PROJECT_DEFAULT_WBS,
-  work_name: PROJECT_DEFAULT_NAME,
-};
+export function procAsNumSuppressZero(value: string, returnHtmlSpaceIfEmpty?: boolean): string {
+  return value.length === 1 && value[0] === '0' ? returnHtmlSpaceIfEmpty ? STR_HTML_SPACE : '' : value;
+}

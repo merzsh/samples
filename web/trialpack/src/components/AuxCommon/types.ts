@@ -23,7 +23,15 @@ export enum EAuxSize { S, M, L }
 export enum EAuxAlignH { L, C, R }
 export enum EAuxAlignV { T, M, B }
 
-export enum EColID { A = 'A', B = 'B', C = 'C', D = 'D', E = 'E', F = 'F', }
+export enum EColID { A = 'A', B = 'B', C = 'C', D = 'D', E = 'E', F = 'F' }
+export enum EAuxTextBoxType { TEXT = 'text', NUM = 'number', DATE = 'date'}
+
+export enum EAuxCompExtData { CURR_COL_NAME = 'currColumnName', KEY_COL_VALUE = 'keyColumnValue' }
+
+export type AuxCompExtData = {
+  [EAuxCompExtData.CURR_COL_NAME]?: string;
+  [EAuxCompExtData.KEY_COL_VALUE]?: string;
+}
 
 export type AuxCommonProps = {
   id?: string;
@@ -33,6 +41,8 @@ export type AuxCommonProps = {
 
 export type AuxCommonTextBoxProps = AuxCommonProps & {
   value?: string;
+  type?: EAuxTextBoxType;
+  onChange?: (value: string) => void;
 };
 
 export type AuxTextBoxProps = AuxCommonTextBoxProps & {

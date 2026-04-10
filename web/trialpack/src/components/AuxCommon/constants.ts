@@ -16,3 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
+
+export const STR_INIT: string = '';
+export const STR_HTML_SPACE = '\u00A0';
+export const STR_DIGITS = '0123456789';
+export const STR_KEY_ENTER = 'Enter';
+export const STR_KEY_ESCAPE = 'Escape';
+
+export const NUM_INIT: number = 0;
+export const BOOL_INIT: boolean = false;

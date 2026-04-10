@@ -20,7 +20,8 @@
 import {
   ApiProjectAttribNodeSpecIds,
   ApiProjectWork,
-  ProjectWorkNode, ProjectWorkNodeProps,
+  ProjectWorkNode,
+  ProjectWorkNodeProps,
   UseProjectWorksTree,
 } from "../types";
 import {useEffect, useState} from "react";

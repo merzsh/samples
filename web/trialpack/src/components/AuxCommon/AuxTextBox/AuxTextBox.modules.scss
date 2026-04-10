@@ -22,6 +22,10 @@
 
   &-input {
     background: transparent;
+
+    &_errored {
+      background: lightpink;
+    }
   }
 
   &-text {

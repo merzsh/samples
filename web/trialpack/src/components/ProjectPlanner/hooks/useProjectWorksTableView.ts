@@ -17,29 +17,37 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 import {
+  ApiProject,
   ApiProjectAttribAllIds, ApiProjectAttribNodeSpecIds,
-  ApiProjectHeaderAttribute,
+  ApiProjectHeaderAttribute, EProjProps,
   ProjectWorkNode, ProjectWorkNodeProps,
   UseProjectWorksTableView, UseProjectWorksTableViewMap
 } from "../types";
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {AdvTblCellProps, AuxCompsProps} from "../../AuxCommon/AdvancedTable/types";
 import {AuxTextBoxProps, EColID} from "../../AuxCommon/types";
-import {INIT_TEXT_BOX_CELL_PROPS} from "../constants";
 import {findTreeNode} from "../../../utils/utils";
+import {INIT_TEXT_BOX_CELL_PROPS} from "../../AuxCommon/AdvancedTable/constants";
 
-export const useProjectWorksTableView = (headerAttrs: ApiProjectHeaderAttribute[],
+export const useProjectWorksTableView = (projectSettings: Pick<ApiProject, EProjProps.IS_SUPPRESS_ZEROS>,
+                                         headerAttrs: ApiProjectHeaderAttribute[],
                                          mappings: Map<ApiProjectAttribAllIds, UseProjectWorksTableViewMap>,
                                          parentWorkAttr: ApiProjectAttribNodeSpecIds,
                                          childrenProp: keyof ProjectWorkNodeProps,
                                          rootWorkNode?: ProjectWorkNode):
   UseProjectWorksTableView => {
 
+  const [rootWorkNodeInt, setRootWorkNodeInt] = useState<ProjectWorkNode>();
   const [header, setHeader] = useState<AdvTblCellProps<AuxCompsProps>[]>();
   const [works, setWorks] = useState<AdvTblCellProps<AuxCompsProps>[][]>();
 
   useEffect(() => {
     if (!rootWorkNode) return;
+    setRootWorkNodeInt(rootWorkNode);
+  }, [rootWorkNode]);
+
+  useEffect(() => {
+    if (!rootWorkNodeInt) return;
 
     // build header for UI table layout
     const headerResult: AdvTblCellProps<AuxTextBoxProps>[] = [];
@@ -52,7 +60,6 @@ export const useProjectWorksTableView = (headerAttrs: ApiProjectHeaderAttribute[
         ? mapping({
           workAttr: {attrId, attrName},
           parentWorkAttr,
-          worksList: works,
           colId: `${Object.values(EColID)[attrIndex]}`,
           isHeader: true,
         })
@@ -64,7 +71,7 @@ export const useProjectWorksTableView = (headerAttrs: ApiProjectHeaderAttribute[
     // build works list for UI table layout from project tree by each node traversing
     const worksResult: AdvTblCellProps<AuxCompsProps>[][] = [];
 
-    findTreeNode(rootWorkNode, {}, childrenProp,
+    findTreeNode(rootWorkNodeInt, {}, childrenProp,
       (node, level, isLastLevel) => {
         const row: AdvTblCellProps<AuxCompsProps>[] = headerAttrs
           .map((prop, colIndex) => {
@@ -75,10 +82,10 @@ export const useProjectWorksTableView = (headerAttrs: ApiProjectHeaderAttribute[
               ? mapping({
                 workAttr: {attrId, attrName},
                 parentWorkAttr,
-                worksList: worksResult,
                 workNode: node,
                 colId: `${Object.values(EColID)[colIndex]}`,
                 isEditable: true,
+                isSuppressZeros: projectSettings.isSuppressZeros,
                 level,
                 isLastLevel,
               })
@@ -89,12 +96,16 @@ export const useProjectWorksTableView = (headerAttrs: ApiProjectHeaderAttribute[
       });
 
     setWorks(worksResult);
-  }, [rootWorkNode]);
+  }, [rootWorkNodeInt]);
 
-  if (!header || !works) return { };
+  const refreshView = useCallback(()=> {
+    if (!rootWorkNode) return;
+    setRootWorkNodeInt({...rootWorkNode});
+  }, [rootWorkNode]);
 
   return {
     header,
     works,
+    refreshView,
   }
 };

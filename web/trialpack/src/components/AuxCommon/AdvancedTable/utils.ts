@@ -22,12 +22,14 @@ import React from "react";
 import AuxTextBox from "../AuxTextBox";
 import {AuxLevelTextBoxProps, EAuxAlignH, EColID, OnExpanderRowsProps} from "../types";
 import AuxLevelTextBox from "../AuxLevelTextBox";
+import {STR_DIGITS} from "../constants";
 
-export function addEmptyRows(array: AdvTblCellProps<AuxCompsProps>[][], addedRowsCount: number):
+export function genEmptyRows(array: AdvTblCellProps<AuxCompsProps>[][], addedRowsCount: number):
   AdvTblCellProps<AuxCompsProps>[][] {
 
   if (!array.length || !addedRowsCount) return [];
 
+  const result: typeof array = [];
   const cols = array[array.length-1];
 
   for (let i = 0; i < addedRowsCount; i++) {
@@ -49,39 +51,36 @@ export function addEmptyRows(array: AdvTblCellProps<AuxCompsProps>[][], addedRow
       colsCopy.push(newCellProps);
     })
 
-    array.push(colsCopy);
+    result.push(colsCopy);
   }
 
-  return array;
+  return result;
 }
 
-export function getColsRow<T extends AdvTblCellProps<AuxCompsProps>>(colsRow: T[] , rowNum?: number): (T)[] {
-  if (!colsRow.length) return [];
-
-  if (rowNum !== undefined && colsRow.length) {
-    const templateCol = colsRow.find(item => item.component === AuxTextBox);
-
-    if (templateCol) {
-      const rowNumCol = {
-        ...templateCol,
-        id: `_${rowNum ? rowNum : ''}`,
-        background: EAdvTblBackground.HEADER,
-        componentProps: {
-          ...templateCol.componentProps,
-          props: {
-            ...templateCol.componentProps.props,
-            alignH: EAuxAlignH.C,
-            isEditable: false,
-          },
-          value: `${rowNum ? rowNum : ''}`,
-        }
-      };
-
-      colsRow.unshift(rowNumCol);
-    }
+export function genRowNumCell<T extends AdvTblCellProps<AuxCompsProps>>(colsRow: T[] , rowNum: number): T {
+  if (!colsRow.length){
+    throw new ReferenceError('colsRow is empty!');
   }
 
-  return colsRow;
+  const templateCol = colsRow.find(item => item.component === AuxTextBox);
+  if (!templateCol){
+    throw new ReferenceError('templateCol is empty!');
+  }
+
+  return {
+    ...templateCol,
+    id: `_${rowNum ? rowNum : ''}`,
+    background: EAdvTblBackground.HEADER,
+    componentProps: {
+      ...templateCol.componentProps,
+      props: {
+        ...templateCol.componentProps.props,
+        alignH: EAuxAlignH.C,
+        isEditable: false,
+      },
+      value: `${rowNum ? rowNum : ''}`,
+    }
+  };
 }
 
 export function sortWorks(a: AdvTblCellProps<AuxCompsProps>[], b: AdvTblCellProps<AuxCompsProps>[], defaultSortColumn = EColID.A): number {
@@ -173,7 +172,7 @@ export function getRowNumByCellId(CellId: string): number {
   let resultStrNum = '';
 
   for (let i = 0; i < CellId.length; i++) {
-    if (!'0123456789'.includes(CellId.charAt(i))) continue;
+    if (!STR_DIGITS.includes(CellId.charAt(i))) continue;
     else resultStrNum += CellId.charAt(i);
   }
 
@@ -184,13 +183,13 @@ export function getRowNumByCellId(CellId: string): number {
   return isNaN(result) ? 0 : result;
 }
 
-export function getColNameByCellId(CellId: string): string {
+export function getColNameByCellId(cellId: string): string {
   let result = '';
-  if (!CellId) return result;
+  if (!cellId) return result;
 
-  for (let i = 0; i < CellId.length; i++) {
-    if (!'0123456789'.includes(CellId.charAt(i))) {
-      result += CellId.charAt(i);
+  for (let i = 0; i < cellId.length; i++) {
+    if (!STR_DIGITS.includes(cellId.charAt(i))) {
+      result += cellId.charAt(i);
     }
   }
 

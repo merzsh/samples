@@ -18,13 +18,13 @@
  */
 
 import * as s from './ProjectPlanner.modules.scss';
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import AdvancedTable from "../AuxCommon/AdvancedTable";
 import {AdvTblCellProps, AdvTblCellPropsAbstract} from "../AuxCommon/AdvancedTable/types";
 import {DEFAULT_WORK, ROOT_WBS_CODE} from "./constants";
-import {AuxLevelTextBoxProps, AuxTextBoxProps} from "../AuxCommon/types";
+import {AuxLevelTextBoxProps, AuxTextBoxProps, EAuxTextBoxType} from "../AuxCommon/types";
 import {projectSampleDataApiRawResponse} from "./fixtures";
-import {ApiProjectAttribAllIds, EProjAttrs, EProjWorkNodeProps, UseProjectWorksTableViewMap} from "./types";
+import {ApiProjectAttribAllIds, EProjAttrs, EProjProps, EProjWorkNodeProps, UseProjectWorksTableViewMap} from "./types";
 import {castApiRawResponse, getDefaultSortColumn, mapCell} from "./utils";
 import {useProjectWorksTree} from "./hooks/useProjectWorksTree";
 import {useProjectWorksTableView} from "./hooks/useProjectWorksTableView";
@@ -35,24 +35,32 @@ type ProjectPlannerProps = {
 };
 
 export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
-
-  const [isLoading, setIsLoading] = React.useState(true);
-
   const [projectApi] = useState(castApiRawResponse(projectSampleDataApiRawResponse));
 
   const { rootWorkNode } = useProjectWorksTree(
-    projectApi.projectWorksList.find(
-      item => item.wbs_code === ROOT_WBS_CODE) ?? DEFAULT_WORK,
+    projectApi.projectWorksList.find(item => item.wbs_code === ROOT_WBS_CODE) ?? DEFAULT_WORK,
     projectApi.projectWorksList.filter(item => item.wbs_code !== ROOT_WBS_CODE),
     EProjAttrs.WBS,
     EProjWorkNodeProps.CHILDREN
   );
 
-  const { header, works } = useProjectWorksTableView(
+  const { header, works, refreshView } = useProjectWorksTableView(
+    {isSuppressZeros: projectApi[EProjProps.IS_SUPPRESS_ZEROS]},
     projectApi.projectHeaderAttributes,
     new Map<ApiProjectAttribAllIds, UseProjectWorksTableViewMap>([
       [EProjAttrs.WBS, (props): AdvTblCellProps<AuxTextBoxProps> => {
-        return mapCell(props);
+        const result = mapCell(props);
+
+        return {
+          ...result,
+          componentProps: {
+            ...result.componentProps,
+            props: {
+              ...result.componentProps.props,
+              isEditable: props.isLastLevel,
+            }
+          }
+        };
       }],
       [EProjAttrs.NAME, (props): AdvTblCellProps<AuxTextBoxProps> => {
         const result: AdvTblCellPropsAbstract<AuxLevelTextBoxProps> = mapCell(props);
@@ -60,6 +68,10 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
 
         const componentProps: AuxLevelTextBoxProps = {
           ...result.componentProps,
+          props: {
+            ...result.componentProps.props,
+            isEditable: props.isLastLevel,
+          },
           level: props.level,
           isExpanderVisible: !props.isLastLevel,
           isExpanded: true,
@@ -79,10 +91,41 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
           }, 0);
         }
 
-        return mapCell(props);
+        const result = mapCell(props);
+
+        return {
+          ...result,
+          componentProps: {
+            ...result.componentProps,
+            props: {
+              ...result.componentProps.props,
+              isEditable: props.isLastLevel,
+            },
+            onChange: (value) => {
+              if (rootWorkNode && props.workNode && result.componentProps.type === EAuxTextBoxType.NUM) {
+                const numVal = Number(value);
+                if (!isNaN(numVal)) {
+                  props.workNode.length = numVal;
+                  refreshView();
+                }
+              }
+            }
+          }
+        };
       }],
       [EProjAttrs.COMPLETE, (props): AdvTblCellProps<AuxTextBoxProps> => {
-        return mapCell(props);
+        const result = mapCell(props);
+
+        return {
+          ...result,
+          componentProps: {
+            ...result.componentProps,
+            props: {
+              ...result.componentProps.props,
+              isEditable: props.isLastLevel,
+            }
+          }
+        };
       }],
     ]),
     EProjAttrs.WBS,
@@ -90,20 +133,13 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
     rootWorkNode
   );
 
-  useEffect(() => {
-    if (!rootWorkNode || !header || !works) return;
-
-
-    setIsLoading(false);
-  }, [rootWorkNode, header, works]);
-
-  if (isLoading || !header || !works) return undefined;
+  if (!header || !works) return;
 
   return (
     <div className={`${s['proj-plan']}`}>
       <AdvancedTable className={`${s['proj-plan__table']}`}
-                     header={header ?? []}
-                     works={works ?? []}
+                     header={header}
+                     works={works}
                      isWithRowNums freeRowsCount={3}
                      defaultSortColumn={getDefaultSortColumn(projectApi.projectHeaderAttributes, EProjAttrs.WBS)}
       />

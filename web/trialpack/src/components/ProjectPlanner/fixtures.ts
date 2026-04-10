@@ -20,10 +20,11 @@
 export const projectSampleDataApiRawResponse = {
   projectStartDate: '2026-03-01',
   dateDisplayTemplate: 'yyyy/MM/dd',
+  isSuppressZeros: true,
   projectHeaderAttributes: [
     { attrId: 'wbs_code', attrName: 'WBS', },
     { attrId: 'work_name', attrName: 'Work', },
-    { attrId: 'length', attrName: 'Len.', },
+    { attrId: 'length', attrName: 'Len. (d)', },
     { attrId: 'percent_complete', attrName: '% done', },
   ],
   projectWorksList: [

@@ -18,7 +18,7 @@
  */
 
 import * as s from './AdvancedTable.modules.scss';
-import React, {ReactElement, useCallback, useRef} from 'react';
+import React, {memo, ReactElement, useCallback, useEffect, useRef} from 'react';
 import clsx from 'clsx';
 import {
   AdvTblCellProps,
@@ -29,8 +29,8 @@ import AuxTextBox from "../AuxTextBox";
 import {AuxLevelTextBoxProps, AuxTextBoxProps, EColID} from "../types";
 import AuxLevelTextBox from "../AuxLevelTextBox";
 import {
-  addEmptyRows,
-  getColsRow,
+  genEmptyRows,
+  genRowNumCell,
   getComponentClass,
   getTableChildrenRows,
   onColumnResize,
@@ -57,6 +57,7 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
   ({header, works, defaultSortColumn = EColID.A,
      isWithRowNums, freeRowsCount, className}) => {
 
+  const worksRef = useRef<typeof works>([]);
   const currCellIdRef = useRef('');
   const debugArr = useRef(['aaa', 'bbb', 'ccc']);
 
@@ -89,6 +90,10 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
     currCellIdRef.current = currCell.id;
   }, []);
 
+    useEffect(() => {
+      worksRef.current = [];
+    }, [works]);
+
   if (!header.length) return;
 
   return (
@@ -96,7 +101,7 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
       <table className={clsx(className, s['adv-table'])} >
         <thead>
         <tr>
-          {getColsRow(header, isWithRowNums ? 0 : undefined).map(col => {
+          {(isWithRowNums ? [genRowNumCell(header, 0), ...header] : header).map(col => {
             return (
               <th id={col.id} key={col.id} className={clsx(s['adv-table__th'], {
                 [`${s['adv-table__cell_background-head-colored']}`]: col.background === EAdvTblBackground.HEADER,
@@ -125,57 +130,64 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
         </tr>
         </thead>
         <tbody>
-        {addEmptyRows(
-          works.sort((a, b) =>
-            sortWorks(a, b, defaultSortColumn)), freeRowsCount ?? 1)
+        {[...works.sort((a, b) =>
+          sortWorks(a, b, defaultSortColumn)), ...genEmptyRows(works, freeRowsCount ?? 1)]
           .map((row, rowIndex) => {
-            return (
+            const rowRef: typeof row = [];
+
+            const rowUi = (
               <tr id={`${rowIndex+1}`} key={`${rowIndex+1}`}>
-                {getColsRow(row, isWithRowNums ? (rowIndex + 1) : undefined).map((col) => {
-                  let comp: ReactElement | undefined;
-                  const props: AdvTblCellProps<AuxCompsProps> = {
+                {(isWithRowNums ? [genRowNumCell(row, rowIndex + 1), ...row] : row).map(col => {
+                  const colRef: typeof col = {
                     ...col,
                     componentProps: {
                       ...col.componentProps,
-                      className: s[getComponentClass(col.id)],
                     }
-                  };
+                  }
 
                   if (!col.id.startsWith('_')) {
                     const cellId = `${col.id}${rowIndex+1}`;
-                    props.id = cellId;
-                    props.componentProps.id = cellId;
+                    colRef.id = cellId;
+                    colRef.componentProps.id = cellId;
                   }
+
+                  rowRef.push(colRef);
+
+                  let uiCell: ReactElement | undefined;
 
                   switch(col.component) {
-                    case AuxTextBox:
-                      comp = generateComponent<AuxTextBoxProps>(props);
-                      break;
-                    case AuxLevelTextBox:
-                      comp = generateComponent<AuxLevelTextBoxProps>(props, works, defaultSortColumn);
-                      break;
-                    default:
-                      comp = undefined;
-                  }
+                      case AuxTextBox:
+                        uiCell = generateComponent<AuxTextBoxProps>(colRef);
+                        break;
+                      case AuxLevelTextBox:
+                        uiCell = generateComponent<AuxLevelTextBoxProps>(colRef, worksRef.current, defaultSortColumn);
+                        break;
+                      default:
+                        uiCell = undefined;
+                    }
 
                   return (
-                    <td id={props.id} key={props.id}
+                    <td id={colRef.id} key={`${colRef.id}~${colRef.componentProps.value}`}
                         className={clsx(s['adv-table__th'], s['adv-table__cell'], {
-                          [`${s['adv-table__cell_dated-row-num']}`]: col.id.startsWith('_'),
-                          [`${s['adv-table__cell_dated']}`]: !col.id.startsWith('_'),
-                          [`${s['adv-table__cell_background-head-colored']}`]: col.background === EAdvTblBackground.HEADER,
-                          [`${s['adv-table__cell_border-left']}`]: col.border.left,
-                          [`${s['adv-table__cell_border-right']}`]: col.border.right,
-                          [`${s['adv-table__cell_border-top']}`]: col.border.top,
-                          [`${s['adv-table__cell_border-bottom']}`]: col.border.bottom
+                          [`${s['adv-table__cell_dated-row-num']}`]: colRef.id.startsWith('_'),
+                          [`${s['adv-table__cell_dated']}`]: !colRef.id.startsWith('_'),
+                          [`${s['adv-table__cell_background-head-colored']}`]: colRef.background === EAdvTblBackground.HEADER,
+                          [`${s['adv-table__cell_border-left']}`]: colRef.border.left,
+                          [`${s['adv-table__cell_border-right']}`]: colRef.border.right,
+                          [`${s['adv-table__cell_border-top']}`]: colRef.border.top,
+                          [`${s['adv-table__cell_border-bottom']}`]: colRef.border.bottom
                         })}
                         onClick={onDataCellClick}>
-                      {comp}
+                      {uiCell}
                     </td>
                   );
                 })}
               </tr>
             );
+
+            worksRef.current.push(rowRef);
+
+            return rowUi;
           })
         }
         </tbody>
@@ -229,4 +241,4 @@ function generateComponent <T extends AuxCompsProps>(comp: Pick<AdvTblCellProps<
   return result;
 }
 
-export default AdvancedTable;
+export default memo(AdvancedTable);

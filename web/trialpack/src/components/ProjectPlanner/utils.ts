@@ -17,45 +17,61 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 import {
-  ApiProject,
-  ApiProjectHeaderAttribute,
+  ApiProject, ApiProjectAttribValueTypes,
+  ApiProjectHeaderAttribute, ApiProjectWork,
   EProjAttrs,
   EProjHeaderProps,
   EProjProps,
   UseProjectWorksTableViewMap
 } from "./types";
 import {prop} from "../../utils/utils";
-import {BORDER_FULL, INIT_TEXT_BOX_CELL_PROPS} from "./constants";
+import {BORDER_FULL} from "./constants";
 import {AdvTblCellProps, EAdvTblBackground} from "../AuxCommon/AdvancedTable/types";
-import {AuxTextBoxProps, EAuxAlignH, EAuxSize, EColID} from "../AuxCommon/types";
+import {AuxCompExtData, AuxTextBoxProps, EAuxAlignH, EAuxSize, EAuxTextBoxType, EColID} from "../AuxCommon/types";
+import {BOOL_INIT, NUM_INIT, STR_INIT} from "../AuxCommon/constants";
+import {INIT_TEXT_BOX_CELL_PROPS} from "../AuxCommon/AdvancedTable/constants";
 
 export function getParentWbs(wbsInDottedTemplate: string, splitter = '.'): string {
-  if (!wbsInDottedTemplate) return '';
+  if (!wbsInDottedTemplate) return STR_INIT;
 
   const parts = wbsInDottedTemplate.split(splitter);
-  if (parts.length === 1) return '';
+  if (parts.length === 1) return STR_INIT;
 
   return parts.slice(0, parts.length - 1).join(splitter);
 }
 
 export function castApiRawResponse(rawAnswerObject: any): ApiProject {
   const result: ApiProject = {
-    [EProjProps.START_DATE]: '',
+    [EProjProps.START_DATE]: STR_INIT,
     [EProjProps.HEADER_ATTRIBS]: [],
     [EProjProps.WORKS_LIST]: [],
   };
 
-  result[EProjProps.START_DATE] = prop(rawAnswerObject, EProjProps.START_DATE, ''.toString()) ?? '';
-  result[EProjProps.CURR_DATE] = prop(rawAnswerObject, EProjProps.CURR_DATE, ''.toString()) ?? '';
-  result[EProjProps.DATE_TEMPLATE] = prop(rawAnswerObject, EProjProps.DATE_TEMPLATE, ''.toString()) ?? '';
+  result[EProjProps.START_DATE] = prop(rawAnswerObject, EProjProps.START_DATE, STR_INIT) ?? STR_INIT;
+  result[EProjProps.CURR_DATE] = prop(rawAnswerObject, EProjProps.CURR_DATE, STR_INIT) ?? STR_INIT;
+  result[EProjProps.DATE_TEMPLATE] = prop(rawAnswerObject, EProjProps.DATE_TEMPLATE, STR_INIT) ?? STR_INIT;
+  result[EProjProps.IS_SUPPRESS_ZEROS] = prop(rawAnswerObject, EProjProps.IS_SUPPRESS_ZEROS, BOOL_INIT) ?? BOOL_INIT;
 
-  result[EProjProps.WORKS_LIST] = prop(rawAnswerObject, EProjProps.WORKS_LIST, []) ?? [];
+  const works = prop(rawAnswerObject, EProjProps.WORKS_LIST, []) ?? [];
+  works.forEach(item => {
+    const res: ApiProjectWork = {
+      [EProjAttrs.WBS]: STR_INIT,
+      [EProjAttrs.NAME]: STR_INIT,
+    };
+
+    res[EProjAttrs.WBS] = prop(item, EProjAttrs.WBS, STR_INIT) ?? STR_INIT;
+    res[EProjAttrs.NAME] = prop(item, EProjAttrs.NAME, STR_INIT) ?? STR_INIT;
+    res[EProjAttrs.LEN] = prop(item, EProjAttrs.LEN, NUM_INIT) ?? NUM_INIT;
+    res[EProjAttrs.COMPLETE] = prop(item, EProjAttrs.COMPLETE, NUM_INIT) ?? NUM_INIT;
+
+    result[EProjProps.WORKS_LIST].push(res);
+  });
 
   const headerAttrsArr = prop(rawAnswerObject, EProjProps.HEADER_ATTRIBS, []) ?? [];
   headerAttrsArr.forEach(item => {
     const res: ApiProjectHeaderAttribute = {
-      attrId: EProjAttrs.WBS,
-      attrName: EProjAttrs.NAME,
+      [EProjHeaderProps.ID]: EProjAttrs.WBS,
+      [EProjHeaderProps.NAME]: EProjAttrs.NAME,
     };
 
     res[EProjHeaderProps.ID] = prop(item, EProjHeaderProps.ID, EProjAttrs.WBS) ?? EProjAttrs.WBS;
@@ -71,18 +87,26 @@ export function castApiRawResponse(rawAnswerObject: any): ApiProject {
 export const mapCell: UseProjectWorksTableViewMap = ({workAttr, parentWorkAttr,
                                                        workNode, colId,
                                                        isHeader, isEditable,
-                                                       isLastLevel} ):
+                                                       isLastLevel, isSuppressZeros} ):
   AdvTblCellProps<AuxTextBoxProps> => {
 
   const result: AdvTblCellProps<AuxTextBoxProps> = { ...INIT_TEXT_BOX_CELL_PROPS };
 
   const attr = workAttr.attrId as keyof typeof workNode;
-  const extData = {
-    [attr]: '',
-    [parentWorkAttr]: workNode ? workNode[parentWorkAttr] : '',
+  const extData: AuxCompExtData = {
+    currColumnName: attr,
+    keyColumnValue: workNode ? workNode[parentWorkAttr].toString() : STR_INIT,
   };
 
-  const value: string = workNode ? workNode[attr] : '';
+  let value = STR_INIT, type = EAuxTextBoxType.TEXT;
+  const attrValue: ApiProjectAttribValueTypes = workNode?.[attr] ?? STR_INIT;
+
+  if (typeof workNode?.[attr] === 'string') {
+    value = attrValue;
+  } else if (typeof workNode?.[attr] === 'number') {
+    value = attrValue.toString();
+    type = EAuxTextBoxType.NUM;
+  }
 
   return {
     ...result,
@@ -90,8 +114,9 @@ export const mapCell: UseProjectWorksTableViewMap = ({workAttr, parentWorkAttr,
     background: isHeader ? EAdvTblBackground.HEADER : undefined,
     border: BORDER_FULL,
     componentProps: {
-      id: workAttr.attrId,
+      id: colId ?? '',
       value: isHeader ? workAttr.attrName : value,
+      type,
       extData,
       props: {
         isNonSelectable: true,
@@ -99,6 +124,7 @@ export const mapCell: UseProjectWorksTableViewMap = ({workAttr, parentWorkAttr,
         isEditable: isHeader ? false : isEditable,
         isBold: isHeader ? true : !isLastLevel,
         alignH: EAuxAlignH.L,
+        isSuppressZeros,
       },
     }
   };

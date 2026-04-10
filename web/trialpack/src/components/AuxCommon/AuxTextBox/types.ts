@@ -26,4 +26,5 @@ export type AuxTextBoxConfig = {
   isBold?: boolean;
   isNonSelectable?: boolean;
   isEditable?: boolean;
+  isSuppressZeros?: boolean;
 }

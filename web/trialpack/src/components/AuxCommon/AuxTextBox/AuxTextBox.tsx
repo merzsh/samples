@@ -20,13 +20,19 @@
 import * as s from './AuxTextBox.modules.scss';
 import React, {useCallback, useRef} from 'react';
 import clsx from 'clsx';
-import {AuxTextBoxProps, EAuxAlignH, EAuxSize} from "../types";
+import {AuxTextBoxProps, EAuxAlignH, EAuxSize, EAuxTextBoxType} from "../types";
+import {procAsNumSuppressZero} from "./utils";
+import {NUM_INIT, STR_HTML_SPACE, STR_INIT, STR_KEY_ENTER, STR_KEY_ESCAPE} from "../constants";
 
-export const AuxTextBox: React.FC<AuxTextBoxProps> = ({value, props,
+export const AuxTextBox: React.FC<AuxTextBoxProps> = ({value, type,
+                                                        onChange, props,
                                                         id, className}) => {
   const [isEditable, setIsEditable] = React.useState(false);
   const [valueInt, setValueInt] = React.useState(value);
+  const [isInputError, setIsInputError] = React.useState(false);
   const colWidthRef = useRef(0);
+
+  const valueIntPrev = useRef(value);
 
   const onGoToEditMode = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (isEditable || !(props && props.isEditable)) return;
@@ -48,18 +54,66 @@ export const AuxTextBox: React.FC<AuxTextBoxProps> = ({value, props,
       [`${s['aux-text-box_right_aligned']}`]: props?.alignH === EAuxAlignH.R
     })} onDoubleClick={onGoToEditMode}>
       {isEditable ? (
-        <input style={{width: `${colWidthRef.current-2}px`}} className={s['aux-text-box-input']}
-          type={'text'} value={valueInt} onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          setValueInt(e.target.value);
-        }} autoFocus onBlur={() => {
-          setIsEditable(!isEditable);
-        }} />
+        <input
+          style={{width: `${colWidthRef.current-2}px`}}
+          className={clsx({
+            [`${s['aux-text-box-input']}`]: !isInputError,
+            [`${s['aux-text-box-input_errored']}`]: isInputError,
+          })}
+          type={'text'}
+          value={valueInt}
+          autoFocus
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            let isErr = false, val = e.target.value;
+
+            if (type === EAuxTextBoxType.NUM) {
+              if (val) {
+                const trm = val.replace(/^0+/, '').trim();
+                val = trm ? trm : NUM_INIT.toString();
+              }
+
+              if (!isNaN(Number(val))) {
+                valueIntPrev.current = val;
+              } else {
+                isErr = true;
+              }
+            }
+
+            setValueInt(val);
+            setIsInputError(isErr);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === STR_KEY_ENTER || event.key === STR_KEY_ESCAPE) {
+              (event.target as HTMLInputElement).blur();
+            }
+          }}
+          onBlur={() => {
+            let val: string;
+            if (isInputError) {
+              val = valueIntPrev.current ?? STR_INIT;
+              setValueInt(val);
+              setIsInputError(false);
+            } else {
+              val = valueInt ?? STR_INIT;
+            }
+            setIsEditable(false);
+
+            if (onChange && val !== value) {
+              onChange(val);
+            }
+          }}
+        />
       ) : (
         <div className={clsx({
           [`${s['aux-text-box-text_as-center']}`]: props?.alignH === EAuxAlignH.C,
           [`${s['aux-text-box-text_as-right']}`]: props?.alignH === EAuxAlignH.R,
         })}>
-          {valueInt ? valueInt : '\u00A0'}
+          {valueInt
+            ? props?.isSuppressZeros
+              ? procAsNumSuppressZero(valueInt, true)
+              : valueInt
+            : STR_HTML_SPACE
+          }
         </div>
       )}
     </div>

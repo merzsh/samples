@@ -29,6 +29,7 @@ export enum EProjProps {
   START_DATE = 'projectStartDate',
   CURR_DATE = 'projectCurrDate',
   DATE_TEMPLATE = 'dateDisplayTemplate',
+  IS_SUPPRESS_ZEROS = 'isSuppressZeros',
   HEADER_ATTRIBS = 'projectHeaderAttributes',
   WORKS_LIST = 'projectWorksList',
 }
@@ -43,7 +44,7 @@ export enum EProjWorkNodeProps {
   CHILDREN = 'children',
 }
 
-export type ApiProjectAttribValueTypes = string | number;
+export type ApiProjectAttribValueTypes = string | number | Date;
 export type ApiProjectAttribNodeSpecIds = EProjAttrs.WBS | EProjAttrs.NAME;
 export type ApiProjectAttribLeafSpecIds =  EProjAttrs.LEN |  EProjAttrs.COMPLETE;
 export type ApiProjectAttribAllIds = ApiProjectAttribNodeSpecIds | ApiProjectAttribLeafSpecIds;
@@ -61,6 +62,7 @@ export type ApiProject = {
   [EProjProps.START_DATE]: string;
   [EProjProps.CURR_DATE]?: string;
   [EProjProps.DATE_TEMPLATE]?: string;
+  [EProjProps.IS_SUPPRESS_ZEROS]?: boolean;
   [EProjProps.HEADER_ATTRIBS]: ApiProjectHeaderAttribute[];
   [EProjProps.WORKS_LIST]: ApiProjectWork[];
 };
@@ -79,12 +81,12 @@ export type UseProjectWorksTableViewMapArg = {
   workAttr: ApiProjectHeaderAttribute;
   parentWorkAttr: ApiProjectAttribNodeSpecIds;
   workNode?: ProjectWorkNode;
-  worksList?: AdvTblCellProps<AuxCompsProps>[][];
   colId?: string;
   isHeader?: boolean;
   isEditable?: boolean;
   level?: number;
   isLastLevel?: boolean;
+  isSuppressZeros?: boolean;
 };
 
 export type UseProjectWorksTableViewMap = (props: UseProjectWorksTableViewMapArg) => AdvTblCellProps<AuxCompsProps>;
@@ -92,4 +94,5 @@ export type UseProjectWorksTableViewMap = (props: UseProjectWorksTableViewMapArg
 export type UseProjectWorksTableView = {
   header?: AdvTblCellProps<AuxCompsProps>[];
   works?: AdvTblCellProps<AuxCompsProps>[][];
+  refreshView: () => void;
 };
