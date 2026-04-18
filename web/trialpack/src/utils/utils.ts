@@ -28,6 +28,7 @@ import {
   STR_MSG_METHOD,
   STR_NAME_COMPONENT_UTILS
 } from './constants';
+import {parse} from "date-fns";
 
 /**
  * Check argument is not null or is not undefined
@@ -361,4 +362,25 @@ export function addTreeNode<N>(rootNode: N, nodeToAdd: N, parentNodeSearchCriter
   }
 
   return parent;
+}
+
+/**
+ * Parses date from string with defined pattern.
+ * @param value - date as string
+ * @param format - template to use for date parsing
+ * @return Date - date in Date format if no any errors occurred
+ * @throws - in case of any parsing errors
+ */
+export function parseDate(value: string, format: string): Date {
+  if (!value) throw new RangeError('Value is undefined!');
+  if (!format) throw new RangeError('Format is undefined!');
+
+  let result: Date;
+
+  result = parse(value, format, new Date());
+  if (isNaN(result.getTime())) {
+    throw new EvalError('Date parsing result contains error!');
+  }
+
+  return result;
 }

@@ -29,12 +29,18 @@
   }
 
   &-text {
+    padding: 0 3px;
+
     &_as-center {
       text-align: center;
     }
 
     &_as-right {
       text-align: right;
+    }
+
+    &_disabled {
+      background: repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0) 5px, rgba(0, 0, 0, 0.08) 3px, rgba(0, 0, 0, 0.08) 8px);
     }
   }
 

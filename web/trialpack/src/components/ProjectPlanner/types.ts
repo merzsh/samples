@@ -22,11 +22,14 @@ export enum EProjAttrs {
   WBS = 'wbs_code',
   NAME = 'work_name',
   LEN = 'length',
-  COMPLETE = 'percent_complete'
+  COMPLETE = 'percent_complete',
+  S_DATE = 'start_date',
+  F_DATE = 'finish_date',
+  PREV = 'prev_works',
 }
 
 export enum EProjProps {
-  START_DATE = 'projectStartDate',
+  PROJ_START_DATE = 'projectStartDate',
   CURR_DATE = 'projectCurrDate',
   DATE_TEMPLATE = 'dateDisplayTemplate',
   IS_SUPPRESS_ZEROS = 'isSuppressZeros',
@@ -41,12 +44,16 @@ export enum EProjHeaderProps {
 }
 
 export enum EProjWorkNodeProps {
+  PARENT = 'parent',
   CHILDREN = 'children',
+  PREDECESSORS ='predecessors',
+  FOLLOWERS = 'followers',
 }
 
-export type ApiProjectAttribValueTypes = string | number | Date;
+export type ApiProjectAttribValueTypes = string | string[] | number | Date;
 export type ApiProjectAttribNodeSpecIds = EProjAttrs.WBS | EProjAttrs.NAME;
-export type ApiProjectAttribLeafSpecIds =  EProjAttrs.LEN |  EProjAttrs.COMPLETE;
+export type ApiProjectAttribLeafSpecIds =  EProjAttrs.LEN |  EProjAttrs.COMPLETE |
+  EProjAttrs.S_DATE | EProjAttrs.F_DATE | EProjAttrs.PREV;
 export type ApiProjectAttribAllIds = ApiProjectAttribNodeSpecIds | ApiProjectAttribLeafSpecIds;
 
 export type ApiProjectHeaderAttribute = {
@@ -59,7 +66,7 @@ export type ApiProjectWork = Record<ApiProjectAttribNodeSpecIds, ApiProjectAttri
   Partial<Record<ApiProjectAttribLeafSpecIds, ApiProjectAttribValueTypes>>;
 
 export type ApiProject = {
-  [EProjProps.START_DATE]: string;
+  [EProjProps.PROJ_START_DATE]: string;
   [EProjProps.CURR_DATE]?: string;
   [EProjProps.DATE_TEMPLATE]?: string;
   [EProjProps.IS_SUPPRESS_ZEROS]?: boolean;
@@ -68,13 +75,18 @@ export type ApiProject = {
 };
 
 export type ProjectWorkNodeProps = {
+  [EProjWorkNodeProps.PARENT]?: ProjectWorkNode;
   [EProjWorkNodeProps.CHILDREN]: ProjectWorkNode[];
+  [EProjWorkNodeProps.PREDECESSORS]: ProjectWorkNode[];
+  [EProjWorkNodeProps.FOLLOWERS]: ProjectWorkNode[];
 };
 
 export type ProjectWorkNode = ApiProjectWork & ProjectWorkNodeProps;
 
 export type UseProjectWorksTree = {
   rootWorkNode?: ProjectWorkNode;
+  worksTreeMap?: Map<string, ProjectWorkNode>;
+  setWorkAttrValue: (nodeId: string, attribs: Partial<ApiProjectWork>) => void;
 };
 
 export type UseProjectWorksTableViewMapArg = {
@@ -84,10 +96,10 @@ export type UseProjectWorksTableViewMapArg = {
   colId?: string;
   isHeader?: boolean;
   isEditable?: boolean;
+  isNonSelectable?: boolean;
   level?: number;
   isLastLevel?: boolean;
-  isSuppressZeros?: boolean;
-};
+} & Pick<ApiProject, EProjProps.IS_SUPPRESS_ZEROS | EProjProps.PROJ_START_DATE | EProjProps.DATE_TEMPLATE>;
 
 export type UseProjectWorksTableViewMap = (props: UseProjectWorksTableViewMapArg) => AdvTblCellProps<AuxCompsProps>;
 

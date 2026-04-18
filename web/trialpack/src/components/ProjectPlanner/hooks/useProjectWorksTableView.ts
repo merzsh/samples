@@ -29,7 +29,8 @@ import {AuxTextBoxProps, EColID} from "../../AuxCommon/types";
 import {findTreeNode} from "../../../utils/utils";
 import {INIT_TEXT_BOX_CELL_PROPS} from "../../AuxCommon/AdvancedTable/constants";
 
-export const useProjectWorksTableView = (projectSettings: Pick<ApiProject, EProjProps.IS_SUPPRESS_ZEROS>,
+export const useProjectWorksTableView = (projectSettings: Pick<ApiProject, EProjProps.IS_SUPPRESS_ZEROS |
+                                           EProjProps.PROJ_START_DATE | EProjProps.DATE_TEMPLATE>,
                                          headerAttrs: ApiProjectHeaderAttribute[],
                                          mappings: Map<ApiProjectAttribAllIds, UseProjectWorksTableViewMap>,
                                          parentWorkAttr: ApiProjectAttribNodeSpecIds,
@@ -37,12 +38,13 @@ export const useProjectWorksTableView = (projectSettings: Pick<ApiProject, EProj
                                          rootWorkNode?: ProjectWorkNode):
   UseProjectWorksTableView => {
 
-  const [rootWorkNodeInt, setRootWorkNodeInt] = useState<ProjectWorkNode>();
+  const [rootWorkNodeInt, setRootWorkNodeInt] = useState<typeof rootWorkNode>();
   const [header, setHeader] = useState<AdvTblCellProps<AuxCompsProps>[]>();
   const [works, setWorks] = useState<AdvTblCellProps<AuxCompsProps>[][]>();
 
   useEffect(() => {
-    if (!rootWorkNode) return;
+    if (!rootWorkNode || !headerAttrs.length) return;
+
     setRootWorkNodeInt(rootWorkNode);
   }, [rootWorkNode]);
 
@@ -62,6 +64,8 @@ export const useProjectWorksTableView = (projectSettings: Pick<ApiProject, EProj
           parentWorkAttr,
           colId: `${Object.values(EColID)[attrIndex]}`,
           isHeader: true,
+          isNonSelectable: true,
+          projectStartDate: projectSettings.projectStartDate,
         })
         : INIT_TEXT_BOX_CELL_PROPS);
     });
@@ -86,6 +90,8 @@ export const useProjectWorksTableView = (projectSettings: Pick<ApiProject, EProj
                 colId: `${Object.values(EColID)[colIndex]}`,
                 isEditable: true,
                 isSuppressZeros: projectSettings.isSuppressZeros,
+                projectStartDate: projectSettings.projectStartDate,
+                dateDisplayTemplate: projectSettings.dateDisplayTemplate,
                 level,
                 isLastLevel,
               })

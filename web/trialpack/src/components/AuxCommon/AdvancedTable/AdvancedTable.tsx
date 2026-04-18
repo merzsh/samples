@@ -18,7 +18,7 @@
  */
 
 import * as s from './AdvancedTable.modules.scss';
-import React, {memo, ReactElement, useCallback, useEffect, useRef} from 'react';
+import React, {ReactElement, useCallback, useEffect, useRef, useState} from 'react';
 import clsx from 'clsx';
 import {
   AdvTblCellProps,
@@ -26,7 +26,7 @@ import {
   EAdvTblBackground
 } from "./types";
 import AuxTextBox from "../AuxTextBox";
-import {AuxLevelTextBoxProps, AuxTextBoxProps, EColID} from "../types";
+import {AuxLevelTextBoxProps, AuxTextBoxProps, EAuxCompExtData, EColID} from "../types";
 import AuxLevelTextBox from "../AuxLevelTextBox";
 import {
   genEmptyRows,
@@ -37,6 +37,7 @@ import {
   onExpanderRows,
   setRowSelection, sortWorks
 } from "./utils";
+import {STR_INIT} from "../constants";
 
 type AdvancedTableProps = {
   header: AdvTblCellProps<AuxTextBoxProps>[];
@@ -59,7 +60,8 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
 
   const worksRef = useRef<typeof works>([]);
   const currCellIdRef = useRef('');
-  const debugArr = useRef(['aaa', 'bbb', 'ccc']);
+
+  const [tableKey, setTableKey] = useState<string>();
 
   const onDataCellClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const target = e.target as HTMLElement;
@@ -90,15 +92,22 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
     currCellIdRef.current = currCell.id;
   }, []);
 
-    useEffect(() => {
-      worksRef.current = [];
-    }, [works]);
+  useEffect(() => {
+    worksRef.current = [];
 
-  if (!header.length) return;
+    const tabKey = works.reduce((acc, cur) => {
+      const [colId] = cur;
+      return acc + colId.componentProps.extData?.keyColumnValue + ',';
+    }, STR_INIT);
+
+    setTableKey(tabKey);
+  }, [works]);
+
+  if (!header.length || !tableKey) return;
 
   return (
     <div>
-      <table className={clsx(className, s['adv-table'])} >
+      <table className={clsx(className, s['adv-table'])}>
         <thead>
         <tr>
           {(isWithRowNums ? [genRowNumCell(header, 0), ...header] : header).map(col => {
@@ -130,8 +139,8 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
         </tr>
         </thead>
         <tbody>
-        {[...works.sort((a, b) =>
-          sortWorks(a, b, defaultSortColumn)), ...genEmptyRows(works, freeRowsCount ?? 1)]
+        {[...[...works].sort((a, b) => sortWorks(a, b, defaultSortColumn)),
+          ...genEmptyRows(works, freeRowsCount ?? 1)]
           .map((row, rowIndex) => {
             const rowRef: typeof row = [];
 
@@ -156,18 +165,25 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
                   let uiCell: ReactElement | undefined;
 
                   switch(col.component) {
-                      case AuxTextBox:
-                        uiCell = generateComponent<AuxTextBoxProps>(colRef);
-                        break;
-                      case AuxLevelTextBox:
-                        uiCell = generateComponent<AuxLevelTextBoxProps>(colRef, worksRef.current, defaultSortColumn);
-                        break;
-                      default:
-                        uiCell = undefined;
-                    }
+                    case AuxTextBox:
+                      uiCell = generateComponent<AuxTextBoxProps>(colRef);
+                      break;
+                    case AuxLevelTextBox:
+                      uiCell = generateComponent<AuxLevelTextBoxProps>(colRef, worksRef.current, defaultSortColumn);
+                      break;
+                    default:
+                      uiCell = undefined;
+                  }
+
+                  const rowKey: string = colRef.componentProps.extData && EAuxCompExtData.KEY_COL_VALUE in colRef.componentProps.extData
+                    ? colRef.componentProps.extData[EAuxCompExtData.KEY_COL_VALUE]
+                    : `${rowIndex+1}`;
+                  const cellKey = `${rowKey}~${colRef.id}~${colRef.componentProps.value}`;
+
+                  const isLevelColored = !colRef.id.startsWith('_') && !colRef.id.startsWith(defaultSortColumn);
 
                   return (
-                    <td id={colRef.id} key={`${colRef.id}~${colRef.componentProps.value}`}
+                    <td id={colRef.id} key={cellKey}
                         className={clsx(s['adv-table__th'], s['adv-table__cell'], {
                           [`${s['adv-table__cell_dated-row-num']}`]: colRef.id.startsWith('_'),
                           [`${s['adv-table__cell_dated']}`]: !colRef.id.startsWith('_'),
@@ -175,7 +191,10 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
                           [`${s['adv-table__cell_border-left']}`]: colRef.border.left,
                           [`${s['adv-table__cell_border-right']}`]: colRef.border.right,
                           [`${s['adv-table__cell_border-top']}`]: colRef.border.top,
-                          [`${s['adv-table__cell_border-bottom']}`]: colRef.border.bottom
+                          [`${s['adv-table__cell_border-bottom']}`]: colRef.border.bottom,
+                          [`${s['adv-table__cell_leveled-1']}`]: colRef.componentProps.level === 0 && isLevelColored,
+                          [`${s['adv-table__cell_leveled-2']}`]: colRef.componentProps.level === 1 && isLevelColored,
+                          [`${s['adv-table__cell_leveled-3']}`]: colRef.componentProps.level === 2 && isLevelColored,
                         })}
                         onClick={onDataCellClick}>
                       {uiCell}
@@ -191,22 +210,6 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
           })
         }
         </tbody>
-      </table>
-
-      <table className={clsx(s['debug'])}>
-        <thead>
-        <tr>
-          {debugArr.current.map((item, index) => {
-            return (
-              <td key={`td${index}`} className={clsx(s['debug__td'])} onClick={() => {
-                debugArr.current[index] += '@';
-              }}>
-                <div className={clsx(s['debug__content'])}>{item}</div>
-              </td>
-            );
-          })}
-        </tr>
-        </thead>
       </table>
     </div>
   );
@@ -241,4 +244,4 @@ function generateComponent <T extends AuxCompsProps>(comp: Pick<AdvTblCellProps<
   return result;
 }
 
-export default memo(AdvancedTable);
+export default AdvancedTable;

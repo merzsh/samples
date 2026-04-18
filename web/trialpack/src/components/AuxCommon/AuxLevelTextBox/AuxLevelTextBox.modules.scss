@@ -22,24 +22,32 @@
   align-items: center;
   gap: 5px;
 
-  &_leveled-1 {
-    padding-left: 1rem;
-  }
+  &-tab {
+    display: flex;
 
-  &_leveled-2 {
-    padding-left: 2rem;
-  }
+    &__content {
+      width: 16px;
 
-  &_leveled-3 {
-    padding-left: 3rem;
-  }
+      &_is-small-sized {
+        font-size: small;
+      }
 
-  &_leveled-4 {
-    padding-left: 4rem;
-  }
+      &_is-medium-sized {
+        font-size: smaller;
+      }
 
-  &_leveled-5 {
-    padding-left: 5rem;
+      &_leveled-1 {
+        background-color: lightsalmon;
+      }
+
+      &_leveled-2 {
+        background-color: beige;
+      }
+
+      &_leveled-3 {
+        background-color: lightskyblue;
+      }
+    }
   }
 
   &-expander {

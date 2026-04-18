@@ -23,8 +23,8 @@ export enum EAuxSize { S, M, L }
 export enum EAuxAlignH { L, C, R }
 export enum EAuxAlignV { T, M, B }
 
-export enum EColID { A = 'A', B = 'B', C = 'C', D = 'D', E = 'E', F = 'F' }
-export enum EAuxTextBoxType { TEXT = 'text', NUM = 'number', DATE = 'date'}
+export enum EColID { A = 'A', B = 'B', C = 'C', D = 'D', E = 'E', F = 'F', G = 'G', H = 'H' }
+export enum EAuxTextBoxType { TEXT = 'text', NUM = 'number', DATE = 'date' }
 
 export enum EAuxCompExtData { CURR_COL_NAME = 'currColumnName', KEY_COL_VALUE = 'keyColumnValue' }
 
@@ -42,7 +42,8 @@ export type AuxCommonProps = {
 export type AuxCommonTextBoxProps = AuxCommonProps & {
   value?: string;
   type?: EAuxTextBoxType;
-  onChange?: (value: string) => void;
+  level?: number;
+  onChange?: (value: string, prevValue?: string) => void;
 };
 
 export type AuxTextBoxProps = AuxCommonTextBoxProps & {
@@ -55,7 +56,6 @@ export type OnExpanderRowsProps = {
 }
 
 export type AuxLevelTextBoxProps = AuxTextBoxProps & {
-  level?: number;
   isExpanded?: boolean;
   isExpanderVisible?: boolean;
   onExpanderClick?: (id: string) => number[];

@@ -20,112 +20,100 @@
 import * as s from './ProjectPlanner.modules.scss';
 import React, {useState} from 'react';
 import AdvancedTable from "../AuxCommon/AdvancedTable";
-import {AdvTblCellProps, AdvTblCellPropsAbstract} from "../AuxCommon/AdvancedTable/types";
-import {DEFAULT_WORK, ROOT_WBS_CODE} from "./constants";
-import {AuxLevelTextBoxProps, AuxTextBoxProps, EAuxTextBoxType} from "../AuxCommon/types";
+import {EAuxTextBoxType} from "../AuxCommon/types";
 import {projectSampleDataApiRawResponse} from "./fixtures";
 import {ApiProjectAttribAllIds, EProjAttrs, EProjProps, EProjWorkNodeProps, UseProjectWorksTableViewMap} from "./types";
-import {castApiRawResponse, getDefaultSortColumn, mapCell} from "./utils";
+import {castApiRawResponse, getDefaultSortColumn, mapWorkAttrBasic} from "./utils";
 import {useProjectWorksTree} from "./hooks/useProjectWorksTree";
 import {useProjectWorksTableView} from "./hooks/useProjectWorksTableView";
 import AuxLevelTextBox from "../AuxCommon/AuxLevelTextBox";
+import {STR_HTML_SPACE} from "../AuxCommon/constants";
+import {PROJECT_DEFAULT_NAME} from "./constants";
 
 type ProjectPlannerProps = {
   title?: string;
 };
 
 export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
-  const [projectApi] = useState(castApiRawResponse(projectSampleDataApiRawResponse));
+  const [projectApi, setProjectApi] = useState(castApiRawResponse(projectSampleDataApiRawResponse));
 
-  const { rootWorkNode } = useProjectWorksTree(
-    projectApi.projectWorksList.find(item => item.wbs_code === ROOT_WBS_CODE) ?? DEFAULT_WORK,
-    projectApi.projectWorksList.filter(item => item.wbs_code !== ROOT_WBS_CODE),
-    EProjAttrs.WBS,
-    EProjWorkNodeProps.CHILDREN
-  );
+  const { rootWorkNode, setWorkAttrValue } = useProjectWorksTree(projectApi);
 
-  const { header, works, refreshView } = useProjectWorksTableView(
-    {isSuppressZeros: projectApi[EProjProps.IS_SUPPRESS_ZEROS]},
+  const { header, works } = useProjectWorksTableView(
+    {
+      projectStartDate: projectApi[EProjProps.PROJ_START_DATE],
+      dateDisplayTemplate: projectApi[EProjProps.DATE_TEMPLATE],
+      isSuppressZeros: projectApi[EProjProps.IS_SUPPRESS_ZEROS],
+    },
     projectApi.projectHeaderAttributes,
     new Map<ApiProjectAttribAllIds, UseProjectWorksTableViewMap>([
-      [EProjAttrs.WBS, (props): AdvTblCellProps<AuxTextBoxProps> => {
-        const result = mapCell(props);
-
-        return {
-          ...result,
-          componentProps: {
-            ...result.componentProps,
-            props: {
-              ...result.componentProps.props,
-              isEditable: props.isLastLevel,
-            }
-          }
-        };
-      }],
-      [EProjAttrs.NAME, (props): AdvTblCellProps<AuxTextBoxProps> => {
-        const result: AdvTblCellPropsAbstract<AuxLevelTextBoxProps> = mapCell(props);
+      [EProjAttrs.WBS, (props) => {
+        const result = mapWorkAttrBasic(props);
         if (props.isHeader) return result;
 
-        const componentProps: AuxLevelTextBoxProps = {
-          ...result.componentProps,
-          props: {
-            ...result.componentProps.props,
-            isEditable: props.isLastLevel,
-          },
-          level: props.level,
-          isExpanderVisible: !props.isLastLevel,
-          isExpanded: true,
-        };
+        result.componentProps.onChange = (value, prevValue) => {
+          if (props.workNode && result.componentProps.type === EAuxTextBoxType.TEXT && value && value !== STR_HTML_SPACE) {
+            if (prevValue === STR_HTML_SPACE) {
+              projectApi[EProjProps.WORKS_LIST].push({ wbs_code: value, work_name: PROJECT_DEFAULT_NAME, length: 1 });
+              setProjectApi({ ...projectApi });
+            } else {
+              setWorkAttrValue(props.workNode.wbs_code.toString(), { wbs_code: value });
+            }
+          }
+        }
+
+        return result;
+      }],
+      [EProjAttrs.NAME, (props) => {
+        const result = mapWorkAttrBasic(props);
+        if (props.isHeader) return result;
 
         return {
           ...result,
           component: AuxLevelTextBox,
-          componentProps,
+          componentProps: {
+            ...result.componentProps,
+            level: props.level,
+            isExpanderVisible: !props.isLastLevel,
+            isExpanded: true,
+          }
         };
       }],
-      [EProjAttrs.LEN, (props): AdvTblCellProps<AuxTextBoxProps> => {
-        if (props.workNode && !props.isLastLevel) {
-          props.workNode.length = props.workNode.children.reduce((accum, curr) => {
-            let len = typeof curr.length === 'number' && !isNaN(curr.length) ? curr.length : 0;
-            return accum + len;
-          }, 0);
+      [EProjAttrs.LEN, (props) => {
+        const result = mapWorkAttrBasic({ ...props, isEditable: props.isLastLevel });
+        if (props.isHeader) return result;
+
+        result.componentProps.onChange = (value) => {
+          if (props.workNode && result.componentProps.type === EAuxTextBoxType.NUM) {
+            const numVal = Number(value);
+            if (!isNaN(numVal)) {
+              setWorkAttrValue(props.workNode.wbs_code.toString(), { length: numVal });
+            }
+          }
         }
 
-        const result = mapCell(props);
-
-        return {
-          ...result,
-          componentProps: {
-            ...result.componentProps,
-            props: {
-              ...result.componentProps.props,
-              isEditable: props.isLastLevel,
-            },
-            onChange: (value) => {
-              if (rootWorkNode && props.workNode && result.componentProps.type === EAuxTextBoxType.NUM) {
-                const numVal = Number(value);
-                if (!isNaN(numVal)) {
-                  props.workNode.length = numVal;
-                  refreshView();
-                }
-              }
-            }
-          }
-        };
+        return result;
       }],
-      [EProjAttrs.COMPLETE, (props): AdvTblCellProps<AuxTextBoxProps> => {
-        const result = mapCell(props);
+      [EProjAttrs.COMPLETE, (props) => {
+        return mapWorkAttrBasic({...props, isEditable: props.isLastLevel });
+      }],
+      [EProjAttrs.S_DATE, (props) => {
+        return mapWorkAttrBasic({...props, isEditable: false });
+      }],
+      [EProjAttrs.F_DATE, (props) => {
+        return mapWorkAttrBasic({...props, isEditable: false });
+      }],
+      [EProjAttrs.PREV, (props) => {
+        const result = mapWorkAttrBasic({...props, isEditable: props.isLastLevel });
+        if (props.isHeader) return result;
 
-        return {
-          ...result,
-          componentProps: {
-            ...result.componentProps,
-            props: {
-              ...result.componentProps.props,
-              isEditable: props.isLastLevel,
-            }
+        result.componentProps.onChange = (value) => {
+          if (props.workNode && result.componentProps.type === EAuxTextBoxType.TEXT) {
+            setWorkAttrValue(props.workNode.wbs_code.toString(), { prev_works: value.split(',') });
           }
-        };
+        }
+
+        return result;
       }],
     ]),
     EProjAttrs.WBS,

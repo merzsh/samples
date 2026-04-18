@@ -26,7 +26,7 @@
   }
 
   &__cell {
-    padding: 1px 0 1px 3px;
+    padding: 1px 0 1px 0;
 
     &-resizer {
       cursor: col-resize;
@@ -46,7 +46,7 @@
     }
 
     &_dated-row-num {
-      padding: 0 5px;
+      padding: 0 3px;
       cursor: cell;
     }
 
@@ -77,6 +77,18 @@
     &_border-bottom {
       border-bottom: 1px solid lightgrey;
     }
+
+    &_leveled-1 {
+      background-color: lightsalmon;
+    }
+
+    &_leveled-2 {
+      background-color: beige;
+    }
+
+    &_leveled-3 {
+      background-color: lightskyblue;
+    }
   }
 }
 
@@ -98,10 +110,5 @@
     width: 64px;
     border: 1px solid lightgrey;
     vertical-align: middle;
-  }
-
-  &__content {
-    border: 1px solid limegreen;
-    font-size: small;
   }
 }

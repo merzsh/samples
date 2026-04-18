@@ -22,7 +22,7 @@ import React from "react";
 import AuxTextBox from "../AuxTextBox";
 import {AuxLevelTextBoxProps, EAuxAlignH, EColID, OnExpanderRowsProps} from "../types";
 import AuxLevelTextBox from "../AuxLevelTextBox";
-import {STR_DIGITS} from "../constants";
+import {STR_DIGITS, STR_HTML_SPACE} from "../constants";
 
 export function genEmptyRows(array: AdvTblCellProps<AuxCompsProps>[][], addedRowsCount: number):
   AdvTblCellProps<AuxCompsProps>[][] {
@@ -30,7 +30,11 @@ export function genEmptyRows(array: AdvTblCellProps<AuxCompsProps>[][], addedRow
   if (!array.length || !addedRowsCount) return [];
 
   const result: typeof array = [];
-  const cols = array[array.length-1];
+
+  const cols = array.find(row =>
+    row.find(col => !(col.component !== AuxLevelTextBox ||
+      'isExpanderVisible' in col.componentProps && col.componentProps.isExpanderVisible)));
+  if (!cols) return [];
 
   for (let i = 0; i < addedRowsCount; i++) {
     const colsCopy: AdvTblCellProps<AuxCompsProps>[] = [];
@@ -38,15 +42,20 @@ export function genEmptyRows(array: AdvTblCellProps<AuxCompsProps>[][], addedRow
     cols.forEach((col, ind) => {
       const id = `${Object.values(EColID)[ind]}`;
 
-      const newCellProps = {
-        ...col,
+      const newCellProps: AdvTblCellProps<AuxCompsProps> = {
         id,
+        border: col.border,
+        component: col.component,
         componentProps: {
-          ...col.componentProps,
           id,
-          value: '',
+          value: STR_HTML_SPACE,
+          type: col.componentProps.type,
+          onChange: col.componentProps.onChange,
+          props: {
+            ...col.componentProps.props,
+          }
         },
-      }
+      };
 
       colsCopy.push(newCellProps);
     })
@@ -76,7 +85,7 @@ export function genRowNumCell<T extends AdvTblCellProps<AuxCompsProps>>(colsRow:
       props: {
         ...templateCol.componentProps.props,
         alignH: EAuxAlignH.C,
-        isEditable: false,
+        isNonSelectable: true,
       },
       value: `${rowNum ? rowNum : ''}`,
     }

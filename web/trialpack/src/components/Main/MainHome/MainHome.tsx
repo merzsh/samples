@@ -33,7 +33,7 @@ export const MainHome: React.FC<IMainHome> = ({title}): JSX.Element => {
 
   return <div className={`${styles[STR_CLASS_MAIN]}`} key={title} >
     <div className={`${styles[`${STR_CLASS_MAIN}__copyright`]}`}>
-      Copyright &#xA9; 2024-2025 Andrew Miroshnichenko &lt;<a href={'mailto:merzsh@gmail.com'}>merzsh@gmail.com</a>&gt;<br/>
+      Copyright &#xA9; 2024-2026 Andrew Miroshnichenko &lt;<a href={'mailto:merzsh@gmail.com'}>merzsh@gmail.com</a>&gt;<br/>
       This program comes with ABSOLUTELY NO WARRANTY; for details go to Github repo via link below.<br/>
       This is free software, and you are welcome to redistribute it under certain conditions.
     </div>

@@ -67,6 +67,8 @@ export const STR_ABC_LETTERS_CAP = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 export const STR_ABC_LETTERS_REG = 'abcdefghijklmnopqrstuvwxyz';
 export const STR_ABC_ALL_LETTERS_DIGITS = STR_ABC_LETTERS_CAP + STR_ABC_LETTERS_REG + STR_ABC_DIGITS;
 
+export const STR_ISO_DATE_TEMPLATE = 'yyyy-MM-dd';
+
 export const STR_MSG_COMPONENT = 'component';
 export const STR_MSG_CLASS = 'class';
 export const STR_MSG_FUNCTION = 'function';

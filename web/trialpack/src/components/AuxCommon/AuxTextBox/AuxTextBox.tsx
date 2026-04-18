@@ -21,14 +21,14 @@ import * as s from './AuxTextBox.modules.scss';
 import React, {useCallback, useRef} from 'react';
 import clsx from 'clsx';
 import {AuxTextBoxProps, EAuxAlignH, EAuxSize, EAuxTextBoxType} from "../types";
-import {procAsNumSuppressZero} from "./utils";
+import {getFormattedValue} from "./utils";
 import {NUM_INIT, STR_HTML_SPACE, STR_INIT, STR_KEY_ENTER, STR_KEY_ESCAPE} from "../constants";
 
 export const AuxTextBox: React.FC<AuxTextBoxProps> = ({value, type,
                                                         onChange, props,
                                                         id, className}) => {
   const [isEditable, setIsEditable] = React.useState(false);
-  const [valueInt, setValueInt] = React.useState(value);
+  const [valueInt, setValueInt] = React.useState<string>(value ? value : STR_HTML_SPACE);
   const [isInputError, setIsInputError] = React.useState(false);
   const colWidthRef = useRef(0);
 
@@ -61,7 +61,7 @@ export const AuxTextBox: React.FC<AuxTextBoxProps> = ({value, type,
             [`${s['aux-text-box-input_errored']}`]: isInputError,
           })}
           type={'text'}
-          value={valueInt}
+          value={valueInt === STR_HTML_SPACE ? STR_INIT : valueInt}
           autoFocus
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             let isErr = false, val = e.target.value;
@@ -79,12 +79,14 @@ export const AuxTextBox: React.FC<AuxTextBoxProps> = ({value, type,
               }
             }
 
-            setValueInt(val);
+            setValueInt(val ? val : STR_HTML_SPACE);
             setIsInputError(isErr);
           }}
           onKeyDown={(event) => {
-            if (event.key === STR_KEY_ENTER || event.key === STR_KEY_ESCAPE) {
+            if (event.key === STR_KEY_ENTER) {
               (event.target as HTMLInputElement).blur();
+            } else if (event.key === STR_KEY_ESCAPE) {
+              setValueInt(value ? value : STR_HTML_SPACE);
             }
           }}
           onBlur={() => {
@@ -99,21 +101,17 @@ export const AuxTextBox: React.FC<AuxTextBoxProps> = ({value, type,
             setIsEditable(false);
 
             if (onChange && val !== value) {
-              onChange(val);
+              onChange(val, value);
             }
           }}
         />
       ) : (
-        <div className={clsx({
+        <div className={clsx(s['aux-text-box-text'], {
           [`${s['aux-text-box-text_as-center']}`]: props?.alignH === EAuxAlignH.C,
           [`${s['aux-text-box-text_as-right']}`]: props?.alignH === EAuxAlignH.R,
+          [`${s['aux-text-box-text_disabled']}`]: !props?.isEditable && !props?.isNonSelectable,
         })}>
-          {valueInt
-            ? props?.isSuppressZeros
-              ? procAsNumSuppressZero(valueInt, true)
-              : valueInt
-            : STR_HTML_SPACE
-          }
+          {getFormattedValue(valueInt ?? STR_INIT, type, props?.isSuppressZeros, props?.dateDisplayTemplate)}
         </div>
       )}
     </div>

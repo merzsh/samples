@@ -27,4 +27,5 @@ export type AuxTextBoxConfig = {
   isNonSelectable?: boolean;
   isEditable?: boolean;
   isSuppressZeros?: boolean;
+  dateDisplayTemplate?: string;
 }

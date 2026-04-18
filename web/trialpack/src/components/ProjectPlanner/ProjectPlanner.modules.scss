@@ -19,6 +19,7 @@
 
 .proj-plan {
   height: 77vh;
+  overflow: auto;
 
   &__table {
     margin-top: 10px;
