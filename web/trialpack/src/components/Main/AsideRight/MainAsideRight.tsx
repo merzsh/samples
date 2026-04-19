@@ -21,10 +21,10 @@ import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import useStores from '../../../hooks/useStores';
 import MainHomeAsideRight from '../MainHome/AsideRight';
-import StoplightAsideRight from '../../Stoplight/AsideRight';
 import Editor2dAsideRight from '../../Editor2d/AsideRight';
 import ProjectPlannerAsideRight from '../../ProjectPlanner/ProjectPlannerAsideRight';
 import {STR_ID_APP_EDITOR2D, STR_ID_APP_PROJ_PLAN, STR_ID_APP_STOPLIGHT} from '../../../utils/constants';
+import {StoplightAsideLeft} from "../../Stoplight/AsideLeft/StoplightAsideLeft";
 
 interface IMainAsideRight {
   title?: string;
@@ -37,7 +37,7 @@ export const MainAsideRight: React.FC<IMainAsideRight> = ({title}): JSX.Element 
     {[...store.appList.keys()].map((item, index) => {
       switch(item) {
         case STR_ID_APP_STOPLIGHT:
-          return (<Route key={index} path={'/' + item} element={<StoplightAsideRight />} />);
+          return (<Route key={index} path={'/' + item} element={<StoplightAsideLeft />} />);
         case STR_ID_APP_EDITOR2D:
           return (<Route key={index} path={'/' + item} element={<Editor2dAsideRight />} />);
         case STR_ID_APP_PROJ_PLAN:

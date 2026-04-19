@@ -17,12 +17,19 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+:root {
+  --left-aside-hd-width: 320px;
+  --right-aside-hd-width: 128px;
+  --splitter-width: 5px;
+}
+
 .trial-pack * {
   margin: 0;
   padding: 0;
   border: none;
   font-size: 100%;
-  color: #333333;
+  color: #151515;
+  font-family: sans-serif;
 
   box-sizing: border-box;
   vertical-align: baseline;
@@ -49,7 +56,7 @@
                     "."
                     "footer";
   grid-template-columns: 1fr;
-  grid-template-rows: auto 5px auto 5px auto 5px auto 5px auto;
+  grid-template-rows: auto var(--splitter-width) auto var(--splitter-width) auto var(--splitter-width) auto var(--splitter-width) auto;
 
   /*height:100vh;*/
   /*height: auto;*/
@@ -79,8 +86,6 @@
 
   main {
     grid-area: content;
-    padding-left: 1.5em;
-    padding-right: 1em;
     border: 1px solid lightgray;
     background-color: snow;
   }
@@ -175,8 +180,12 @@
                     "menu . content . side"
                     ". . . . ."
                     "footer footer footer footer footer";
-    grid-template-columns: 300px 5px 1fr 5px 200px;
-    grid-template-rows: auto 5px auto 5px auto;
+    grid-template-columns: var(--left-aside-hd-width) var(--splitter-width) 1fr var(--splitter-width) var(--right-aside-hd-width);
+    grid-template-rows: auto var(--splitter-width) auto var(--splitter-width) auto;
+
+    main {
+      max-width: calc(100vw - var(--left-aside-hd-width) - var(--right-aside-hd-width) - 2 * var(--splitter-width) - 1em);
+    }
   }
 
   .trial-pack nav ul {

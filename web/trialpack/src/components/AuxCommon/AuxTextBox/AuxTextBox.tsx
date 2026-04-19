@@ -48,6 +48,7 @@ export const AuxTextBox: React.FC<AuxTextBoxProps> = ({value, type,
     <div id={`atb-${id}`} className={clsx(className, s['aux-text-box'], {
       [`${s['aux-text-box_non-selectable']}`]: props?.isNonSelectable,
       [`${s['aux-text-box_is-weighted']}`]: props?.isBold,
+      [`${s['aux-text-box_is-unweighted']}`]: !props?.isBold,
       [`${s['aux-text-box_is-medium-sized']}`]: props?.fontSize === EAuxSize.M,
       [`${s['aux-text-box_is-small-sized']}`]: props?.fontSize === EAuxSize.S,
       [`${s['aux-text-box_left_aligned']}`]: props?.alignH === EAuxAlignH.L,

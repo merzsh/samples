@@ -29,6 +29,7 @@ import {useProjectWorksTableView} from "./hooks/useProjectWorksTableView";
 import AuxLevelTextBox from "../AuxCommon/AuxLevelTextBox";
 import {STR_HTML_SPACE} from "../AuxCommon/constants";
 import {PROJECT_DEFAULT_NAME} from "./constants";
+import AuxViews from "../AuxCommon/AuxViews";
 
 type ProjectPlannerProps = {
   title?: string;
@@ -124,14 +125,22 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
   if (!header || !works) return;
 
   return (
-    <div className={`${s['proj-plan']}`}>
-      <AdvancedTable className={`${s['proj-plan__table']}`}
+    <AuxViews className={`${s['proj-plan']}`} resizerScreenAdjustmentInPx={250}>
+      <AdvancedTable id={'wbs'} key={'wbs'}
+                     className={`${s['proj-plan__table']}`}
                      header={header}
                      works={works}
                      isWithRowNums freeRowsCount={3}
                      defaultSortColumn={getDefaultSortColumn(projectApi.projectHeaderAttributes, EProjAttrs.WBS)}
       />
-    </div>
+      <AdvancedTable id={'diagram'} key={'diagram'}
+                     className={`${s['proj-plan__table']}`}
+                     header={header}
+                     works={works}
+                     isWithRowNums freeRowsCount={3}
+                     defaultSortColumn={getDefaultSortColumn(projectApi.projectHeaderAttributes, EProjAttrs.WBS)}
+      />
+    </AuxViews>
   );
 };
 

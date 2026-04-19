@@ -17,6 +17,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+:root {
+  --firstLevelColor: lightsteelblue;
+  --secondLevelColor: lightgreen;
+  --thirdLevelColor: skyblue;
+}
+
 .aux-level-text-box {
   display: flex;
   align-items: center;
@@ -24,6 +30,7 @@
 
   &-tab {
     display: flex;
+    margin: 0;
 
     &__content {
       width: 16px;
@@ -37,15 +44,15 @@
       }
 
       &_leveled-1 {
-        background-color: lightsalmon;
+        background-color: var(--firstLevelColor);
       }
 
       &_leveled-2 {
-        background-color: beige;
+        background-color: var(--secondLevelColor);
       }
 
       &_leveled-3 {
-        background-color: lightskyblue;
+        background-color: var(--thirdLevelColor);
       }
     }
   }

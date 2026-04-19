@@ -47,7 +47,7 @@ export const projectSampleDataApiRawResponse = {
     { wbs_code: '1.3.1', work_name: 'Justification of design decisions on technical support', length: 6, prev_works: ['1.2.4'], },
     { wbs_code: '1.3.2', work_name: 'Justification of design decisions on information support', length: 6, prev_works: ['1.3.1'], },
     { wbs_code: '1.3.3', work_name: 'Justification of design decisions on software', length: 6, prev_works: ['1.3.2'], },
-    { wbs_code: '1.4', work_name: 'Creation of technical task documentation', length: 3, prev_works: ['1.2.4'], },
+    { wbs_code: '1.3.4', work_name: 'Creation of technical task documentation', length: 3, prev_works: ['1.2.4'], },
     { wbs_code: '2', work_name: 'Designing', },
     { wbs_code: '2.1', work_name: 'Development of an automation project', },
     { wbs_code: '2.1.1', work_name: 'Development of an automation schedule', length: 3, prev_works: ['1.3.3'], },
@@ -58,7 +58,7 @@ export const projectSampleDataApiRawResponse = {
     { wbs_code: '2.2.1', work_name: 'Information model development', length: 3, prev_works: ['2.1.2'], },
     { wbs_code: '2.2.2', work_name: 'Classifier development', length: 3, prev_works: ['2.2.1'], },
     { wbs_code: '2.2.3', work_name: 'Development of prototypes of screen forms', length: 3, prev_works: ['2.2.2'], },
-    { wbs_code: '2.3', work_name: 'Creation of project documentation', length: 3, prev_works: ['2.2.3'], },
+    { wbs_code: '2.2.4', work_name: 'Creation of project documentation', length: 3, prev_works: ['2.2.3'], },
     { wbs_code: '3', work_name: 'Implementation', },
     { wbs_code: '3.1', work_name: 'Preparing for software development', },
     { wbs_code: '3.1.1', work_name: 'Purchase and installation of software tools', length: 6, prev_works: ['2.3'], },
@@ -69,6 +69,6 @@ export const projectSampleDataApiRawResponse = {
     { wbs_code: '3.2.2', work_name: 'Interface development', length: 15, prev_works: ['3.1.3'],},
     { wbs_code: '3.2.3', work_name: 'Software modules development', length: 32, prev_works: ['3.2.1'], },
     { wbs_code: '3.2.4', work_name: 'Development of software verification tests', length: 16, prev_works: ['3.2.3'], },
-    { wbs_code: '3.3', work_name: 'Creation of software documentation', length: 3, prev_works: ['3.2.4'], },
+    { wbs_code: '3.2.5', work_name: 'Creation of software documentation', length: 3, prev_works: ['3.2.4'], },
   ]
 }

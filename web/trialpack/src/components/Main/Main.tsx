@@ -38,7 +38,7 @@ interface IMain {
   title?: string;
 }
 
-export const Main: React.FC<IMain> = ({title}): JSX.Element => {
+const Main: React.FC<IMain> = ({title}): JSX.Element => {
   const { store } = useStores();
 
   return <Routes>

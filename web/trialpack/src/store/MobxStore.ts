@@ -75,9 +75,9 @@ class MobxStore {
     let result = Map<string, { shortName: string; name: string }>();
 
     result = result.set(STR_ID_APP_EDITOR2D, {shortName: '2d graphics editor', name: '2D VECTOR GRAPHICS WEB EDITOR'});
+    result = result.set(STR_ID_APP_PROJ_PLAN, {shortName: 'Project planner', name: 'PROJECT PLANNER'});
     result = result.set(STR_ID_APP_STOPLIGHT, {shortName: 'Stoplight', name: 'STATE MACHINE WITH STOPLIGHT SAMPLE'});
     result = result.set(STR_ID_APP_TELLER, {shortName: 'Teller machine', name: 'AUTOMATED TELLER MACHINE EMULATOR'});
-    result = result.set(STR_ID_APP_PROJ_PLAN, {shortName: 'Project planner', name: 'PROJECT PLANNER'});
     return result;
   }
 }

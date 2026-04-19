@@ -17,6 +17,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+:root {
+  --font-size-weighted: 500;
+  --font-size-unweighted: 400;
+}
+
 .aux-text-box {
   font-weight: normal;
 
@@ -45,7 +50,11 @@
   }
 
   &_is-weighted {
-    font-weight: bold;
+    font-weight: var(--font-size-weighted);
+  }
+
+  &_is-unweighted {
+    font-weight: var(--font-size-unweighted);
   }
 
   &_is-small-sized {

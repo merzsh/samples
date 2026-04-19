@@ -17,16 +17,31 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+:root {
+  --firstLevelColor: lightsteelblue;
+  --secondLevelColor: lightgreen;
+  --thirdLevelColor: skyblue;
+}
+
+.adv-table-container {
+  flex-shrink: 0;
+}
+
 .adv-table {
   border-collapse: collapse;
   table-layout: fixed;
+  border-spacing: 0;
+
+  &__tr {
+    padding: 0;
+  }
 
   &__th {
     vertical-align: middle;
   }
 
   &__cell {
-    padding: 1px 0 1px 0;
+    visibility: visible;
 
     &-resizer {
       cursor: col-resize;
@@ -79,15 +94,15 @@
     }
 
     &_leveled-1 {
-      background-color: lightsalmon;
+      background-color: var(--firstLevelColor);
     }
 
     &_leveled-2 {
-      background-color: beige;
+      background-color: var(--secondLevelColor);
     }
 
     &_leveled-3 {
-      background-color: lightskyblue;
+      background-color: var(--thirdLevelColor);
     }
   }
 }
@@ -98,6 +113,7 @@
 
 .comp-row-regular {
   width: 100%;
+  margin: 3px 0;
 }
 
 .debug {

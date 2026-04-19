@@ -18,6 +18,7 @@
  */
 
 import {AuxTextBoxConfig} from "./AuxTextBox/types";
+import React from "react";
 
 export enum EAuxSize { S, M, L }
 export enum EAuxAlignH { L, C, R }
@@ -61,3 +62,9 @@ export type AuxLevelTextBoxProps = AuxTextBoxProps & {
   onExpanderClick?: (id: string) => number[];
   onExpanderRows?: (props: OnExpanderRowsProps) => void;
 };
+
+export type AuxViewsProps = AuxCommonProps & {
+  resizerScreenAdjustmentInPx?: number;
+}
+
+export type AuxOnColumnResize = (e: React.MouseEvent<HTMLDivElement>) => void;

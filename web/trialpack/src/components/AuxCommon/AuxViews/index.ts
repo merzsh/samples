@@ -17,11 +17,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-.proj-plan {
-  height: 77vh;
+import AuxViews from './AuxViews';
 
-  &__table {
-    display: flex;
-    overflow: auto;
-  }
-}
+export default AuxViews;

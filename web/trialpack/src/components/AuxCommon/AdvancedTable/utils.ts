@@ -18,7 +18,6 @@
  */
 
 import {AdvTblCellProps, AdvTblRowSelectStyles, AuxCompsProps, EAdvTblBackground} from "./types";
-import React from "react";
 import AuxTextBox from "../AuxTextBox";
 import {AuxLevelTextBoxProps, EAuxAlignH, EColID, OnExpanderRowsProps} from "../types";
 import AuxLevelTextBox from "../AuxLevelTextBox";
@@ -139,36 +138,6 @@ export function setRowSelection(rowNumCellId: string, cellSelectionStyles: AdvTb
     rowNumCell.classList.remove(style2rem);
     rowNumCell.classList.add(style2add);
   }
-}
-
-export function onColumnResize(e: React.MouseEvent<HTMLDivElement>) {
-  const target = e.target as HTMLDivElement;
-  if (!target.parentElement) return;
-
-  let startX = e.pageX;
-  let startWidth = target.parentElement.offsetWidth;
-
-  // Function to handle mouse movement during drag
-  function onMouseMove(e: any) {
-    if (!target.parentElement) return;
-
-    const diffX = e.pageX - startX;
-    // Calculate new width, preventing columns from becoming too small
-    const newWidth = Math.max(50, startWidth + diffX);
-    target.parentElement.style.width = newWidth + 'px';
-  }
-
-  // Function to stop resizing on mouse up
-  function onMouseUp() {
-    if (!target.parentElement) return;
-
-    document.removeEventListener('mousemove', onMouseMove);
-    document.removeEventListener('mouseup', onMouseUp);
-    target.parentElement.classList.remove('active');
-  }
-
-  document.addEventListener('mousemove', onMouseMove);
-  document.addEventListener('mouseup', onMouseUp);
 }
 
 export function getComponentClass(colId: string): string {

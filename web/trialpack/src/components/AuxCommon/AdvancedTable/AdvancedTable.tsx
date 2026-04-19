@@ -26,18 +26,19 @@ import {
   EAdvTblBackground
 } from "./types";
 import AuxTextBox from "../AuxTextBox";
-import {AuxLevelTextBoxProps, AuxTextBoxProps, EAuxCompExtData, EColID} from "../types";
+import {AuxLevelTextBoxProps, AuxOnColumnResize, AuxTextBoxProps, EAuxCompExtData, EColID} from "../types";
 import AuxLevelTextBox from "../AuxLevelTextBox";
 import {
   genEmptyRows,
   genRowNumCell,
   getComponentClass,
   getTableChildrenRows,
-  onColumnResize,
   onExpanderRows,
-  setRowSelection, sortWorks
+  setRowSelection,
+  sortWorks
 } from "./utils";
 import {STR_INIT} from "../constants";
+import {onResize} from "../utils";
 
 type AdvancedTableProps = {
   header: AdvTblCellProps<AuxTextBoxProps>[];
@@ -46,6 +47,7 @@ type AdvancedTableProps = {
   isWithRowNums?: boolean;
   freeRowsCount?: number;
   className?: string;
+  id?: string;
 };
 
 const ROW_SELECTION_STYLES = {
@@ -56,10 +58,11 @@ const ROW_SELECTION_STYLES = {
 
 export const AdvancedTable: React.FC<AdvancedTableProps> =
   ({header, works, defaultSortColumn = EColID.A,
-     isWithRowNums, freeRowsCount, className}) => {
+     isWithRowNums, freeRowsCount, className, id}) => {
 
   const worksRef = useRef<typeof works>([]);
   const currCellIdRef = useRef('');
+  const resizeHandlersRef = useRef(new Map<string, AuxOnColumnResize>());
 
   const [tableKey, setTableKey] = useState<string>();
 
@@ -106,117 +109,129 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
   if (!header.length || !tableKey) return;
 
   return (
-    <div>
-      <table className={clsx(className, s['adv-table'])}>
-        <thead>
-        <tr>
-          {(isWithRowNums ? [genRowNumCell(header, 0), ...header] : header).map(col => {
-            return (
-              <th id={col.id} key={col.id} className={clsx(s['adv-table__th'], {
-                [`${s['adv-table__cell_background-head-colored']}`]: col.background === EAdvTblBackground.HEADER,
-                [`${s['adv-table__cell_border-left']}`]: col.border.left,
-                [`${s['adv-table__cell_border-right']}`]: col.border.right,
-                [`${s['adv-table__cell_border-top']}`]: col.border.top,
-                [`${s['adv-table__cell_border-bottom']}`]: col.border.bottom
-              })} >
-                <div className={clsx(s['adv-table__cell'], s['adv-table__cell_headed'])}
-                     onDoubleClick={(event) => {
-                       event.currentTarget.style.width = '';
-                     }}>
-                  {generateComponent<AuxTextBoxProps>({
-                    component: AuxTextBox,
-                    componentProps: {
-                      ...col.componentProps,
-                      className: s[getComponentClass(col.id)],
-                    }})}
-                  {col.id !== '_'
-                    ? (<div className={`${s['adv-table__cell-resizer']}`} onMouseDown={onColumnResize} />)
-                    : undefined}
-                </div>
-              </th>
-            );
-          })}
-        </tr>
-        </thead>
-        <tbody>
-        {[...[...works].sort((a, b) => sortWorks(a, b, defaultSortColumn)),
-          ...genEmptyRows(works, freeRowsCount ?? 1)]
-          .map((row, rowIndex) => {
-            const rowRef: typeof row = [];
+    <div id={id} className={className}>
+      <div className={s['adv-table-container']}>
+        <table className={s['adv-table']}>
+          <thead>
+          <tr>
+            {(isWithRowNums ? [genRowNumCell(header, 0), ...header] : header).map(col => {
+              let resizeHandler;
+              const resizerId = `col-resizer-${col.id}`
 
-            const rowUi = (
-              <tr id={`${rowIndex+1}`} key={`${rowIndex+1}`}>
-                {(isWithRowNums ? [genRowNumCell(row, rowIndex + 1), ...row] : row).map(col => {
-                  const colRef: typeof col = {
-                    ...col,
-                    componentProps: {
-                      ...col.componentProps,
+              if (!(resizeHandler = resizeHandlersRef.current.get(resizerId))) {
+                resizeHandler = onResize(resizerId, () => 512);
+                resizeHandlersRef.current.set(resizerId, resizeHandler);
+              }
+
+              return (
+                <th id={col.id} key={col.id} className={clsx(s['adv-table__th'], {
+                  [`${s['adv-table__cell_background-head-colored']}`]: col.background === EAdvTblBackground.HEADER,
+                  [`${s['adv-table__cell_border-left']}`]: col.border.left,
+                  [`${s['adv-table__cell_border-right']}`]: col.border.right,
+                  [`${s['adv-table__cell_border-top']}`]: col.border.top,
+                  [`${s['adv-table__cell_border-bottom']}`]: col.border.bottom
+                })}>
+                  <div className={clsx(s['adv-table__cell'], s['adv-table__cell_headed'])}
+                       onDoubleClick={(event) => {
+                         event.currentTarget.style.width = '';
+                       }}>
+                    {generateComponent<AuxTextBoxProps>({
+                      component: AuxTextBox,
+                      componentProps: {
+                        ...col.componentProps,
+                        className: s[getComponentClass(col.id)],
+                      }
+                    })}
+                    {col.id !== '_'
+                      ? (<div id={resizerId} className={`${s['adv-table__cell-resizer']}`}
+                              onMouseDown={resizeHandler} />)
+                      : undefined}
+                  </div>
+                </th>
+              );
+            })}
+          </tr>
+          </thead>
+          <tbody>
+          {[...[...works].sort((a, b) => sortWorks(a, b, defaultSortColumn)),
+            ...genEmptyRows(works, freeRowsCount ?? 1)]
+            .map((row, rowIndex) => {
+              const rowRef: typeof row = [];
+
+              const rowUi = (
+                <tr id={`${rowIndex + 1}`} key={`${rowIndex + 1}`} className={s['adv-table__tr']}>
+                  {(isWithRowNums ? [genRowNumCell(row, rowIndex + 1), ...row] : row).map(col => {
+                    const colRef: typeof col = {
+                      ...col,
+                      componentProps: {
+                        ...col.componentProps,
+                      }
                     }
-                  }
 
-                  if (!col.id.startsWith('_')) {
-                    const cellId = `${col.id}${rowIndex+1}`;
-                    colRef.id = cellId;
-                    colRef.componentProps.id = cellId;
-                  }
+                    if (!col.id.startsWith('_')) {
+                      const cellId = `${col.id}${rowIndex + 1}`;
+                      colRef.id = cellId;
+                      colRef.componentProps.id = cellId;
+                    }
 
-                  rowRef.push(colRef);
+                    rowRef.push(colRef);
 
-                  let uiCell: ReactElement | undefined;
+                    let uiCell: ReactElement | undefined;
 
-                  switch(col.component) {
-                    case AuxTextBox:
-                      uiCell = generateComponent<AuxTextBoxProps>(colRef);
-                      break;
-                    case AuxLevelTextBox:
-                      uiCell = generateComponent<AuxLevelTextBoxProps>(colRef, worksRef.current, defaultSortColumn);
-                      break;
-                    default:
-                      uiCell = undefined;
-                  }
+                    switch (col.component) {
+                      case AuxTextBox:
+                        uiCell = generateComponent<AuxTextBoxProps>(colRef);
+                        break;
+                      case AuxLevelTextBox:
+                        uiCell = generateComponent<AuxLevelTextBoxProps>(colRef, worksRef.current, defaultSortColumn);
+                        break;
+                      default:
+                        uiCell = undefined;
+                    }
 
-                  const rowKey: string = colRef.componentProps.extData && EAuxCompExtData.KEY_COL_VALUE in colRef.componentProps.extData
-                    ? colRef.componentProps.extData[EAuxCompExtData.KEY_COL_VALUE]
-                    : `${rowIndex+1}`;
-                  const cellKey = `${rowKey}~${colRef.id}~${colRef.componentProps.value}`;
+                    const rowKey: string = colRef.componentProps.extData && EAuxCompExtData.KEY_COL_VALUE in colRef.componentProps.extData
+                      ? colRef.componentProps.extData[EAuxCompExtData.KEY_COL_VALUE]
+                      : `${rowIndex + 1}`;
+                    const cellKey = `${rowKey}~${colRef.id}~${colRef.componentProps.value}`;
 
-                  const isLevelColored = !colRef.id.startsWith('_') && !colRef.id.startsWith(defaultSortColumn);
+                    const isLevelColored = !colRef.id.startsWith('_') && !colRef.id.startsWith(defaultSortColumn);
 
-                  return (
-                    <td id={colRef.id} key={cellKey}
-                        className={clsx(s['adv-table__th'], s['adv-table__cell'], {
-                          [`${s['adv-table__cell_dated-row-num']}`]: colRef.id.startsWith('_'),
-                          [`${s['adv-table__cell_dated']}`]: !colRef.id.startsWith('_'),
-                          [`${s['adv-table__cell_background-head-colored']}`]: colRef.background === EAdvTblBackground.HEADER,
-                          [`${s['adv-table__cell_border-left']}`]: colRef.border.left,
-                          [`${s['adv-table__cell_border-right']}`]: colRef.border.right,
-                          [`${s['adv-table__cell_border-top']}`]: colRef.border.top,
-                          [`${s['adv-table__cell_border-bottom']}`]: colRef.border.bottom,
-                          [`${s['adv-table__cell_leveled-1']}`]: colRef.componentProps.level === 0 && isLevelColored,
-                          [`${s['adv-table__cell_leveled-2']}`]: colRef.componentProps.level === 1 && isLevelColored,
-                          [`${s['adv-table__cell_leveled-3']}`]: colRef.componentProps.level === 2 && isLevelColored,
-                        })}
-                        onClick={onDataCellClick}>
-                      {uiCell}
-                    </td>
-                  );
-                })}
-              </tr>
-            );
+                    return (
+                      <td id={colRef.id} key={cellKey}
+                          className={clsx(s['adv-table__th'], s['adv-table__cell'], {
+                            [`${s['adv-table__cell_dated-row-num']}`]: colRef.id.startsWith('_'),
+                            [`${s['adv-table__cell_dated']}`]: !colRef.id.startsWith('_'),
+                            [`${s['adv-table__cell_background-head-colored']}`]: colRef.background === EAdvTblBackground.HEADER,
+                            [`${s['adv-table__cell_border-left']}`]: colRef.border.left,
+                            [`${s['adv-table__cell_border-right']}`]: colRef.border.right,
+                            [`${s['adv-table__cell_border-top']}`]: colRef.border.top,
+                            [`${s['adv-table__cell_border-bottom']}`]: colRef.border.bottom,
+                            [`${s['adv-table__cell_leveled-1']}`]: colRef.componentProps.level === 0 && isLevelColored,
+                            [`${s['adv-table__cell_leveled-2']}`]: colRef.componentProps.level === 1 && isLevelColored,
+                            [`${s['adv-table__cell_leveled-3']}`]: colRef.componentProps.level === 2 && isLevelColored,
+                          })}
+                          onClick={onDataCellClick}>
+                        {uiCell}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
 
-            worksRef.current.push(rowRef);
+              worksRef.current.push(rowRef);
 
-            return rowUi;
-          })
-        }
-        </tbody>
-      </table>
+              return rowUi;
+            })
+          }
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-};
+  };
 
-function generateComponent <T extends AuxCompsProps>(comp: Pick<AdvTblCellProps<T>, 'component' | 'componentProps'>,
-                                                     works?: AdvTblCellProps<AuxCompsProps>[][], defaultSortColumn?: EColID):
+function generateComponent<T extends AuxCompsProps>(comp: Pick<AdvTblCellProps<T>, 'component' | 'componentProps'>,
+                                                    works?: AdvTblCellProps<AuxCompsProps>[][], defaultSortColumn?: EColID):
   ReactElement | undefined {
 
   let result: ReactElement | undefined = undefined;

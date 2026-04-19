@@ -29,7 +29,6 @@ export const Editor2dAsideRight: React.FC<IEditor2dAsideRight> = ({title}): JSX.
   return <div className={`${styles['aside-right-editor-2d']}`} key={title} >
     <nav>
       <button>Object options</button>
-      <button>Common settings</button>
     </nav>
     <h4>The standard Lorem Ipsum passage</h4>
     <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</p>
