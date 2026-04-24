@@ -23,6 +23,7 @@ import clsx from 'clsx';
 import {AuxTextBoxProps, EAuxAlignH, EAuxSize, EAuxTextBoxType} from "../types";
 import {getFormattedValue} from "./utils";
 import {NUM_INIT, STR_HTML_SPACE, STR_INIT, STR_KEY_ENTER, STR_KEY_ESCAPE} from "../constants";
+import {prop} from "../../../utils/utils";
 
 export const AuxTextBox: React.FC<AuxTextBoxProps> = ({value, type,
                                                         onChange, props,
@@ -111,6 +112,7 @@ export const AuxTextBox: React.FC<AuxTextBoxProps> = ({value, type,
           [`${s['aux-text-box-text_as-center']}`]: props?.alignH === EAuxAlignH.C,
           [`${s['aux-text-box-text_as-right']}`]: props?.alignH === EAuxAlignH.R,
           [`${s['aux-text-box-text_disabled']}`]: !props?.isEditable && !props?.isNonSelectable,
+          [`${s['aux-text-box_is-monospaced']}`]: props?.isMonospaced,
         })}>
           {getFormattedValue(valueInt ?? STR_INIT, type, props?.isSuppressZeros, props?.dateDisplayTemplate)}
         </div>

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-import {STR_HTML_SPACE} from "../constants";
+import {MSG_DATE_FORMATTING_ERROR, STR_HTML_SPACE} from "../constants";
 import {EAuxTextBoxType} from "../types";
 import {format} from "date-fns";
 import {STR_ISO_DATE_TEMPLATE} from "../../../utils/constants";
@@ -40,7 +40,7 @@ export function getFormattedValue(value: string, type?: EAuxTextBoxType, isSuppr
       try {
         return format(value, dateDisplayTemplate ? dateDisplayTemplate : STR_ISO_DATE_TEMPLATE);
       } catch (err) {
-        console.warn(`AuxTextBox: date to string by template '${dateDisplayTemplate}' formatting error`, err);
+        console.warn(`AuxTextBox: ${MSG_DATE_FORMATTING_ERROR} '${dateDisplayTemplate}'`, err);
         return value;
       }
     default:

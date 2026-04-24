@@ -17,7 +17,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 import {
-  ApiProject,
+  ApiGantAttribIds,
+  ApiProject, ApiProjectAttribAllIds,
   ApiProjectHeaderAttribute,
   ApiProjectWork,
   EProjAttrs,
@@ -25,7 +26,7 @@ import {
   EProjProps,
   EProjWorkNodeProps,
   ProjectWorkNode,
-  UseProjectWorksTableViewMap
+  UseProjectWorksTableViewMapArg
 } from "./types";
 import {prop} from "../../utils/utils";
 import {BORDER_FULL} from "./constants";
@@ -36,27 +37,8 @@ import {INIT_TEXT_BOX_CELL_PROPS} from "../AuxCommon/AdvancedTable/constants";
 import {format} from "date-fns";
 import {STR_ISO_DATE_TEMPLATE} from "../../utils/constants";
 
-export function getParentWbs(wbsInDottedTemplate: string, splitter = '.'): string {
-  if (!wbsInDottedTemplate) return STR_INIT;
-
-  const parts = wbsInDottedTemplate.split(splitter);
-  if (parts.length === 1) return STR_INIT;
-
-  return parts.slice(0, parts.length - 1).join(splitter);
-}
-
-export function getWbsLevelNum(wbsInDottedTemplate: string, splitter = '.'): number {
-  if (!wbsInDottedTemplate) return 0;
-
-  let result = 1, wbs = wbsInDottedTemplate;
-  while (wbs = getParentWbs(wbs, splitter)) {
-    result++;
-  }
-  return result;
-}
-
-export function castApiRawResponse(rawAnswerObject: any): ApiProject {
-  const result: ApiProject = {
+export function castApiRawResponse(rawAnswerObject: any): ApiProject<ApiProjectAttribAllIds> {
+  const result: ApiProject<ApiProjectAttribAllIds> = {
     [EProjProps.PROJ_START_DATE]: STR_INIT,
     [EProjProps.HEADER_ATTRIBS]: [],
     [EProjProps.WORKS_LIST]: [],
@@ -88,7 +70,7 @@ export function castApiRawResponse(rawAnswerObject: any): ApiProject {
 
   const headerAttrsArr = prop(rawAnswerObject, EProjProps.HEADER_ATTRIBS, []) ?? [];
   headerAttrsArr.forEach(item => {
-    const res: ApiProjectHeaderAttribute = {
+    const res: ApiProjectHeaderAttribute<ApiProjectAttribAllIds> = {
       [EProjHeaderProps.ID]: EProjAttrs.WBS,
       [EProjHeaderProps.NAME]: EProjAttrs.NAME,
     };
@@ -103,41 +85,25 @@ export function castApiRawResponse(rawAnswerObject: any): ApiProject {
   return result;
 }
 
-export const mapCell: UseProjectWorksTableViewMap = ({workAttr, parentWorkAttr,
-                                                       workNode, colId,
-                                                       isHeader, isEditable,
-                                                       isNonSelectable, isLastLevel,
-                                                       isSuppressZeros, dateDisplayTemplate} ):
-  AdvTblCellProps<AuxTextBoxProps> => {
-
+export const mapCellBase = <T extends ApiProjectAttribAllIds | ApiGantAttribIds>(
+  { workAttr, parentWorkAttr, workNode,
+    colId, isHeader, isEditable, isNonSelectable,
+    isLastLevel, isSuppressZeros, dateDisplayTemplate, level }: UseProjectWorksTableViewMapArg<T>,
+  onGetValue?: () => [string, EAuxTextBoxType]
+): AdvTblCellProps<AuxTextBoxProps> => {
   const result: AdvTblCellProps<AuxTextBoxProps> = { ...INIT_TEXT_BOX_CELL_PROPS };
   const extData: AuxCompExtData = { };
+  extData.currColumnName = workAttr.attrId;
+  extData.keyColumnValue = workNode ? workNode[parentWorkAttr].toString() : STR_INIT;
 
-  let value = STR_INIT, type = EAuxTextBoxType.TEXT,
-    alignH = EAuxAlignH.L, level = 0;
+  let value = STR_INIT, type = EAuxTextBoxType.TEXT, alignH = EAuxAlignH.L;
 
-  if (workNode) {
-    extData.currColumnName = workAttr.attrId;
-    extData.keyColumnValue = workNode ? workNode[parentWorkAttr].toString() : STR_INIT;
-    level = getWbsLevelNum(extData.keyColumnValue);
+  if (onGetValue) {
+    [value, type] = onGetValue();
 
-    const attrValue = workNode[workAttr.attrId];
-
-    if (typeof attrValue === 'string') {
-      value = attrValue;
-    } else if (Array.isArray(attrValue)) {
-      value = attrValue.join(',');
-    } else if (typeof attrValue === 'number') {
-      value = attrValue.toString();
-      type = EAuxTextBoxType.NUM;
+    if (type === EAuxTextBoxType.NUM) {
       alignH = EAuxAlignH.R;
-    } else if (attrValue instanceof Date) {
-      try {
-        value = format(attrValue, STR_ISO_DATE_TEMPLATE);
-      } catch (err) {
-        console.warn(`Date to string by template '${STR_ISO_DATE_TEMPLATE}' formatting error`, err);
-      }
-      type = EAuxTextBoxType.DATE;
+    } else if (type === EAuxTextBoxType.DATE) {
       alignH = EAuxAlignH.C;
     }
   }
@@ -147,6 +113,7 @@ export const mapCell: UseProjectWorksTableViewMap = ({workAttr, parentWorkAttr,
     id: colId ?? '',
     background: isHeader ? EAdvTblBackground.HEADER : undefined,
     border: BORDER_FULL,
+    isHorizResizable: isHeader,
     componentProps: {
       id: colId ?? '',
       value: isHeader ? workAttr.attrName : value,
@@ -166,7 +133,84 @@ export const mapCell: UseProjectWorksTableViewMap = ({workAttr, parentWorkAttr,
   };
 }
 
-export function getDefaultSortColumn(attrs: ApiProjectHeaderAttribute[], attribId: EProjAttrs) {
+export const mapCellBaseWithStringValue = (props: UseProjectWorksTableViewMapArg<ApiProjectAttribAllIds>): AdvTblCellProps<AuxTextBoxProps> => {
+  return mapCellBase(props, () => {
+    let value = '', type = EAuxTextBoxType.TEXT;
+    if (!props.workNode) return [value, type];
+
+    const attrValue = props.workNode[props.workAttr.attrId];
+
+    if (typeof attrValue === 'string') {
+      value = attrValue;
+    }
+
+    return [value, type];
+  });
+}
+
+export const mapCellBaseWithNumberValue = (props: UseProjectWorksTableViewMapArg<ApiProjectAttribAllIds>,
+                                           isEditable?: boolean, isSuppressZeros?: boolean): AdvTblCellProps<AuxTextBoxProps> => {
+  return mapCellBase(
+    { ...props, isEditable, isSuppressZeros },
+    () => {
+      let value = '', type = EAuxTextBoxType.TEXT;
+      if (!props.workNode) return [value, type];
+
+      const attrValue = props.workNode[props.workAttr.attrId];
+
+      if (typeof attrValue === 'number') {
+        value = attrValue.toString();
+        type = EAuxTextBoxType.NUM;
+      }
+
+      return [value, type];
+    });
+}
+
+export const mapCellBaseWithDateValue = (props: UseProjectWorksTableViewMapArg<ApiProjectAttribAllIds>,
+                                         isEditable?: boolean, dateDisplayTemplate?: string): AdvTblCellProps<AuxTextBoxProps> => {
+  return mapCellBase(
+    { ...props, isEditable, dateDisplayTemplate },
+    () => {
+      let value = '', type = EAuxTextBoxType.TEXT;
+      if (!props.workNode) return [value, type];
+
+      const attrValue = props.workNode[props.workAttr.attrId];
+
+      if (attrValue instanceof Date) {
+        try {
+          value = format(attrValue, STR_ISO_DATE_TEMPLATE);
+        } catch (err) {
+          console.warn(`Date to string by template '${STR_ISO_DATE_TEMPLATE}' formatting error`, err);
+        }
+        type = EAuxTextBoxType.DATE;
+      }
+
+      return [value, type];
+    });
+}
+
+export const mapCellBaseWithStringArrayValue = (props: UseProjectWorksTableViewMapArg<ApiProjectAttribAllIds>, isEditable?: boolean):
+  AdvTblCellProps<AuxTextBoxProps> => {
+  return mapCellBase(
+    { ...props, isEditable: isEditable },
+    () => {
+      let value = '', type = EAuxTextBoxType.TEXT;
+      if (!props.workNode) return [value, type];
+
+      const attrValue = props.workNode[props.workAttr.attrId];
+
+      if (Array.isArray(attrValue)) {
+        value = attrValue.join(',');
+      }
+
+      return [value, type];
+    });
+}
+
+export function getDefaultSortColumn<T extends ApiProjectAttribAllIds | ApiGantAttribIds>(
+  attrs: ApiProjectHeaderAttribute<T>[], attribId: EProjAttrs) {
+
   let result = EColID.A;
 
   const found = attrs.find(item => item.attrId === attribId);
@@ -177,20 +221,6 @@ export function getDefaultSortColumn(attrs: ApiProjectHeaderAttribute[], attribI
 
   return result;
 }
-
-export const mapWorkAttrBasic: UseProjectWorksTableViewMap = (props) => {
-  const result = mapCell(props);
-
-  return {
-    ...result,
-    componentProps: {
-      ...result.componentProps,
-      props: {
-        ...result.componentProps.props,
-      }
-    }
-  };
-};
 
 export function calcWorkNodeDates(node: ProjectWorkNode, defaultDate?: Date):
   [Date | undefined, Date | undefined] {
@@ -216,6 +246,15 @@ export function calcWorkNodeDates(node: ProjectWorkNode, defaultDate?: Date):
     startDate,
     finishDate,
   ];
+}
+
+export function getParentWbs(wbsInDottedTemplate: string, splitter = '.'): string {
+  if (!wbsInDottedTemplate) return STR_INIT;
+
+  const parts = wbsInDottedTemplate.split(splitter);
+  if (parts.length === 1) return STR_INIT;
+
+  return parts.slice(0, parts.length - 1).join(splitter);
 }
 
 export function createMilestone(node: ProjectWorkNode, isStart = true): [ProjectWorkNode, Map<string, ProjectWorkNode[]>] {
@@ -262,3 +301,57 @@ export function calcLenDates4SumNode(node: ProjectWorkNode, nodes: Map<string, P
     }
   });
 }
+
+export function generateDateSequence(startDate: Date, daysForward: number, isFromFirstMonthDay = true): Date[] {
+  if (daysForward < 1) return [];
+
+  const result: Date[] = [];
+  let beginDate = new Date(startDate), len = daysForward, deltaBackDays2WeekStart = 0;
+
+  if (isFromFirstMonthDay) {
+    len = beginDate.getDate() + daysForward - 1;
+    beginDate.setDate(1);
+  }
+
+  if (beginDate.getDay() !== 1) {
+    if (!beginDate.getDay()) deltaBackDays2WeekStart = 6;
+    else deltaBackDays2WeekStart = beginDate.getDay() - 1;
+  }
+
+  len += deltaBackDays2WeekStart;
+  beginDate.setDate(beginDate.getDate() - deltaBackDays2WeekStart);
+
+  for (let i = 0; i <= len; i++) {
+    const newDate = new Date(beginDate);
+    newDate.setDate(newDate.getDate() + i);
+    result.push(newDate);
+  }
+
+  if (result.length) {
+    const lastDate = result[result.length - 1];
+
+    if (lastDate.getDay()) {
+      const deltaForwardDays2WeekEnd = 7 - lastDate.getDay();
+
+      for (let i = 1; i <= deltaForwardDays2WeekEnd; i++) {
+        const newDate = new Date(lastDate);
+        newDate.setDate(newDate.getDate() + i);
+        result.push(newDate);
+      }
+    }
+  }
+
+  return result;
+}
+
+/*
+export function getWbsLevelNum(wbsInDottedTemplate: string, splitter = '.'): number {
+  if (!wbsInDottedTemplate) return 0;
+
+  let result = 1, wbs = wbsInDottedTemplate;
+  while (wbs = getParentWbs(wbs, splitter)) {
+    result++;
+  }
+  return result;
+}
+*/

@@ -55,9 +55,10 @@ export type ApiProjectAttribNodeSpecIds = EProjAttrs.WBS | EProjAttrs.NAME;
 export type ApiProjectAttribLeafSpecIds =  EProjAttrs.LEN |  EProjAttrs.COMPLETE |
   EProjAttrs.S_DATE | EProjAttrs.F_DATE | EProjAttrs.PREV;
 export type ApiProjectAttribAllIds = ApiProjectAttribNodeSpecIds | ApiProjectAttribLeafSpecIds;
+export type ApiGantAttribIds = EProjAttrs.WBS | string;
 
-export type ApiProjectHeaderAttribute = {
-  [EProjHeaderProps.ID]: ApiProjectAttribAllIds;
+export type ApiProjectHeaderAttribute<T extends ApiProjectAttribAllIds | ApiGantAttribIds> = {
+  [EProjHeaderProps.ID]: T;
   [EProjHeaderProps.NAME]: string;
   [EProjHeaderProps.IS_OPTIONAL4LEAF]?: boolean;
 };
@@ -65,12 +66,12 @@ export type ApiProjectHeaderAttribute = {
 export type ApiProjectWork = Record<ApiProjectAttribNodeSpecIds, ApiProjectAttribValueTypes> &
   Partial<Record<ApiProjectAttribLeafSpecIds, ApiProjectAttribValueTypes>>;
 
-export type ApiProject = {
+export type ApiProject<T extends ApiProjectAttribAllIds | ApiGantAttribIds> = {
   [EProjProps.PROJ_START_DATE]: string;
   [EProjProps.CURR_DATE]?: string;
   [EProjProps.DATE_TEMPLATE]?: string;
   [EProjProps.IS_SUPPRESS_ZEROS]?: boolean;
-  [EProjProps.HEADER_ATTRIBS]: ApiProjectHeaderAttribute[];
+  [EProjProps.HEADER_ATTRIBS]: ApiProjectHeaderAttribute<T>[];
   [EProjProps.WORKS_LIST]: ApiProjectWork[];
 };
 
@@ -83,14 +84,16 @@ export type ProjectWorkNodeProps = {
 
 export type ProjectWorkNode = ApiProjectWork & ProjectWorkNodeProps;
 
+export type UseProjectWorksTreeSetWorkAttrValue = (workId: string, attribs: Partial<ApiProjectWork>) => void;
+
 export type UseProjectWorksTree = {
   rootWorkNode?: ProjectWorkNode;
   worksTreeMap?: Map<string, ProjectWorkNode>;
-  setWorkAttrValue: (nodeId: string, attribs: Partial<ApiProjectWork>) => void;
+  setWorkAttrValue: UseProjectWorksTreeSetWorkAttrValue;
 };
 
-export type UseProjectWorksTableViewMapArg = {
-  workAttr: ApiProjectHeaderAttribute;
+export type UseProjectWorksTableViewMapArg<T extends ApiProjectAttribAllIds | ApiGantAttribIds> = {
+  workAttr: ApiProjectHeaderAttribute<T>;
   parentWorkAttr: ApiProjectAttribNodeSpecIds;
   workNode?: ProjectWorkNode;
   colId?: string;
@@ -99,9 +102,10 @@ export type UseProjectWorksTableViewMapArg = {
   isNonSelectable?: boolean;
   level?: number;
   isLastLevel?: boolean;
-} & Pick<ApiProject, EProjProps.IS_SUPPRESS_ZEROS | EProjProps.PROJ_START_DATE | EProjProps.DATE_TEMPLATE>;
+} & Pick<ApiProject<T>, EProjProps.IS_SUPPRESS_ZEROS | EProjProps.DATE_TEMPLATE>;
 
-export type UseProjectWorksTableViewMap = (props: UseProjectWorksTableViewMapArg) => AdvTblCellProps<AuxCompsProps>;
+export type UseProjectWorksTableViewMap<T extends ApiProjectAttribAllIds | ApiGantAttribIds> =
+  (props: UseProjectWorksTableViewMapArg<T>) => AdvTblCellProps<AuxCompsProps>;
 
 export type UseProjectWorksTableView = {
   header?: AdvTblCellProps<AuxCompsProps>[];

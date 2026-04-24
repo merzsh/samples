@@ -37,6 +37,7 @@ export type AdvTblCellPropsAbstract<T extends AuxCompsProps> = {
   component: React.FC<T>;
   componentProps: T;
   background?: EAdvTblBackground;
+  isHorizResizable?: boolean;
 }
 
 export type AdvTblCellProps<T> = T extends AuxCompsProps ? AdvTblCellPropsAbstract<T> : never;

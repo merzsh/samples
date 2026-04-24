@@ -24,4 +24,8 @@ export const STR_KEY_ENTER = 'Enter';
 export const STR_KEY_ESCAPE = 'Escape';
 
 export const NUM_INIT: number = 0;
+export const NUM_VIEW_SEPARATOR_WIDTH = 8;
+
 export const BOOL_INIT: boolean = false;
+
+export const MSG_DATE_FORMATTING_ERROR = `date to string formatting error by template`;

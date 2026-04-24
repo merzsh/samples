@@ -22,6 +22,7 @@ import React, {PropsWithChildren, useEffect, useRef, useState} from "react";
 import clsx from 'clsx';
 import {AuxOnColumnResize, AuxViewsProps} from "../types";
 import {onResize} from "../utils";
+import {NUM_VIEW_SEPARATOR_WIDTH} from "../constants";
 
 const AuxViews: React.FC<PropsWithChildren<AuxViewsProps>> = ({children, className,
                                                                 resizerScreenAdjustmentInPx}) => {
@@ -54,7 +55,7 @@ const AuxViews: React.FC<PropsWithChildren<AuxViewsProps>> = ({children, classNa
             {child}
             {index === childrenArr.length - 1
               ? undefined
-              : (<div id={id1} key={id1}
+              : (<div id={id1} key={id1} style={{ width: NUM_VIEW_SEPARATOR_WIDTH - 1}}
                       className={s['aux-views-container__splitter']}
                       onMouseDown={resizeHandler}/>)
             }

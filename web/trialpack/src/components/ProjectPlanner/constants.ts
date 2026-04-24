@@ -32,3 +32,11 @@ export const DEFAULT_WORK: ApiProjectWork = {
   wbs_code: PROJECT_DEFAULT_WBS,
   work_name: PROJECT_DEFAULT_NAME,
 };
+
+export const TREE_VIEW_ID = 'works-tree';
+export const GANT_CHART_ID = 'gant-chart';
+
+export const DATES_GROUP_COLUMN_ID = 'dates';
+export const DATES_GROUP_COLUMN_TITLE = 'Dates';
+export const DATE_TEMPLATE_DAY = 'dd';
+export const DATE_TEMPLATE_WEEK_DAY = 'iiiii';

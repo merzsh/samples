@@ -18,7 +18,7 @@
  */
 
 export const projectSampleDataApiRawResponse = {
-  projectStartDate: '2026-03-01',
+  projectStartDate: '2026-04-20',
   dateDisplayTemplate: 'yy/MM/dd',
   isSuppressZeros: true,
   projectHeaderAttributes: [

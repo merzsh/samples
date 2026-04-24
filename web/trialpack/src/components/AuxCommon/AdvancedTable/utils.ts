@@ -81,6 +81,7 @@ export function genRowNumCell<T extends AdvTblCellProps<AuxCompsProps>>(colsRow:
     background: EAdvTblBackground.HEADER,
     componentProps: {
       ...templateCol.componentProps,
+      extData: { currColumnName: '_'},
       props: {
         ...templateCol.componentProps.props,
         alignH: EAuxAlignH.C,

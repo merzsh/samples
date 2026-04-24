@@ -17,11 +17,14 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 import {
-  ApiProject,
-  ApiProjectAttribAllIds, ApiProjectAttribNodeSpecIds,
-  ApiProjectHeaderAttribute, EProjProps,
-  ProjectWorkNode, ProjectWorkNodeProps,
-  UseProjectWorksTableView, UseProjectWorksTableViewMap
+  ApiGantAttribIds,
+  ApiProjectAttribAllIds,
+  ApiProjectAttribNodeSpecIds,
+  ApiProjectHeaderAttribute,
+  ProjectWorkNode,
+  ProjectWorkNodeProps,
+  UseProjectWorksTableView,
+  UseProjectWorksTableViewMap
 } from "../types";
 import {useCallback, useEffect, useState} from "react";
 import {AdvTblCellProps, AuxCompsProps} from "../../AuxCommon/AdvancedTable/types";
@@ -29,14 +32,10 @@ import {AuxTextBoxProps, EColID} from "../../AuxCommon/types";
 import {findTreeNode} from "../../../utils/utils";
 import {INIT_TEXT_BOX_CELL_PROPS} from "../../AuxCommon/AdvancedTable/constants";
 
-export const useProjectWorksTableView = (projectSettings: Pick<ApiProject, EProjProps.IS_SUPPRESS_ZEROS |
-                                           EProjProps.PROJ_START_DATE | EProjProps.DATE_TEMPLATE>,
-                                         headerAttrs: ApiProjectHeaderAttribute[],
-                                         mappings: Map<ApiProjectAttribAllIds, UseProjectWorksTableViewMap>,
-                                         parentWorkAttr: ApiProjectAttribNodeSpecIds,
-                                         childrenProp: keyof ProjectWorkNodeProps,
-                                         rootWorkNode?: ProjectWorkNode):
-  UseProjectWorksTableView => {
+export const useProjectWorksTableView = <T extends ApiProjectAttribAllIds | ApiGantAttribIds>(
+  headerAttrs: ApiProjectHeaderAttribute<T>[], mappings: Map<T, UseProjectWorksTableViewMap<T>>,
+  parentWorkAttr: ApiProjectAttribNodeSpecIds, childrenProp: keyof ProjectWorkNodeProps, rootWorkNode?: ProjectWorkNode
+): UseProjectWorksTableView => {
 
   const [rootWorkNodeInt, setRootWorkNodeInt] = useState<typeof rootWorkNode>();
   const [header, setHeader] = useState<AdvTblCellProps<AuxCompsProps>[]>();
@@ -56,7 +55,8 @@ export const useProjectWorksTableView = (projectSettings: Pick<ApiProject, EProj
 
     headerAttrs.forEach((attr, attrIndex) => {
       const {attrId, attrName} = attr;
-      const mapping = mappings.get(attrId);
+      let mapping = mappings.get(attrId);
+      if (!mapping && mappings.size) [mapping] = [...mappings.values()];
 
       headerResult.push(mapping
         ? mapping({
@@ -65,11 +65,9 @@ export const useProjectWorksTableView = (projectSettings: Pick<ApiProject, EProj
           colId: `${Object.values(EColID)[attrIndex]}`,
           isHeader: true,
           isNonSelectable: true,
-          projectStartDate: projectSettings.projectStartDate,
         })
         : INIT_TEXT_BOX_CELL_PROPS);
     });
-
     setHeader(headerResult);
 
     // build works list for UI table layout from project tree by each node traversing
@@ -80,7 +78,8 @@ export const useProjectWorksTableView = (projectSettings: Pick<ApiProject, EProj
         const row: AdvTblCellProps<AuxCompsProps>[] = headerAttrs
           .map((prop, colIndex) => {
             const {attrId, attrName} = prop;
-            const mapping = mappings.get(attrId);
+            let mapping = mappings.get(attrId);
+            if (!mapping && mappings.size) [mapping] = [...mappings.values()];
 
             return mapping
               ? mapping({
@@ -89,9 +88,6 @@ export const useProjectWorksTableView = (projectSettings: Pick<ApiProject, EProj
                 workNode: node,
                 colId: `${Object.values(EColID)[colIndex]}`,
                 isEditable: true,
-                isSuppressZeros: projectSettings.isSuppressZeros,
-                projectStartDate: projectSettings.projectStartDate,
-                dateDisplayTemplate: projectSettings.dateDisplayTemplate,
                 level,
                 isLastLevel,
               })

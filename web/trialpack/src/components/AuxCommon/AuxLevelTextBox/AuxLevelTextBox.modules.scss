@@ -27,13 +27,16 @@
   display: flex;
   align-items: center;
   gap: 5px;
+  height: 100%;
 
   &-tab {
     display: flex;
     margin: 0;
+    height: 100%;
 
     &__content {
       width: 16px;
+      height: 100%;
 
       &_is-small-sized {
         font-size: small;

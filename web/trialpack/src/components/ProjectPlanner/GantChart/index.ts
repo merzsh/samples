@@ -17,16 +17,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {EAuxAlignH, EAuxAlignV, EAuxSize} from "../types";
+import GantChart from './GantChart';
 
-export type AuxTextBoxConfig = {
-  fontSize?: EAuxSize;
-  alignH?: EAuxAlignH;
-  alignV?: EAuxAlignV;
-  isBold?: boolean;
-  isMonospaced?: boolean;
-  isNonSelectable?: boolean;
-  isEditable?: boolean;
-  isSuppressZeros?: boolean;
-  dateDisplayTemplate?: string;
-}
+export default GantChart;

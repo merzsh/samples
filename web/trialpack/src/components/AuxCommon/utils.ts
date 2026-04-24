@@ -1,5 +1,6 @@
 import React from "react";
 import {AuxOnColumnResize} from "./types";
+import {NUM_VIEW_SEPARATOR_WIDTH} from "./constants";
 
 export const onResize = (elemId: string, onCalcMaxWidth: (target: HTMLDivElement) => number,
                          resizerScreenAdjustmentInPx = 0): AuxOnColumnResize => {
@@ -10,7 +11,7 @@ export const onResize = (elemId: string, onCalcMaxWidth: (target: HTMLDivElement
   function onMouseMove(e: any) {
     if (!target?.parentElement || width === undefined) return;
 
-    const newWidth = width + e.movementX, minWidth = 32, maxWidth = onCalcMaxWidth(target);
+    const newWidth = width + e.movementX, minWidth = 32, maxWidth = onCalcMaxWidth(target) + NUM_VIEW_SEPARATOR_WIDTH;
 
     if (newWidth > minWidth && newWidth < maxWidth) {
       let minWidthText = '', maxWidthText = '', widthText = '';

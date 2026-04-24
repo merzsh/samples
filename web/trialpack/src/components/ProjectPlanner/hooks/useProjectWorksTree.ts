@@ -18,10 +18,10 @@
  */
 
 import {
-  ApiProject, ApiProjectWork, EProjAttrs,
+  ApiProject, ApiProjectAttribAllIds, ApiProjectWork, EProjAttrs,
   EProjWorkNodeProps,
   ProjectWorkNode,
-  UseProjectWorksTree,
+  UseProjectWorksTree, UseProjectWorksTreeSetWorkAttrValue,
 } from "../types";
 import {useCallback, useEffect, useRef, useState} from "react";
 import {calcLenDates4SumNode, calcWorkNodeDates, getParentWbs} from "../utils";
@@ -29,7 +29,7 @@ import {STR_INIT} from "../../AuxCommon/constants";
 import {findTreeNode} from "../../../utils/utils";
 import {ROOT_WBS_CODE} from "../constants";
 
-export const useProjectWorksTree = (project: ApiProject): UseProjectWorksTree => {
+export const useProjectWorksTree = (project: ApiProject<ApiProjectAttribAllIds>): UseProjectWorksTree => {
   const [refreshCalcTrigger, setRefreshCalcTrigger] = useState<any>();
   const [rootWorkNode, setRootWorkNode] = useState<ProjectWorkNode>();
   const [worksTreeMap, setWorksTreeMap] = useState<Map<string, ProjectWorkNode>>();
@@ -122,79 +122,80 @@ export const useProjectWorksTree = (project: ApiProject): UseProjectWorksTree =>
     setWorksTreeMap(new Map<string, ProjectWorkNode>(worksTreeMapRef.current));
   }, [refreshCalcTrigger]);
 
-  const setWorkAttrValue = useCallback((nodeId: string, attribs: Partial<ApiProjectWork>)=> {
-    if (!worksTreeMapRef.current) return;
-    else if (attribs.length && typeof attribs.length !== 'number' || attribs.length && typeof attribs.length === 'number' && attribs.length < 0) return;
-
-    let node = worksTreeMapRef.current.get(nodeId);
-    if (node) {
-      if (node.children.length) return;
-    } else {
-      node = {
-        wbs_code: STR_INIT,
-        work_name: STR_INIT,
-        children: [],
-        predecessors: [],
-        followers: [],
-      }
-      worksTreeMapRef.current.set(nodeId, node);
-    }
-
-    Object.keys(attribs).forEach(key => {
+  const setWorkAttrValue = useCallback<UseProjectWorksTreeSetWorkAttrValue>(
+    (workId, attribs)=> {
       if (!worksTreeMapRef.current) return;
+      else if (attribs.length && typeof attribs.length !== 'number' || attribs.length && typeof attribs.length === 'number' && attribs.length < 0) return;
 
-      const attribKey = key as keyof ApiProjectWork;
-      const attribVal = attribs[attribKey];
-      if (!attribVal) return;
+      let node = worksTreeMapRef.current.get(workId);
+      if (node) {
+        if (node.children.length) return;
+      } else {
+        node = {
+          wbs_code: STR_INIT,
+          work_name: STR_INIT,
+          children: [],
+          predecessors: [],
+          followers: [],
+        }
+        worksTreeMapRef.current.set(workId, node);
+      }
 
-      if (attribKey === EProjAttrs.WBS) {
-        const newId = attribs[attribKey];
-        if (!newId) return;
+      Object.keys(attribs).forEach(key => {
+        if (!worksTreeMapRef.current) return;
 
-        const newParentId = getParentWbs(newId.toString());
-        const newParent = worksTreeMapRef.current.get(newParentId);
+        const attribKey = key as keyof ApiProjectWork;
+        const attribVal = attribs[attribKey];
+        if (!attribVal) return;
 
-        if (newParent) {
-          if (node.parent) {
-            node.parent.children = node.parent.children.filter(child => child.wbs_code !== node.wbs_code);
+        if (attribKey === EProjAttrs.WBS) {
+          const newId = attribs[attribKey];
+          if (!newId) return;
+
+          const newParentId = getParentWbs(newId.toString());
+          const newParent = worksTreeMapRef.current.get(newParentId);
+
+          if (newParent) {
+            if (node.parent) {
+              node.parent.children = node.parent.children.filter(child => child.wbs_code !== node.wbs_code);
+            }
+
+            newParent.children.push(node);
+            node.parent = newParent;
+
+            node.followers.forEach(follower => {
+              if (Array.isArray(follower.prev_works)) {
+                follower.prev_works = follower.prev_works.filter(prev => prev !== workId);
+                follower.prev_works.push(newId.toString());
+              }
+            });
           }
 
-          newParent.children.push(node);
-          node.parent = newParent;
+          worksTreeMapRef.current.delete(workId);
+          worksTreeMapRef.current.set(newId.toString(), node);
 
-          node.followers.forEach(follower => {
-            if (Array.isArray(follower.prev_works)) {
-              follower.prev_works = follower.prev_works.filter(prev => prev !== nodeId);
-              follower.prev_works.push(newId.toString());
+        } else if (attribKey === EProjAttrs.PREV && Array.isArray(attribVal)) {
+          node.predecessors.forEach(predecessor => {
+            predecessor.followers = predecessor.followers.filter(follower => follower.wbs_code !== node.wbs_code);
+          });
+          node.predecessors = [];
+
+          attribVal.forEach(newPredId => {
+            if (!worksTreeMapRef.current) return;
+
+            const newPred = worksTreeMapRef.current.get(newPredId);
+            if (newPred) {
+              node.predecessors.push(newPred);
+              newPred.followers.push(node);
             }
           });
         }
 
-        worksTreeMapRef.current.delete(nodeId);
-        worksTreeMapRef.current.set(newId.toString(), node);
+        node[attribKey] = attribVal;
+      });
 
-      } else if (attribKey === EProjAttrs.PREV && Array.isArray(attribVal)) {
-        node.predecessors.forEach(predecessor => {
-          predecessor.followers = predecessor.followers.filter(follower => follower.wbs_code !== node.wbs_code);
-        });
-        node.predecessors = [];
-
-        attribVal.forEach(newPredId => {
-          if (!worksTreeMapRef.current) return;
-
-          const newPred = worksTreeMapRef.current.get(newPredId);
-          if (newPred) {
-            node.predecessors.push(newPred);
-            newPred.followers.push(node);
-          }
-        });
-      }
-
-      node[attribKey] = attribVal;
-    });
-
-    setRefreshCalcTrigger({ });
-  }, []);
+      setRefreshCalcTrigger({ });
+    }, []);
 
   if (!rootWorkNode) return { setWorkAttrValue };
 
