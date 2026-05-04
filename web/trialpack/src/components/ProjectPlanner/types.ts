@@ -100,6 +100,7 @@ export type UseProjectWorksTableViewMapArg<T extends ApiProjectAttribAllIds | Ap
   isHeader?: boolean;
   isEditable?: boolean;
   isNonSelectable?: boolean;
+  isReadOnlyMarkDisabled?: boolean;
   level?: number;
   isLastLevel?: boolean;
 } & Pick<ApiProject<T>, EProjProps.IS_SUPPRESS_ZEROS | EProjProps.DATE_TEMPLATE>;

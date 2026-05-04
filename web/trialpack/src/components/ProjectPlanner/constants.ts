@@ -33,8 +33,8 @@ export const DEFAULT_WORK: ApiProjectWork = {
   work_name: PROJECT_DEFAULT_NAME,
 };
 
-export const TREE_VIEW_ID = 'works-tree';
-export const GANT_CHART_ID = 'gant-chart';
+export const TREE_VIEW_ID = 'work-view';
+export const GANT_VIEW_ID = 'gant-view';
 
 export const DATES_GROUP_COLUMN_ID = 'dates';
 export const DATES_GROUP_COLUMN_TITLE = 'Dates';

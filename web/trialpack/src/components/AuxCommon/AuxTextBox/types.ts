@@ -27,6 +27,7 @@ export type AuxTextBoxConfig = {
   isMonospaced?: boolean;
   isNonSelectable?: boolean;
   isEditable?: boolean;
+  isReadOnlyMarkDisabled?: boolean;
   isSuppressZeros?: boolean;
   dateDisplayTemplate?: string;
 }

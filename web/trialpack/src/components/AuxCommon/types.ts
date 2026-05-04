@@ -24,7 +24,6 @@ import {
   ApiGantAttribIds,
   ApiProject,
   ApiProjectAttribAllIds,
-  EProjProps,
   ProjectWorkNode,
   UseProjectWorksTreeSetWorkAttrValue
 } from "../ProjectPlanner/types";
@@ -33,7 +32,8 @@ export enum EAuxSize { S, M, L }
 export enum EAuxAlignH { L, C, R }
 export enum EAuxAlignV { T, M, B }
 
-export enum EColID { A = 'A', B = 'B', C = 'C', D = 'D', E = 'E', F = 'F', G = 'G', H = 'H', I = 'I', J = 'J', K = 'K', L = 'L', }
+export enum EColID { A = 'A', B = 'B', C = 'C', D = 'D', E = 'E', F = 'F', G = 'G', H = 'H', I = 'I', J = 'J', K = 'K', L = 'L',
+  M = 'M', N = 'N', O = 'O', P = 'P', Q = 'Q', R = 'R', S = 'S', T = 'T', U = 'U', V = 'V', W = 'W', X = 'X', Y = 'Y', Z = 'Z', }
 export enum EAuxTextBoxType { TEXT = 'text', NUM = 'number', DATE = 'date' }
 
 export enum EAuxCompExtData { CURR_COL_NAME = 'currColumnName', KEY_COL_VALUE = 'keyColumnValue' }
@@ -83,6 +83,8 @@ export type AdvancedTableProps = AuxCommonProps & {
   defaultSortColumn?: EColID;
   isWithRowNums?: boolean;
   freeRowsCount?: number;
+  onScroll?: (event: React.UIEvent<HTMLDivElement>) => void;
+  onRowSelect?: (cellId: string, isRowSelected: boolean) => void;
 };
 
 export type AdvancedTableViewProps<T extends ApiProjectAttribAllIds | ApiGantAttribIds> = AuxCommonProps & {
@@ -90,6 +92,9 @@ export type AdvancedTableViewProps<T extends ApiProjectAttribAllIds | ApiGantAtt
   projectApi: ApiProject<T>;
   onRebuildWorksTree?: () => void;
   onChangeWorkAttrValue?: UseProjectWorksTreeSetWorkAttrValue;
+  onScroll?: (event: React.UIEvent<HTMLDivElement>) => void;
+  onRowSelect?: (cellId: string, isRowSelected: boolean) => void;
+  onHeader?: (header: AdvTblCellProps<AuxCompsProps>[]) => void;
 }
 
 export type WorksTreeProps = AdvancedTableViewProps<ApiProjectAttribAllIds> & {

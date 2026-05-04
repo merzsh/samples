@@ -44,7 +44,9 @@ import {AdvTblCellProps, AuxCompsProps} from "../../AuxCommon/AdvancedTable/type
 
 const WorksTree: React.FC<WorksTreeProps> = ({ projectApi, rootWorkNode,
                                                onRebuildWorksTree, onChangeWorkAttrValue,
-                                               id, className}) => {
+                                               onScroll, onRowSelect,
+                                               onHeader, id, className}
+) => {
 
   const { header, works } = useProjectWorksTableView(
     projectApi.projectHeaderAttributes,
@@ -191,12 +193,13 @@ const WorksTree: React.FC<WorksTreeProps> = ({ projectApi, rootWorkNode,
 
     setMultilineHeader([firstHeaderLine, secondHeaderLine]);
     setHeaderCellUnionsMap(mapping);
+    if (onHeader) onHeader(header);
   }, [header]);
 
   if (!works || !multilineHeader || !headerCellUnionsMap) return undefined;
 
   return (
-    <div id={id} key={id} className={clsx(className, s['works-tree'])}>
+    <div id={id} key={id} className={clsx(className, s['works-tree'])} onScroll={onScroll}>
       <AdvancedTable id={`${id}-table`}
                      header={multilineHeader}
                      headerCellUnionsMapping={headerCellUnionsMap}
@@ -204,6 +207,7 @@ const WorksTree: React.FC<WorksTreeProps> = ({ projectApi, rootWorkNode,
                      isWithRowNums
                      freeRowsCount={3}
                      defaultSortColumn={getDefaultSortColumn(projectApi.projectHeaderAttributes, EProjAttrs.WBS)}
+                     onRowSelect={onRowSelect}
       />
     </div>
   );

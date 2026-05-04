@@ -33,7 +33,7 @@ import {BORDER_FULL} from "./constants";
 import {AdvTblCellProps, EAdvTblBackground} from "../AuxCommon/AdvancedTable/types";
 import {AuxCompExtData, AuxTextBoxProps, EAuxAlignH, EAuxSize, EAuxTextBoxType, EColID} from "../AuxCommon/types";
 import {BOOL_INIT, NUM_INIT, STR_INIT} from "../AuxCommon/constants";
-import {INIT_TEXT_BOX_CELL_PROPS} from "../AuxCommon/AdvancedTable/constants";
+import {colIds, INIT_TEXT_BOX_CELL_PROPS, TOTAL_ABC_CAPACITY} from "../AuxCommon/AdvancedTable/constants";
 import {format} from "date-fns";
 import {STR_ISO_DATE_TEMPLATE} from "../../utils/constants";
 
@@ -87,7 +87,7 @@ export function castApiRawResponse(rawAnswerObject: any): ApiProject<ApiProjectA
 
 export const mapCellBase = <T extends ApiProjectAttribAllIds | ApiGantAttribIds>(
   { workAttr, parentWorkAttr, workNode,
-    colId, isHeader, isEditable, isNonSelectable,
+    colId, isHeader, isEditable, isNonSelectable, isReadOnlyMarkDisabled,
     isLastLevel, isSuppressZeros, dateDisplayTemplate, level }: UseProjectWorksTableViewMapArg<T>,
   onGetValue?: () => [string, EAuxTextBoxType]
 ): AdvTblCellProps<AuxTextBoxProps> => {
@@ -126,6 +126,7 @@ export const mapCellBase = <T extends ApiProjectAttribAllIds | ApiGantAttribIds>
         isBold: isHeader ? true : !isLastLevel,
         alignH,
         isNonSelectable,
+        isReadOnlyMarkDisabled,
         isSuppressZeros,
         dateDisplayTemplate,
       },
@@ -209,14 +210,14 @@ export const mapCellBaseWithStringArrayValue = (props: UseProjectWorksTableViewM
 }
 
 export function getDefaultSortColumn<T extends ApiProjectAttribAllIds | ApiGantAttribIds>(
-  attrs: ApiProjectHeaderAttribute<T>[], attribId: EProjAttrs) {
+  attrs: ApiProjectHeaderAttribute<T>[], attribId: EProjAttrs): EColID {
 
   let result = EColID.A;
 
   const found = attrs.find(item => item.attrId === attribId);
   if (found) {
     const index = attrs.indexOf(found);
-    result = Object.values(EColID)[index];
+    if (index <= TOTAL_ABC_CAPACITY) result = colIds[index];
   }
 
   return result;
@@ -344,14 +345,16 @@ export function generateDateSequence(startDate: Date, daysForward: number, isFro
   return result;
 }
 
-/*
-export function getWbsLevelNum(wbsInDottedTemplate: string, splitter = '.'): number {
-  if (!wbsInDottedTemplate) return 0;
+export function getWorksViewsIds(ids: string[]): [HTMLDivElement, HTMLDivElement] {
+  if (ids.length !== 2) throw new RangeError('ProjectPlanner.getWorksViewsIds(ids): ids length might be 2');
 
-  let result = 1, wbs = wbsInDottedTemplate;
-  while (wbs = getParentWbs(wbs, splitter)) {
-    result++;
-  }
-  return result;
+  const [id1, id2] = ids;
+  const view1 = document.getElementById(id1);
+  const view2 = document.getElementById(id2);
+  const msg = 'ProjectPlanner.getWorksViewsIds(ids): there is no view with id';
+
+  if (!(view1 instanceof HTMLDivElement)) throw new ReferenceError(`${msg} '${id1}'`);
+  else if (!(view2 instanceof HTMLDivElement)) throw new ReferenceError(`${msg} '${id2}'`);
+
+  return [view1, view2];
 }
-*/

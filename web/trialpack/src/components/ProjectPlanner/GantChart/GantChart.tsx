@@ -36,8 +36,9 @@ import {MSG_DATE_FORMATTING_ERROR} from "../../AuxCommon/constants";
 import {DATE_TEMPLATE_DAY, DATE_TEMPLATE_WEEK_DAY} from "../constants";
 import {AdvTblCellProps, AuxCompsProps} from "../../AuxCommon/AdvancedTable/types";
 
-const GantChart: React.FC<GantChartProps> = ({projectApi, rootWorkNode,
-                                               id, className}) => {
+const GantChart: React.FC<GantChartProps> = ({projectApi, rootWorkNode, onScroll,
+                                               onHeader, id, className}
+) => {
 
   const { header, works } = useProjectWorksTableView(
     [
@@ -74,7 +75,9 @@ const GantChart: React.FC<GantChartProps> = ({projectApi, rootWorkNode,
           return headerCell;
         }
 
-        return mapCellBase(props, () => {
+        return mapCellBase({
+          ...props, isNonSelectable: true,
+        }, () => {
           let value = '', type = EAuxTextBoxType.TEXT;
           if (!props.workNode) return [value, type];
 
@@ -140,12 +143,13 @@ const GantChart: React.FC<GantChartProps> = ({projectApi, rootWorkNode,
 
     setMultilineHeader([firstHeaderLine, secondHeaderLine]);
     setHeaderCellUnionsMap(mapping);
+    if (onHeader) onHeader(header);
   }, [header]);
 
   if (!works || !multilineHeader || !headerCellUnionsMap) return undefined;
 
   return (
-    <div id={id} key={id} className={clsx(className, s['gant-chart'])}>
+    <div id={id} key={id} className={clsx(className, s['gant-chart'])} onScroll={onScroll}>
       <AdvancedTable id={`${id}-table`}
                      header={multilineHeader}
                      headerCellUnionsMapping={headerCellUnionsMap}

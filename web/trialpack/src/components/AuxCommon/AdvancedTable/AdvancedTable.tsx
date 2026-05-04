@@ -41,22 +41,15 @@ import {
   getComponentClass,
   getTableChildrenRows,
   onExpanderRows,
-  setRowSelection,
   sortWorks
 } from "./utils";
 import {STR_INIT} from "../constants";
 import {onResize} from "../utils";
 
-const ROW_SELECTION_STYLES = {
-  dataCellBackSelected: s['adv-table__cell_selected'],
-  headerCellBackSelected: s['adv-table__cell_background-head-select-colored'],
-  headerCellBackUnselected: s['adv-table__cell_background-head-colored'],
-};
-
 export const AdvancedTable: React.FC<AdvancedTableProps> =
   ({header, headerCellUnionsMapping, works,
      defaultSortColumn = EColID.A, isWithRowNums, freeRowsCount,
-     className, id}) => {
+     onRowSelect, className, id}) => {
 
   const worksRef = useRef<typeof works>([]);
   const currCellIdRef = useRef('');
@@ -71,7 +64,8 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
     // deselect previous cell
     if (currCellIdRef.current) {
       if (currCellIdRef.current.startsWith('_')) {
-        setRowSelection(currCellIdRef.current, ROW_SELECTION_STYLES);
+        if (!onRowSelect || !id) return;
+        onRowSelect(currCellIdRef.current, false);
       } else {
         const prevCell = document.getElementById(currCellIdRef.current);
         if (prevCell && prevCell instanceof HTMLTableCellElement) {
@@ -85,7 +79,8 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
     if (!currCell || !(currCell instanceof HTMLTableCellElement)) return;
 
     if (currCell.id.startsWith('_')) {
-      setRowSelection(currCell.id, ROW_SELECTION_STYLES, true);
+      if (!onRowSelect || !id) return;
+      onRowSelect(currCell.id, true);
     } else {
       currCell.classList.add(s['adv-table__cell_selected']);
     }
@@ -144,7 +139,9 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
 
                   return (
                     <th id={col.id} key={col.id}
-                        className={clsx(s['adv-table__th'], {
+                        className={clsx(s['adv-table__th'], s['adv-table__th_fixed'], {
+                          [`${s['adv-table__th_fixed-l1']}`]: headerRowIndex === 0,
+                          [`${s['adv-table__th_fixed-l2']}`]: headerRowIndex === 1,
                           [`${s['adv-table__cell_background-head-colored']}`]: col.background === EAdvTblBackground.HEADER,
                           [`${s['adv-table__cell_border-left']}`]: col.border.left,
                           [`${s['adv-table__cell_border-right']}`]: col.border.right,
@@ -195,7 +192,7 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
                   }
 
                   if (!col.id.startsWith('_')) {
-                    const cellId = `${col.id}${rowIndex + 1}`;
+                    const cellId = `${id?.substring(0,4)}@${col.id}${rowIndex + 1}`;
                     colRef.id = cellId;
                     colRef.componentProps.id = cellId;
                   }
@@ -216,11 +213,11 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
                   }
 
                   const rowKey: string = colRef.componentProps.extData && EAuxCompExtData.KEY_COL_VALUE in colRef.componentProps.extData
-                    ? colRef.componentProps.extData[EAuxCompExtData.KEY_COL_VALUE]
+                    ? (colRef.componentProps.extData[EAuxCompExtData.KEY_COL_VALUE] ?
+                      colRef.componentProps.extData[EAuxCompExtData.KEY_COL_VALUE] : '_')
                     : `${rowIndex + 1}`;
                   const cellKey = `${rowKey}~${colRef.id}~${colRef.componentProps.value}`;
-
-                  const isLevelColored = !colRef.id.startsWith('_') && !colRef.id.startsWith(defaultSortColumn);
+                  const isLevelColored = !colRef.id.startsWith('_') && colRef.id !== `${defaultSortColumn}${rowIndex+1}`;
 
                   return (
                     <td id={colRef.id} key={cellKey}
@@ -236,7 +233,7 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
                           [`${s['adv-table__cell_leveled-2']}`]: colRef.componentProps.level === 1 && isLevelColored,
                           [`${s['adv-table__cell_leveled-3']}`]: colRef.componentProps.level === 2 && isLevelColored,
                         })}
-                        onClick={onDataCellClick}>
+                        onClick={!colRef.componentProps.props?.isNonSelectable ? onDataCellClick : undefined}>
                       {uiCell}
                     </td>
                   );
@@ -256,7 +253,7 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
 };
 
 function generateComponent<T extends AuxCompsProps>(comp: Pick<AdvTblCellProps<T>, 'component' | 'componentProps'>,
-                                                    works?: AdvTblCellProps<AuxCompsProps>[][], defaultSortColumn?: EColID):
+                                                    works?: AdvTblCellProps<AuxCompsProps>[][], defaultSortColumn?: string):
   ReactElement | undefined {
 
   let result: ReactElement | undefined = undefined;

@@ -28,9 +28,10 @@ import {
 } from "../types";
 import {useCallback, useEffect, useState} from "react";
 import {AdvTblCellProps, AuxCompsProps} from "../../AuxCommon/AdvancedTable/types";
-import {AuxTextBoxProps, EColID} from "../../AuxCommon/types";
+import {AuxTextBoxProps} from "../../AuxCommon/types";
 import {findTreeNode} from "../../../utils/utils";
 import {INIT_TEXT_BOX_CELL_PROPS} from "../../AuxCommon/AdvancedTable/constants";
+import {getColIdBySeqNumber} from "../../AuxCommon/AdvancedTable/utils";
 
 export const useProjectWorksTableView = <T extends ApiProjectAttribAllIds | ApiGantAttribIds>(
   headerAttrs: ApiProjectHeaderAttribute<T>[], mappings: Map<T, UseProjectWorksTableViewMap<T>>,
@@ -62,9 +63,10 @@ export const useProjectWorksTableView = <T extends ApiProjectAttribAllIds | ApiG
         ? mapping({
           workAttr: {attrId, attrName},
           parentWorkAttr,
-          colId: `${Object.values(EColID)[attrIndex]}`,
+          colId: `${getColIdBySeqNumber(attrIndex)}`,
           isHeader: true,
           isNonSelectable: true,
+          isReadOnlyMarkDisabled: true,
         })
         : INIT_TEXT_BOX_CELL_PROPS);
     });
@@ -86,7 +88,7 @@ export const useProjectWorksTableView = <T extends ApiProjectAttribAllIds | ApiG
                 workAttr: {attrId, attrName},
                 parentWorkAttr,
                 workNode: node,
-                colId: `${Object.values(EColID)[colIndex]}`,
+                colId: `${getColIdBySeqNumber(colIndex)}`,
                 isEditable: true,
                 level,
                 isLastLevel,

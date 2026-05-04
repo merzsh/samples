@@ -18,14 +18,15 @@
  */
 
 import * as s from './ProjectPlanner.modules.scss';
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import AuxViews from "../AuxCommon/AuxViews";
 import WorksTree from "./WorksTree";
-import {GANT_CHART_ID, TREE_VIEW_ID} from "./constants";
-import {castApiRawResponse} from "./utils";
+import {GANT_VIEW_ID, TREE_VIEW_ID} from "./constants";
+import {castApiRawResponse, getWorksViewsIds} from "./utils";
 import {projectSampleDataApiRawResponse} from "./fixtures";
 import {useProjectWorksTree} from "./hooks/useProjectWorksTree";
 import GantChart from "./GantChart";
+import {setRowSelection} from "../AuxCommon/AdvancedTable/utils";
 
 type ProjectPlannerProps = {
   title?: string;
@@ -36,19 +37,44 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
 
   const { rootWorkNode, setWorkAttrValue } = useProjectWorksTree(projectApi);
 
+  const treeViewDivRef = useRef<HTMLDivElement>();
+  const treeViewColsCountRef = useRef<number>();
+
+  const gantViewDivRef = useRef<HTMLDivElement>();
+  const gantViewColsCountRef = useRef<number>();
+
   if (!rootWorkNode) return undefined;
 
   return (
     <AuxViews className={`${s['proj-plan']}`} resizerScreenAdjustmentInPx={250}>
-      <WorksTree id={TREE_VIEW_ID} className={s['proj-plan__table']}
+      <WorksTree id={TREE_VIEW_ID} className={s['proj-plan__view']}
                  projectApi={projectApi} rootWorkNode={rootWorkNode}
                  onRebuildWorksTree={() => setProjectApi({ ...projectApi })}
-                 onChangeWorkAttrValue={(workId, attribs) => setWorkAttrValue(workId, attribs)} />
+                 onChangeWorkAttrValue={(workId, attribs) => setWorkAttrValue(workId, attribs)}
+                 onScroll={() => {
+                   if (!treeViewDivRef.current || !gantViewDivRef.current)
+                     [treeViewDivRef.current, gantViewDivRef.current] = getWorksViewsIds([TREE_VIEW_ID, GANT_VIEW_ID]);
+                   gantViewDivRef.current.scrollTop = treeViewDivRef.current.scrollTop;
+                 }}
+                 onHeader={(header) => {treeViewColsCountRef.current = header.length}}
+                 onRowSelect={(cellId, isRowSelected) => {
+                   if (!treeViewColsCountRef.current || !gantViewColsCountRef.current) return;
+                   setRowSelection(cellId, isRowSelected, treeViewColsCountRef.current, TREE_VIEW_ID);
+                   setRowSelection(cellId, isRowSelected, gantViewColsCountRef.current, GANT_VIEW_ID);
+                 }}
+      />
 
-      <GantChart id={GANT_CHART_ID} className={s['proj-plan__table']}
+      <GantChart id={GANT_VIEW_ID} className={s['proj-plan__view']}
                  projectApi={projectApi} rootWorkNode={rootWorkNode}
                  onRebuildWorksTree={() => setProjectApi({ ...projectApi })}
-                 onChangeWorkAttrValue={(workId, attribs) => setWorkAttrValue(workId, attribs)} />
+                 onChangeWorkAttrValue={(workId, attribs) => setWorkAttrValue(workId, attribs)}
+                 onScroll={() => {
+                   if (!treeViewDivRef.current || !gantViewDivRef.current)
+                     [treeViewDivRef.current, gantViewDivRef.current] = getWorksViewsIds([TREE_VIEW_ID, GANT_VIEW_ID]);
+                   treeViewDivRef.current.scrollTop = gantViewDivRef.current.scrollTop;
+                 }}
+                 onHeader={(header) => {gantViewColsCountRef.current = header.length}}
+      />
     </AuxViews>
   );
 };

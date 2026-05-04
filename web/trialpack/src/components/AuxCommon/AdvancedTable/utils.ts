@@ -17,11 +17,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {AdvTblCellProps, AdvTblRowSelectStyles, AuxCompsProps, EAdvTblBackground} from "./types";
+import {AdvTblCellProps, AuxCompsProps, EAdvTblBackground} from "./types";
 import AuxTextBox from "../AuxTextBox";
 import {AuxLevelTextBoxProps, EAuxAlignH, EColID, OnExpanderRowsProps} from "../types";
 import AuxLevelTextBox from "../AuxLevelTextBox";
 import {STR_DIGITS, STR_HTML_SPACE} from "../constants";
+import {colIds, ROW_SELECTION_STYLES, TOTAL_ABC_CAPACITY} from "./constants";
 
 export function genEmptyRows(array: AdvTblCellProps<AuxCompsProps>[][], addedRowsCount: number):
   AdvTblCellProps<AuxCompsProps>[][] {
@@ -30,16 +31,13 @@ export function genEmptyRows(array: AdvTblCellProps<AuxCompsProps>[][], addedRow
 
   const result: typeof array = [];
 
-  const cols = array.find(row =>
-    row.find(col => !(col.component !== AuxLevelTextBox ||
-      'isExpanderVisible' in col.componentProps && col.componentProps.isExpanderVisible)));
-  if (!cols) return [];
+  const cols = array[array.length - 1];
 
   for (let i = 0; i < addedRowsCount; i++) {
     const colsCopy: AdvTblCellProps<AuxCompsProps>[] = [];
 
     cols.forEach((col, ind) => {
-      const id = `${Object.values(EColID)[ind]}`;
+      const id = `${getColIdBySeqNumber(ind)}`;
 
       const newCellProps: AdvTblCellProps<AuxCompsProps> = {
         id,
@@ -85,7 +83,8 @@ export function genRowNumCell<T extends AdvTblCellProps<AuxCompsProps>>(colsRow:
       props: {
         ...templateCol.componentProps.props,
         alignH: EAuxAlignH.C,
-        isNonSelectable: true,
+        isEditable: false,
+        isReadOnlyMarkDisabled: true,
       },
       value: `${rowNum ? rowNum : ''}`,
     }
@@ -110,31 +109,30 @@ export function sortWorks(a: AdvTblCellProps<AuxCompsProps>[], b: AdvTblCellProp
   return cellAData < cellBData ? -1 : cellAData > cellBData ? 1 : 0;
 }
 
-export function setRowSelection(rowNumCellId: string, cellSelectionStyles: AdvTblRowSelectStyles, is2SelectRow?: boolean) {
-  if (!rowNumCellId) return;
+export function setRowSelection(cellId: string, isRowSelected: boolean, rowColsCount: number, tableId?: string, ): void {
+  if (!cellId || rowColsCount <= 0) return;
 
-  let rowNum = parseInt(rowNumCellId.substring(1));
+  let rowNum = parseInt(cellId.substring(1));
   rowNum = isNaN(rowNum) ? 0 : rowNum;
   if (!rowNum) return;
 
-  const colIds = Object.values(EColID);
-  const count = colIds.length;
+  for (let i = 0; i < rowColsCount; i++) {
+    const cell = document.getElementById(
+      `${tableId && tableId.length >= 4 ? tableId.substring(0, 4) + '@' : ''}${getColIdBySeqNumber(i)}${rowNum}`);
 
-  for (let i = 0; i < count; i++) {
-    const cell = document.getElementById(`${colIds[i]}${rowNum}`);
     if (cell && cell instanceof HTMLTableCellElement) {
-      if (is2SelectRow && !cell.classList.contains(cellSelectionStyles.dataCellBackSelected)) {
-        cell.classList.add(cellSelectionStyles.dataCellBackSelected);
+      if (isRowSelected && !cell.classList.contains(ROW_SELECTION_STYLES.dataCellBackSelected)) {
+        cell.classList.add(ROW_SELECTION_STYLES.dataCellBackSelected);
       } else {
-        cell.classList.remove(cellSelectionStyles.dataCellBackSelected);
+        cell.classList.remove(ROW_SELECTION_STYLES.dataCellBackSelected);
       }
     }
   }
 
-  const rowNumCell = document.getElementById(rowNumCellId);
+  const rowNumCell = document.getElementById(cellId);
   if (rowNumCell && rowNumCell instanceof HTMLTableCellElement) {
-    const style2rem = is2SelectRow ? cellSelectionStyles.headerCellBackUnselected : cellSelectionStyles.headerCellBackSelected;
-    const style2add = is2SelectRow ? cellSelectionStyles.headerCellBackSelected : cellSelectionStyles.headerCellBackUnselected;
+    const style2rem = isRowSelected ? ROW_SELECTION_STYLES.headerCellBackUnselected : ROW_SELECTION_STYLES.headerCellBackSelected;
+    const style2add = isRowSelected ? ROW_SELECTION_STYLES.headerCellBackSelected : ROW_SELECTION_STYLES.headerCellBackUnselected;
 
     rowNumCell.classList.remove(style2rem);
     rowNumCell.classList.add(style2add);
@@ -143,6 +141,20 @@ export function setRowSelection(rowNumCellId: string, cellSelectionStyles: AdvTb
 
 export function getComponentClass(colId: string): string {
   return colId.startsWith('_') ? 'comp-row-num' : 'comp-row-regular'
+}
+
+export function getColIdBySeqNumber(colNum: number): string {
+  if (colNum < 0 || colNum > 625) {
+    throw new RangeError('AdvancedTable.getColIdBySeqNumber(colNum): colNum might be between 0 and 625' +
+      `current value is ${colNum}`);
+  }
+
+  const posCount = Math.floor(colNum / TOTAL_ABC_CAPACITY);
+  if (!posCount) {
+    return colIds[colNum];
+  }
+
+  return colIds[posCount - 1] + colIds[colNum % TOTAL_ABC_CAPACITY];
 }
 
 export function getRowNumByCellId(CellId: string): number {
@@ -176,7 +188,7 @@ export function getColNameByCellId(cellId: string): string {
 }
 
 export function onExpanderRows({rowNums, isExpanded, works, defaultSortColumn}: OnExpanderRowsProps &
-  {works?: AdvTblCellProps<AuxCompsProps>[][]; defaultSortColumn?: EColID;}) {
+  {works?: AdvTblCellProps<AuxCompsProps>[][]; defaultSortColumn?: string;}) {
 
   if (!rowNums.length) return;
 
@@ -225,7 +237,7 @@ export function onExpanderRows({rowNums, isExpanded, works, defaultSortColumn}: 
   }
 }
 
-export function getTableChildrenRows(works: AdvTblCellProps<AuxCompsProps>[][], id: string, defaultSortColumn: EColID): number[] {
+export function getTableChildrenRows(works: AdvTblCellProps<AuxCompsProps>[][], id: string, defaultSortColumn: string): number[] {
   const result: number[] = [];
 
   if (!works.length || !id) return result;

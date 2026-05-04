@@ -41,6 +41,19 @@
     vertical-align: middle;
     padding: 0;
     height: 100%;
+
+    &_fixed {
+      position: sticky;
+      z-index: 1;
+    }
+
+    &_fixed-l1 {
+      top: 0;
+    }
+
+    &_fixed-l2 {
+      top: 20px;
+    }
   }
 
   &__cell {
