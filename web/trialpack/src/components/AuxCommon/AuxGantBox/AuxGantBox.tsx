@@ -17,24 +17,17 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {AdvTblCellBorder, EBorderType} from "../AuxCommon/AdvancedTable/types";
-import {ApiProjectWork,} from "./types";
+import * as s from './AuxGantBox.modules.scss';
+import React from 'react';
+import clsx from 'clsx';
+import {AuxGantBoxProps} from "../types";
 
-export const BORDER_FULL: AdvTblCellBorder = { left: true, right: EBorderType.REGULAR, top: true, bottom: true };
-
-export const ROOT_WBS_CODE = '';
-
-export const PROJECT_DEFAULT_WBS = '';
-export const PROJECT_DEFAULT_NAME = 'Untitled work';
-export const DEFAULT_WORK: ApiProjectWork = {
-  wbs_code: PROJECT_DEFAULT_WBS,
-  work_name: PROJECT_DEFAULT_NAME,
+export const AuxGantBox: React.FC<AuxGantBoxProps> = ({id, className}) => {
+  return (
+    <div id={`atb-${id}`} className={clsx(className, s['aux-gant-box'])}>
+      123
+    </div>
+  );
 };
 
-export const TREE_VIEW_ID = 'work-view';
-export const GANT_VIEW_ID = 'gant-view';
-
-export const DATES_GROUP_COLUMN_ID = 'dates';
-export const DATES_GROUP_COLUMN_TITLE = 'Dates';
-export const DATE_TEMPLATE_DAY = 'dd';
-export const DATE_TEMPLATE_WEEK_DAY = 'iiiii';
+export default AuxGantBox;

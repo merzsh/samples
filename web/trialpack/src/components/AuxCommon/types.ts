@@ -20,13 +20,7 @@
 import {AuxTextBoxConfig} from "./AuxTextBox/types";
 import React from "react";
 import {AdvTblCellProps, AuxCompsProps} from "./AdvancedTable/types";
-import {
-  ApiGantAttribIds,
-  ApiProject,
-  ApiProjectAttribAllIds,
-  ProjectWorkNode,
-  UseProjectWorksTreeSetWorkAttrValue
-} from "../ProjectPlanner/types";
+import {AuxGantBoxConfig} from "./AuxGantBox/types";
 
 export enum EAuxSize { S, M, L }
 export enum EAuxAlignH { L, C, R }
@@ -60,9 +54,19 @@ export type AuxTextBoxProps = AuxCommonTextBoxProps & {
   props?: AuxTextBoxConfig;
 };
 
+export type AuxGantBoxProps = AuxCommonTextBoxProps & {
+  props?: AuxGantBoxConfig;
+};
+
 export type OnExpanderRowsProps = {
   rowNums: number[];
   isExpanded?: boolean;
+}
+
+export type OnExpanderRowsTabProps = OnExpanderRowsProps & {
+  tableId?: string;
+  defaultSortColumn?: EColID;
+  works?: AdvTblCellProps<AuxCompsProps>[][];
 }
 
 export type AuxLevelTextBoxProps = AuxTextBoxProps & {
@@ -71,10 +75,6 @@ export type AuxLevelTextBoxProps = AuxTextBoxProps & {
   onExpanderClick?: (id: string) => number[];
   onExpanderRows?: (props: OnExpanderRowsProps) => void;
 };
-
-export type AuxViewsProps = AuxCommonProps & {
-  resizerScreenAdjustmentInPx?: number;
-}
 
 export type AdvancedTableProps = AuxCommonProps & {
   header: AdvTblCellProps<AuxTextBoxProps>[][];
@@ -85,24 +85,11 @@ export type AdvancedTableProps = AuxCommonProps & {
   freeRowsCount?: number;
   onScroll?: (event: React.UIEvent<HTMLDivElement>) => void;
   onRowSelect?: (cellId: string, isRowSelected: boolean) => void;
+  onExpanderRows?: (props: OnExpanderRowsProps) => void;
 };
 
-export type AdvancedTableViewProps<T extends ApiProjectAttribAllIds | ApiGantAttribIds> = AuxCommonProps & {
-  rootWorkNode: ProjectWorkNode;
-  projectApi: ApiProject<T>;
-  onRebuildWorksTree?: () => void;
-  onChangeWorkAttrValue?: UseProjectWorksTreeSetWorkAttrValue;
-  onScroll?: (event: React.UIEvent<HTMLDivElement>) => void;
-  onRowSelect?: (cellId: string, isRowSelected: boolean) => void;
-  onHeader?: (header: AdvTblCellProps<AuxCompsProps>[]) => void;
-}
-
-export type WorksTreeProps = AdvancedTableViewProps<ApiProjectAttribAllIds> & {
-  flag?: boolean;
-}
-
-export type GantChartProps = AdvancedTableViewProps<ApiGantAttribIds> & {
-  flag?: boolean;
+export type AuxViewsProps = AuxCommonProps & {
+  resizerScreenAdjustmentInPx?: number;
 }
 
 export type AuxOnColumnResize = (e: React.MouseEvent<HTMLDivElement>) => void;

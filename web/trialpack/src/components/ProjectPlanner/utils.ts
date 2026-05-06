@@ -18,7 +18,8 @@
  */
 import {
   ApiGantAttribIds,
-  ApiProject, ApiProjectAttribAllIds,
+  ApiProject,
+  ApiProjectAttribAllIds,
   ApiProjectHeaderAttribute,
   ApiProjectWork,
   EProjAttrs,
@@ -30,7 +31,7 @@ import {
 } from "./types";
 import {prop} from "../../utils/utils";
 import {BORDER_FULL} from "./constants";
-import {AdvTblCellProps, EAdvTblBackground} from "../AuxCommon/AdvancedTable/types";
+import {AdvTblCellProps, EAdvTblBackground, EBorderType} from "../AuxCommon/AdvancedTable/types";
 import {AuxCompExtData, AuxTextBoxProps, EAuxAlignH, EAuxSize, EAuxTextBoxType, EColID} from "../AuxCommon/types";
 import {BOOL_INIT, NUM_INIT, STR_INIT} from "../AuxCommon/constants";
 import {colIds, INIT_TEXT_BOX_CELL_PROPS, TOTAL_ABC_CAPACITY} from "../AuxCommon/AdvancedTable/constants";
@@ -87,7 +88,7 @@ export function castApiRawResponse(rawAnswerObject: any): ApiProject<ApiProjectA
 
 export const mapCellBase = <T extends ApiProjectAttribAllIds | ApiGantAttribIds>(
   { workAttr, parentWorkAttr, workNode,
-    colId, isHeader, isEditable, isNonSelectable, isReadOnlyMarkDisabled,
+    colId, isHeader, isEditable, isNonSelectable, isReadOnlyMarkDisabled, isRightBorderAsTimeline,
     isLastLevel, isSuppressZeros, dateDisplayTemplate, level }: UseProjectWorksTableViewMapArg<T>,
   onGetValue?: () => [string, EAuxTextBoxType]
 ): AdvTblCellProps<AuxTextBoxProps> => {
@@ -112,7 +113,7 @@ export const mapCellBase = <T extends ApiProjectAttribAllIds | ApiGantAttribIds>
     ...result,
     id: colId ?? '',
     background: isHeader ? EAdvTblBackground.HEADER : undefined,
-    border: BORDER_FULL,
+    border: isRightBorderAsTimeline ? {...BORDER_FULL, right: EBorderType.TIMELINE} : BORDER_FULL,
     isHorizResizable: isHeader,
     componentProps: {
       id: colId ?? '',

@@ -22,9 +22,11 @@ import {AuxTextBoxProps, AuxLevelTextBoxProps} from "../types";
 
 export enum EAdvTblBackground { HEADER }
 
+export enum EBorderType {REGULAR, TIMELINE}
+
 export type AdvTblCellBorder = {
   left?: boolean;
-  right?: boolean;
+  right?: EBorderType;
   top?: boolean;
   bottom?: boolean;
 }
@@ -41,9 +43,3 @@ export type AdvTblCellPropsAbstract<T extends AuxCompsProps> = {
 }
 
 export type AdvTblCellProps<T> = T extends AuxCompsProps ? AdvTblCellPropsAbstract<T> : never;
-
-export type AdvTblRowSelectStyles = {
-  dataCellBackSelected: string;
-  headerCellBackSelected: string;
-  headerCellBackUnselected: string;
-}

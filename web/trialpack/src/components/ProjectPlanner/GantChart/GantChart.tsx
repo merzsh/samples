@@ -18,7 +18,7 @@
  */
 
 import * as s from './GantChart.modules.scss';
-import {EAuxAlignH, EAuxTextBoxType, GantChartProps} from "../../AuxCommon/types";
+import {EAuxAlignH, EAuxTextBoxType} from "../../AuxCommon/types";
 import React, {useEffect, useState} from "react";
 import clsx from "clsx";
 import {useProjectWorksTableView} from "../hooks/useProjectWorksTableView";
@@ -26,6 +26,7 @@ import {
   ApiGantAttribIds,
   EProjAttrs,
   EProjWorkNodeProps,
+  GantChartProps,
   UseProjectWorksTableViewMap
 } from "../types";
 import {generateDateSequence, getDefaultSortColumn, mapCellBase} from "../utils";
@@ -35,9 +36,11 @@ import {STR_ISO_DATE_TEMPLATE} from "../../../utils/constants";
 import {MSG_DATE_FORMATTING_ERROR} from "../../AuxCommon/constants";
 import {DATE_TEMPLATE_DAY, DATE_TEMPLATE_WEEK_DAY} from "../constants";
 import {AdvTblCellProps, AuxCompsProps} from "../../AuxCommon/AdvancedTable/types";
+import {getTableShortId} from "../../AuxCommon/AdvancedTable/utils";
 
-const GantChart: React.FC<GantChartProps> = ({projectApi, rootWorkNode, onScroll,
-                                               onHeader, id, className}
+const GantChart: React.FC<GantChartProps> = ({projectApi, rootWorkNode, rows2Expand,
+                                               onScroll, onHeader,
+                                               id, className}
 ) => {
 
   const { header, works } = useProjectWorksTableView(
@@ -75,8 +78,16 @@ const GantChart: React.FC<GantChartProps> = ({projectApi, rootWorkNode, onScroll
           return headerCell;
         }
 
+        let isTimeline = false;
+        const currDate = new Date(), colDate = new Date(props.workAttr.attrId);
+
+        if (currDate.getFullYear() === colDate.getFullYear() && currDate.getMonth() === colDate.getMonth() &&
+          currDate.getDate() === colDate.getDate()) {
+          isTimeline = true;
+        }
+
         return mapCellBase({
-          ...props, isNonSelectable: true,
+          ...props, isNonSelectable: true, isRightBorderAsTimeline: isTimeline,
         }, () => {
           let value = '', type = EAuxTextBoxType.TEXT;
           if (!props.workNode) return [value, type];
@@ -145,6 +156,18 @@ const GantChart: React.FC<GantChartProps> = ({projectApi, rootWorkNode, onScroll
     setHeaderCellUnionsMap(mapping);
     if (onHeader) onHeader(header);
   }, [header]);
+
+  useEffect(() => {
+    if (!rows2Expand) return;
+    const tableId = getTableShortId(id);
+
+    rows2Expand.rowNums.forEach(item => {
+      const row = document.getElementById(`${tableId}${item.toString()}`);
+      if (row) {
+        row.style.display = rows2Expand.isExpanded ? 'table-row' : 'none';
+      }
+    });
+  }, [rows2Expand]);
 
   if (!works || !multilineHeader || !headerCellUnionsMap) return undefined;
 

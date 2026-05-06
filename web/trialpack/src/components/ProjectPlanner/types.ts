@@ -17,6 +17,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 import {AdvTblCellProps, AuxCompsProps} from "../AuxCommon/AdvancedTable/types";
+import React from "react";
+import {AuxCommonProps, OnExpanderRowsProps} from "../AuxCommon/types";
 
 export enum EProjAttrs {
   WBS = 'wbs_code',
@@ -101,6 +103,7 @@ export type UseProjectWorksTableViewMapArg<T extends ApiProjectAttribAllIds | Ap
   isEditable?: boolean;
   isNonSelectable?: boolean;
   isReadOnlyMarkDisabled?: boolean;
+  isRightBorderAsTimeline?: boolean;
   level?: number;
   isLastLevel?: boolean;
 } & Pick<ApiProject<T>, EProjProps.IS_SUPPRESS_ZEROS | EProjProps.DATE_TEMPLATE>;
@@ -113,3 +116,23 @@ export type UseProjectWorksTableView = {
   works?: AdvTblCellProps<AuxCompsProps>[][];
   refreshView: () => void;
 };
+
+export type AdvancedTableViewProps<T extends ApiProjectAttribAllIds | ApiGantAttribIds> =
+  AuxCommonProps & {
+  rootWorkNode: ProjectWorkNode;
+  projectApi: ApiProject<T>;
+  onRebuildWorksTree?: () => void;
+  onChangeWorkAttrValue?: UseProjectWorksTreeSetWorkAttrValue;
+  onScroll?: (event: React.UIEvent<HTMLDivElement>) => void;
+  onRowSelect?: (cellId: string, isRowSelected: boolean) => void;
+  onExpanderRows?: (props: OnExpanderRowsProps) => void;
+  onHeader?: (header: AdvTblCellProps<AuxCompsProps>[]) => void;
+}
+
+export type WorksTreeProps = AdvancedTableViewProps<ApiProjectAttribAllIds> & {
+  flag?: boolean;
+}
+
+export type GantChartProps = AdvancedTableViewProps<ApiGantAttribIds> & {
+  rows2Expand?: OnExpanderRowsProps;
+}

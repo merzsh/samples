@@ -19,7 +19,7 @@
 
 import * as s from './WorksTree.modules.scss';
 import clsx from 'clsx';
-import {EAuxAlignH, EAuxTextBoxType, WorksTreeProps} from "../../AuxCommon/types";
+import {EAuxAlignH, EAuxTextBoxType} from "../../AuxCommon/types";
 import React, {useEffect, useState} from "react";
 import {
   getDefaultSortColumn,
@@ -34,7 +34,8 @@ import {
   EProjAttrs,
   EProjProps,
   EProjWorkNodeProps,
-  UseProjectWorksTableViewMap
+  UseProjectWorksTableViewMap,
+  WorksTreeProps
 } from "../types";
 import {STR_HTML_SPACE} from "../../AuxCommon/constants";
 import {DATES_GROUP_COLUMN_ID, DATES_GROUP_COLUMN_TITLE, DEFAULT_WORK} from "../constants";
@@ -45,6 +46,7 @@ import {AdvTblCellProps, AuxCompsProps} from "../../AuxCommon/AdvancedTable/type
 const WorksTree: React.FC<WorksTreeProps> = ({ projectApi, rootWorkNode,
                                                onRebuildWorksTree, onChangeWorkAttrValue,
                                                onScroll, onRowSelect,
+                                               onExpanderRows,
                                                onHeader, id, className}
 ) => {
 
@@ -198,6 +200,8 @@ const WorksTree: React.FC<WorksTreeProps> = ({ projectApi, rootWorkNode,
 
   if (!works || !multilineHeader || !headerCellUnionsMap) return undefined;
 
+  const defaultSortColumn = getDefaultSortColumn(projectApi.projectHeaderAttributes, EProjAttrs.WBS);
+
   return (
     <div id={id} key={id} className={clsx(className, s['works-tree'])} onScroll={onScroll}>
       <AdvancedTable id={`${id}-table`}
@@ -206,8 +210,9 @@ const WorksTree: React.FC<WorksTreeProps> = ({ projectApi, rootWorkNode,
                      works={works}
                      isWithRowNums
                      freeRowsCount={3}
-                     defaultSortColumn={getDefaultSortColumn(projectApi.projectHeaderAttributes, EProjAttrs.WBS)}
+                     defaultSortColumn={defaultSortColumn}
                      onRowSelect={onRowSelect}
+                     onExpanderRows={onExpanderRows}
       />
     </div>
   );

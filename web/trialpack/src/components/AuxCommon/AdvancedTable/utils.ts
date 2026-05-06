@@ -19,7 +19,12 @@
 
 import {AdvTblCellProps, AuxCompsProps, EAdvTblBackground} from "./types";
 import AuxTextBox from "../AuxTextBox";
-import {AuxLevelTextBoxProps, EAuxAlignH, EColID, OnExpanderRowsProps} from "../types";
+import {
+  AuxLevelTextBoxProps,
+  EAuxAlignH,
+  EColID,
+  OnExpanderRowsTabProps
+} from "../types";
 import AuxLevelTextBox from "../AuxLevelTextBox";
 import {STR_DIGITS, STR_HTML_SPACE} from "../constants";
 import {colIds, ROW_SELECTION_STYLES, TOTAL_ABC_CAPACITY} from "./constants";
@@ -157,14 +162,14 @@ export function getColIdBySeqNumber(colNum: number): string {
   return colIds[posCount - 1] + colIds[colNum % TOTAL_ABC_CAPACITY];
 }
 
-export function getRowNumByCellId(CellId: string): number {
-  if (!CellId) return 0;
+export function getRowNumByCellId(cellId: string): number {
+  if (!cellId) return 0;
 
   let resultStrNum = '';
 
-  for (let i = 0; i < CellId.length; i++) {
-    if (!STR_DIGITS.includes(CellId.charAt(i))) continue;
-    else resultStrNum += CellId.charAt(i);
+  for (let i = 0; i < cellId.length; i++) {
+    if (!STR_DIGITS.includes(cellId.charAt(i))) continue;
+    else resultStrNum += cellId.charAt(i);
   }
 
   if (!resultStrNum) return 0;
@@ -178,6 +183,9 @@ export function getColNameByCellId(cellId: string): string {
   let result = '';
   if (!cellId) return result;
 
+  const ids = cellId.split('@');
+  cellId = ids.length === 1 ? ids[0] : ids[1];
+
   for (let i = 0; i < cellId.length; i++) {
     if (!STR_DIGITS.includes(cellId.charAt(i))) {
       result += cellId.charAt(i);
@@ -187,38 +195,43 @@ export function getColNameByCellId(cellId: string): string {
   return result;
 }
 
-export function onExpanderRows({rowNums, isExpanded, works, defaultSortColumn}: OnExpanderRowsProps &
-  {works?: AdvTblCellProps<AuxCompsProps>[][]; defaultSortColumn?: string;}) {
+export function getTableShortId(tableFullId?: string): string {
+  if (!tableFullId) return '';
 
-  if (!rowNums.length) return;
+  return tableFullId.substring(0,4) + '@';
+}
+
+export function onExpanderRowsHandler({rowNums, isExpanded, tableId, defaultSortColumn, works}: OnExpanderRowsTabProps): number[] {
+  const result: number[] = [];
+  if (!rowNums.length) return result;
 
   const [row1st] = rowNums;
-  if (!row1st) return;
+  if (!row1st) return result;
 
   const work1st = works?.[row1st-1];
-  if (!work1st) return;
+  if (!work1st) return result;
 
   const comp = AuxLevelTextBox;
 
   const cell1st = [...work1st.values()].find(item =>
     item.component === comp);
-  if (!cell1st) return;
+  if (!cell1st) return result;
 
   const cell1stProps: AuxLevelTextBoxProps = cell1st.componentProps;
 
   for (let i = 0; i < rowNums.length; i++) {
     let work = works?.[rowNums[i]-1];
-    if (!work) return;
+    if (!work) return result;
 
     if (defaultSortColumn) {
       const sortCell = [...work].find(item =>
         getColNameByCellId(item.id) === defaultSortColumn);
-      if (sortCell && !sortCell.componentProps.value) return;
+      if (sortCell && !sortCell.componentProps.value) return result;
     }
 
     const cell = [...work].find(item =>
       item.component === comp);
-    if (!cell) return;
+    if (!cell) return result;
 
     const cellProps: AuxLevelTextBoxProps = cell.componentProps;
 
@@ -230,14 +243,19 @@ export function onExpanderRows({rowNums, isExpanded, works, defaultSortColumn}: 
       cellProps.isExpanded = undefined;
     }
 
-    const row = document.getElementById(`${rowNums[i].toString()}`);
+    const row = document.getElementById(`${tableId ?? ''}${rowNums[i].toString()}`);
     if (row) {
+      if (cellProps.isExpanded === isExpanded) {
+        result.push(rowNums[i]);
+      }
       row.style.display = cellProps.isExpanded ? 'table-row' : 'none';
     }
   }
+
+  return result;
 }
 
-export function getTableChildrenRows(works: AdvTblCellProps<AuxCompsProps>[][], id: string, defaultSortColumn: string): number[] {
+export function getTableChildrenRowNums(works: AdvTblCellProps<AuxCompsProps>[][], id: string, defaultSortColumn: string): number[] {
   const result: number[] = [];
 
   if (!works.length || !id) return result;
@@ -255,13 +273,13 @@ export function getTableChildrenRows(works: AdvTblCellProps<AuxCompsProps>[][], 
   if (typeof masterRowCodePrefix !== 'string') return result;
 
   for (let i = masterRowNum; i < works.length; i++) {
-    const cell = works[i].find(
-      item => getColNameByCellId(item.id) === defaultSortColumn);
+    const cell = works[i].find(item =>
+      getColNameByCellId(item.id) === defaultSortColumn);
 
     if (cell) {
-      const currRowCode = cell.componentProps.value;
-      if (typeof currRowCode === 'string' && currRowCode.startsWith(masterRowCodePrefix)) {
-        result.push(i+1);
+      const value = cell.componentProps.value?.trim() ?? '';
+      if (value && (!masterRowCodePrefix || value.startsWith(masterRowCodePrefix))) {
+        result.push(i + 1);
       }
     }
   }
