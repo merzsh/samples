@@ -22,81 +22,136 @@ import {EAuxAlignH, EAuxTextBoxType} from "../../AuxCommon/types";
 import React, {useEffect, useState} from "react";
 import clsx from "clsx";
 import {useProjectWorksTableView} from "../hooks/useProjectWorksTableView";
-import {
-  ApiGantAttribIds,
-  EProjAttrs,
-  EProjWorkNodeProps,
-  GantChartProps,
-  UseProjectWorksTableViewMap
-} from "../types";
-import {generateDateSequence, getDefaultSortColumn, mapCellBase} from "../utils";
+import {ApiGantAttribIds, ApiProjectHeaderAttribute, EProjAttrs, EProjWorkNodeProps, GantChartProps,} from "../types";
+import {generateDateSequence, mapCellBase} from "../utils";
 import AdvancedTable from "../../AuxCommon/AdvancedTable";
 import {format} from "date-fns";
 import {STR_ISO_DATE_TEMPLATE} from "../../../utils/constants";
 import {MSG_DATE_FORMATTING_ERROR} from "../../AuxCommon/constants";
-import {DATE_TEMPLATE_DAY, DATE_TEMPLATE_WEEK_DAY} from "../constants";
-import {AdvTblCellProps, AuxCompsProps} from "../../AuxCommon/AdvancedTable/types";
+import {DATA_PROPS_DEFAULT, DATE_TEMPLATE_DAY, DATE_TEMPLATE_WEEK_DAY, HEADER_PROPS_DEFAULT} from "../constants";
+import {AdvTblCellProps, EBorderType} from "../../AuxCommon/AdvancedTable/types";
 import {getTableShortId} from "../../AuxCommon/AdvancedTable/utils";
+import {AuxTextBoxProps} from "../../AuxCommon/AuxTextBox/types";
+import AuxGantBox from "../../AuxCommon/AuxGantBox";
+import {AuxGantBoxConfig, EAuxGantBoxCellKind} from "../../AuxCommon/AuxGantBox/types";
 
-const GantChart: React.FC<GantChartProps> = ({projectApi, rootWorkNode, rows2Expand,
-                                               onScroll, onHeader,
-                                               id, className}
+const GantChart: React.FC<GantChartProps> = ({rootWorkNode, defaultSortColumn, projectStartDate,
+                                               rows2Expand, onScroll,
+                                               onHeader, id, className}
 ) => {
 
-  const { header, works } = useProjectWorksTableView(
+  const { header, works } = useProjectWorksTableView<ApiGantAttribIds>(
     [
-      { attrId: 'wbs_code', attrName: 'WBS', },
-      ...generateDateSequence(new Date(projectApi.projectStartDate), 100)
-        .map(date => {
-          let attrId = '', attrName = '';
+      { attrId: EProjAttrs.WBS, attrName: 'WBS', },
+      ...generateDateSequence(projectStartDate ? projectStartDate : new Date(), 135)
+        .map<ApiProjectHeaderAttribute<ApiGantAttribIds>>(date => {
+          let attrName = '';
 
           try {
-            attrId =  format(date, STR_ISO_DATE_TEMPLATE);
+            attrName =  format(date, STR_ISO_DATE_TEMPLATE);
           } catch (err) {
             console.warn(`GantChart: ${MSG_DATE_FORMATTING_ERROR} '${STR_ISO_DATE_TEMPLATE}'`, err);
           }
 
-          try {
-            attrName =  format(date, DATE_TEMPLATE_WEEK_DAY);
-          } catch (err) {
-            console.warn(`GantChart: ${MSG_DATE_FORMATTING_ERROR} '${DATE_TEMPLATE_WEEK_DAY}'`, err);
-          }
-
-          return { attrId, attrName };
-        })
+          return { attrId: EProjAttrs.DEFAULT, attrName };
+        }),
     ],
-    new Map<ApiGantAttribIds, UseProjectWorksTableViewMap<ApiGantAttribIds>>([
+    new Map([
       [EProjAttrs.WBS, (props) => {
         if (props.isHeader) {
-          const headerCell = mapCellBase(props);
+          const headerCellResult = mapCellBase(props);
 
-          headerCell.isHorizResizable = undefined;
-          if (headerCell.componentProps.props) {
-            headerCell.componentProps.props.isMonospaced = true;
-          }
+          headerCellResult.isHorizResizable = undefined;
+          headerCellResult.componentProps.props = {
+            ...headerCellResult.componentProps.props,
+            ...HEADER_PROPS_DEFAULT,
+          };
 
-          return headerCell;
+          return headerCellResult;
         }
 
-        let isTimeline = false;
-        const currDate = new Date(), colDate = new Date(props.workAttr.attrId);
-
-        if (currDate.getFullYear() === colDate.getFullYear() && currDate.getMonth() === colDate.getMonth() &&
-          currDate.getDate() === colDate.getDate()) {
-          isTimeline = true;
-        }
-
-        return mapCellBase({
-          ...props, isNonSelectable: true, isRightBorderAsTimeline: isTimeline,
+        const dataCellResult = mapCellBase({
+          ...props, isNonSelectable: true,
         }, () => {
           let value = '', type = EAuxTextBoxType.TEXT;
           if (!props.workNode) return [value, type];
 
-          value = props.workAttr.attrId === EProjAttrs.WBS ? props.workNode[EProjAttrs.WBS].toString() : '';
+          const attrValue = props.workNode[EProjAttrs.WBS];
+
+          if (typeof attrValue === 'string') {
+            value = attrValue;
+          }
 
           return [value, type];
         });
-      }]
+
+        dataCellResult.componentProps.props = {
+          ...dataCellResult.componentProps.props,
+          ...DATA_PROPS_DEFAULT,
+        }
+
+        return dataCellResult;
+      }],
+      [EProjAttrs.DEFAULT, (props) => {
+        if (props.isHeader) {
+          const headerCellResult = mapCellBase({
+            ...props,
+            dateDisplayTemplate: DATE_TEMPLATE_WEEK_DAY,
+          });
+
+          headerCellResult.isHorizResizable = undefined;
+          headerCellResult.componentProps.type = EAuxTextBoxType.DATE;
+          if (headerCellResult.componentProps.props) {
+            headerCellResult.componentProps.props.isMonospaced = true;
+            headerCellResult.componentProps.props.alignH = EAuxAlignH.C;
+          }
+
+          return headerCellResult;
+        }
+
+        const now = new Date(), colDate = new Date(props.workAttr.attrName);
+        const startDate = props.workNode?.start_date instanceof Date ? new Date(props.workNode.start_date) : undefined;
+        const finishDate = props.workNode?.finish_date instanceof Date ? new Date(props.workNode.finish_date) : undefined;
+
+        now.setHours(0, 0, 0, 0);
+        colDate.setHours(0, 0, 0, 0);
+        startDate?.setHours(0, 0, 0, 0);
+        finishDate?.setHours(0, 0, 0, 0);
+
+        const result = mapCellBase({
+          ...props, isNonSelectable: true,
+        }, () => {
+          return [props.workAttr.attrName, EAuxTextBoxType.TEXT];
+        });
+
+        result.component = AuxGantBox;
+        if (props.workNode?.children.length) result.isGroupHighlighting = true;
+
+        const compSubProps = result.componentProps.props as AuxGantBoxConfig;
+
+        // work cell representation
+        if (props.workNode && startDate && finishDate && colDate >= startDate && colDate <= finishDate) {
+          if (props.workNode.children.length) {
+            if (colDate.getTime() === startDate.getTime() || colDate.getTime() === finishDate.getTime()) {
+              compSubProps.cellKind = EAuxGantBoxCellKind.SUM_SIDE;
+            } else compSubProps.cellKind = EAuxGantBoxCellKind.SUM;
+          } else if (startDate.getTime() === finishDate.getTime()) {
+            compSubProps.cellKind = EAuxGantBoxCellKind.MILESTONE
+          } else if (colDate.getTime() < now.getTime()) {
+            compSubProps.cellKind = EAuxGantBoxCellKind.FACT;
+          } else {
+            compSubProps.cellKind = EAuxGantBoxCellKind.PLAN;
+          }
+        } else if (props.workNode?.children.length) compSubProps.cellKind = EAuxGantBoxCellKind.EMPTY_LEVEL;
+
+        result.border = {
+          ...result.border,
+          left: now.getTime() === colDate.getTime() ? EBorderType.TIMELINE : undefined,
+          right: undefined,
+        }
+
+        return result;
+      }],
     ]),
     EProjAttrs.WBS,
     EProjWorkNodeProps.CHILDREN,
@@ -104,7 +159,7 @@ const GantChart: React.FC<GantChartProps> = ({projectApi, rootWorkNode, rows2Exp
   );
 
   const [multilineHeader, setMultilineHeader] =
-    React.useState<AdvTblCellProps<AuxCompsProps>[][]>();
+    React.useState<AdvTblCellProps<AuxTextBoxProps>[][]>();
   const [headerCellUnionsMap, setHeaderCellUnionsMap] =
     useState<Map<string, number>>();
 
@@ -112,40 +167,39 @@ const GantChart: React.FC<GantChartProps> = ({projectApi, rootWorkNode, rows2Exp
     if (!header) return;
 
     const mapping = new Map<string, number>();
-    const firstHeaderLine: AdvTblCellProps<AuxCompsProps>[] = [];
+    const firstHeaderLine: AdvTblCellProps<AuxTextBoxProps>[] = [];
     const secondHeaderLine: typeof firstHeaderLine = [];
 
     header.forEach(attr => {
-      const attrId = attr.componentProps.extData?.currColumnName;
+      const attrId = attr.extData?.currColumnName;
       if (!attrId) return;
 
       if (attrId === EProjAttrs.WBS) {
         firstHeaderLine.push(attr);
         mapping.set(attrId, 0);
       } else {
-        let day = '', label = '';
+        const attrName = attr.extData?.rawValue;
+        if (!attrName) return;
 
-        try {
-          day = format(new Date(attrId), DATE_TEMPLATE_WEEK_DAY);
-          label = format(new Date(attrId), `MMM ${DATE_TEMPLATE_DAY}, ''yy`);
-        } catch (err) {
-          console.warn(`GantChart.useEffect: ${MSG_DATE_FORMATTING_ERROR} '${DATE_TEMPLATE_WEEK_DAY}' (or other)`, err);
-        }
+        const date = new Date(attrName);
 
-        if (day === 'M') {
+        if (date.getDay() === 1) {
           firstHeaderLine.push({
             ...attr,
+            extData: { currColumnName: date.getDay().toString() },
             componentProps: {
               ...attr.componentProps,
-              value: label,
-              extData: { currColumnName: day },
+              value: attrName,
+              type: EAuxTextBoxType.DATE,
               props: {
                 ...attr.componentProps.props,
+                ...HEADER_PROPS_DEFAULT,
                 alignH: EAuxAlignH.L,
+                dateDisplayTemplate: `MMM ${DATE_TEMPLATE_DAY}, ''yy`,
               }
             }
           });
-          mapping.set(day, 6);
+          mapping.set(date.getDay().toString(), 6);
         }
 
         secondHeaderLine.push(attr);
@@ -162,9 +216,11 @@ const GantChart: React.FC<GantChartProps> = ({projectApi, rootWorkNode, rows2Exp
     const tableId = getTableShortId(id);
 
     rows2Expand.rowNums.forEach(item => {
-      const row = document.getElementById(`${tableId}${item.toString()}`);
+      if (!item) return;
+
+      const row = document.getElementById(`${tableId}${(item > 0 ? item : -1 * item) }`);
       if (row) {
-        row.style.display = rows2Expand.isExpanded ? 'table-row' : 'none';
+        row.style.display = item > 0 ? 'table-row' : 'none';
       }
     });
   }, [rows2Expand]);
@@ -176,9 +232,9 @@ const GantChart: React.FC<GantChartProps> = ({projectApi, rootWorkNode, rows2Exp
       <AdvancedTable id={`${id}-table`}
                      header={multilineHeader}
                      headerCellUnionsMapping={headerCellUnionsMap}
-                     works={works}
+                     data={works}
                      freeRowsCount={3}
-                     defaultSortColumn={getDefaultSortColumn(projectApi.projectHeaderAttributes, EProjAttrs.WBS)}
+                     defaultSortColumn={defaultSortColumn}
       />
     </div>
   );

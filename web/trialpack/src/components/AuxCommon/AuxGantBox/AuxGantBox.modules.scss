@@ -17,6 +17,89 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+:root {
+  --firstLevelColor: lightsteelblue;
+  --secondLevelColor: lightgreen;
+  --thirdLevelColor: skyblue;
+}
+
 .aux-gant-box {
-  visibility: visible;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  &_non-selectable {
+    user-select: none;
+  }
+
+  &_as-aside-summed-task {
+    justify-content: end;
+  }
+
+  &_as-weekend-day-leveled-1 {
+    background-image:
+            repeating-linear-gradient(180deg, transparent 0, transparent 1px, rgb(from var(--firstLevelColor) r g b / 0.6) 0,
+                    rgb(from var(--firstLevelColor) r g b / 0.6) 2px),
+            repeating-linear-gradient(90deg, rgb(from var(--firstLevelColor) r g b / 0.6) 0,
+                    rgb(from var(--firstLevelColor) r g b / 0.6) 1px, lightgray 0, lightgray 2px);
+  }
+
+  &_as-weekend-day-leveled-2 {
+    background-image:
+            repeating-linear-gradient(180deg, transparent 0, transparent 1px, rgb(from var(--secondLevelColor) r g b / 0.6) 0,
+                    rgb(from var(--secondLevelColor) r g b / 0.6) 2px),
+            repeating-linear-gradient(90deg, rgb(from var(--secondLevelColor) r g b / 0.6) 0,
+                    rgb(from var(--secondLevelColor) r g b / 0.6) 1px, lightgray 0, lightgray 2px);
+  }
+
+  &_as-weekend-day-leveled-3 {
+    background-image:
+            repeating-linear-gradient(180deg, transparent 0, transparent 1px, rgb(from var(--thirdLevelColor) r g b / 0.6) 0,
+                    rgb(from var(--thirdLevelColor) r g b / 0.6) 2px),
+            repeating-linear-gradient(90deg, rgb(from var(--thirdLevelColor) r g b / 0.6) 0,
+                    rgb(from var(--thirdLevelColor) r g b / 0.6) 1px, lightgray 0, lightgray 2px);
+  }
+
+  &_as-weekend-day-leveled-4-and-more {
+    background-image:
+            repeating-linear-gradient(180deg, transparent 0, transparent 1px, snow 0, snow 2px),
+            repeating-linear-gradient(90deg, transparent 0, transparent 1px, lightgray 0, lightgray 2px);
+  }
+
+  &-item {
+    width: 100%;
+    height: 50%;
+
+    &_summed-task {
+      background-color: gray;
+    }
+
+    &_done-task {
+      background-color: limegreen;
+    }
+
+    &_planned-task {
+      background-color: cornflowerblue;
+    }
+
+    &_milestone-task {
+      width: 10px;
+      height: 10px;
+      border: 2px solid gray;
+      background-color: rgb(SandyBrown, 0.5);
+      transform: rotate(45deg);
+    }
+  }
+
+  &-sub-item {
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 4px solid gray;
+    transform: rotate(180deg);
+  }
 }

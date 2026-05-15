@@ -17,12 +17,6 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {OnExpanderRowsProps} from "../types";
-import {AuxTextBoxProps} from "../AuxTextBox/types";
+import AuxUiCompGenerator from './AuxUiCompGenerator';
 
-export type AuxLevelTextBoxProps = AuxTextBoxProps & {
-  isExpanded: boolean;
-  isExpanderVisible?: boolean;
-  onExpanderClick?: (id: string) => number[];
-  onExpanderRows?: (props: OnExpanderRowsProps) => void;
-};
+export default AuxUiCompGenerator;

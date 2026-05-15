@@ -17,17 +17,17 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {AdvTblCellProps, AuxCompsProps, EAdvTblBackground} from "./types";
+import {AdvTblCellProps, EAdvTblBackground} from "./types";
 import AuxTextBox from "../AuxTextBox";
 import {
-  AuxLevelTextBoxProps,
   EAuxAlignH,
   EColID,
-  OnExpanderRowsTabProps
 } from "../types";
-import AuxLevelTextBox from "../AuxLevelTextBox";
-import {STR_DIGITS, STR_HTML_SPACE} from "../constants";
-import {colIds, ROW_SELECTION_STYLES, TOTAL_ABC_CAPACITY} from "./constants";
+import {STR_DIGITS} from "../constants";
+import {ROW_SELECTION_STYLES} from "./constants";
+import {AuxCompsProps} from "../AuxUiCompGenerator/types";
+import {getColIdBySeqNumber} from "../utils";
+import {cloneCompProps} from "../AuxUiCompGenerator/utils";
 
 export function genEmptyRows(array: AdvTblCellProps<AuxCompsProps>[][], addedRowsCount: number):
   AdvTblCellProps<AuxCompsProps>[][] {
@@ -39,25 +39,21 @@ export function genEmptyRows(array: AdvTblCellProps<AuxCompsProps>[][], addedRow
   const cols = array[array.length - 1];
 
   for (let i = 0; i < addedRowsCount; i++) {
-    const colsCopy: AdvTblCellProps<AuxCompsProps>[] = [];
+    const colsCopy: typeof cols = [];
 
     cols.forEach((col, ind) => {
       const id = `${getColIdBySeqNumber(ind)}`;
 
-      const newCellProps: AdvTblCellProps<AuxCompsProps> = {
-        id,
-        border: col.border,
-        component: col.component,
-        componentProps: {
-          id,
-          value: STR_HTML_SPACE,
-          type: col.componentProps.type,
-          onChange: col.componentProps.onChange,
-          props: {
-            ...col.componentProps.props,
-          }
+      const newCellProps: typeof col = {
+        ...col,
+        extData: {
+          ...col.extData,
         },
+        border: {
+          ...col.border,
+        }
       };
+      newCellProps.componentProps = cloneCompProps(col.componentProps, id, true);
 
       colsCopy.push(newCellProps);
     })
@@ -96,7 +92,9 @@ export function genRowNumCell<T extends AdvTblCellProps<AuxCompsProps>>(colsRow:
   };
 }
 
-export function sortWorks(a: AdvTblCellProps<AuxCompsProps>[], b: AdvTblCellProps<AuxCompsProps>[], defaultSortColumn = EColID.A): number {
+export function sortDataRows(a: AdvTblCellProps<AuxCompsProps>[], b: AdvTblCellProps<AuxCompsProps>[],
+                          defaultSortColumn = EColID.A): number {
+
   const cellA = a.find(
     item => getColNameByCellId(item.id) === defaultSortColumn);
   if (!cellA) return 0;
@@ -148,24 +146,13 @@ export function getComponentClass(colId: string): string {
   return colId.startsWith('_') ? 'comp-row-num' : 'comp-row-regular'
 }
 
-export function getColIdBySeqNumber(colNum: number): string {
-  if (colNum < 0 || colNum > 625) {
-    throw new RangeError('AdvancedTable.getColIdBySeqNumber(colNum): colNum might be between 0 and 625' +
-      `current value is ${colNum}`);
-  }
-
-  const posCount = Math.floor(colNum / TOTAL_ABC_CAPACITY);
-  if (!posCount) {
-    return colIds[colNum];
-  }
-
-  return colIds[posCount - 1] + colIds[colNum % TOTAL_ABC_CAPACITY];
-}
-
 export function getRowNumByCellId(cellId: string): number {
   if (!cellId) return 0;
 
   let resultStrNum = '';
+  const ids = cellId.split('@');
+
+  cellId = ids.length === 1 ? ids[0] : ids[1];
 
   for (let i = 0; i < cellId.length; i++) {
     if (!STR_DIGITS.includes(cellId.charAt(i))) continue;
@@ -199,90 +186,4 @@ export function getTableShortId(tableFullId?: string): string {
   if (!tableFullId) return '';
 
   return tableFullId.substring(0,4) + '@';
-}
-
-export function onExpanderRowsHandler({rowNums, isExpanded, tableId, defaultSortColumn, works}: OnExpanderRowsTabProps): number[] {
-  const result: number[] = [];
-  if (!rowNums.length) return result;
-
-  const [row1st] = rowNums;
-  if (!row1st) return result;
-
-  const work1st = works?.[row1st-1];
-  if (!work1st) return result;
-
-  const comp = AuxLevelTextBox;
-
-  const cell1st = [...work1st.values()].find(item =>
-    item.component === comp);
-  if (!cell1st) return result;
-
-  const cell1stProps: AuxLevelTextBoxProps = cell1st.componentProps;
-
-  for (let i = 0; i < rowNums.length; i++) {
-    let work = works?.[rowNums[i]-1];
-    if (!work) return result;
-
-    if (defaultSortColumn) {
-      const sortCell = [...work].find(item =>
-        getColNameByCellId(item.id) === defaultSortColumn);
-      if (sortCell && !sortCell.componentProps.value) return result;
-    }
-
-    const cell = [...work].find(item =>
-      item.component === comp);
-    if (!cell) return result;
-
-    const cellProps: AuxLevelTextBoxProps = cell.componentProps;
-
-    if (isExpanded && (cellProps.isExpanded === false || cellProps.isExpanded === undefined && cellProps.level === cell1stProps.level)) {
-      cellProps.isExpanded = true;
-    } else if (!isExpanded && cellProps.isExpanded) {
-      cellProps.isExpanded = false;
-    } else if (!isExpanded && cellProps.isExpanded === false) {
-      cellProps.isExpanded = undefined;
-    }
-
-    const row = document.getElementById(`${tableId ?? ''}${rowNums[i].toString()}`);
-    if (row) {
-      if (cellProps.isExpanded === isExpanded) {
-        result.push(rowNums[i]);
-      }
-      row.style.display = cellProps.isExpanded ? 'table-row' : 'none';
-    }
-  }
-
-  return result;
-}
-
-export function getTableChildrenRowNums(works: AdvTblCellProps<AuxCompsProps>[][], id: string, defaultSortColumn: string): number[] {
-  const result: number[] = [];
-
-  if (!works.length || !id) return result;
-
-  const masterRowNum = getRowNumByCellId(id);
-  if (!masterRowNum) return result;
-
-  const masterRow = works[masterRowNum-1];
-
-  const masterCell = masterRow.find(
-    item => getColNameByCellId(item.id) === defaultSortColumn);
-  if (!masterCell) return result;
-
-  const masterRowCodePrefix = masterCell.componentProps.value;
-  if (typeof masterRowCodePrefix !== 'string') return result;
-
-  for (let i = masterRowNum; i < works.length; i++) {
-    const cell = works[i].find(item =>
-      getColNameByCellId(item.id) === defaultSortColumn);
-
-    if (cell) {
-      const value = cell.componentProps.value?.trim() ?? '';
-      if (value && (!masterRowCodePrefix || value.startsWith(masterRowCodePrefix))) {
-        result.push(i + 1);
-      }
-    }
-  }
-
-  return result;
 }

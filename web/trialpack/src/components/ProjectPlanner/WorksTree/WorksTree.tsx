@@ -20,13 +20,12 @@
 import * as s from './WorksTree.modules.scss';
 import clsx from 'clsx';
 import {EAuxAlignH, EAuxTextBoxType} from "../../AuxCommon/types";
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {
-  getDefaultSortColumn,
   mapCellBaseWithDateValue,
   mapCellBaseWithNumberValue,
   mapCellBaseWithStringArrayValue,
-  mapCellBaseWithStringValue
+  mapCellBaseWithStringValue, mapWorkHeaderDataDefault
 } from "../utils";
 import {useProjectWorksTableView} from "../hooks/useProjectWorksTableView";
 import {
@@ -34,33 +33,44 @@ import {
   EProjAttrs,
   EProjProps,
   EProjWorkNodeProps,
-  UseProjectWorksTableViewMap,
   WorksTreeProps
 } from "../types";
 import {STR_HTML_SPACE} from "../../AuxCommon/constants";
-import {DATES_GROUP_COLUMN_ID, DATES_GROUP_COLUMN_TITLE, DEFAULT_WORK} from "../constants";
+import {
+  DATA_PROPS_DEFAULT,
+  DATES_GROUP_COLUMN_ID,
+  DATES_GROUP_COLUMN_TITLE,
+  DEFAULT_WORK,
+  HEADER_PROPS_DEFAULT
+} from "../constants";
 import AuxLevelTextBox from "../../AuxCommon/AuxLevelTextBox";
 import AdvancedTable from "../../AuxCommon/AdvancedTable";
-import {AdvTblCellProps, AuxCompsProps} from "../../AuxCommon/AdvancedTable/types";
+import {AdvTblCellProps} from "../../AuxCommon/AdvancedTable/types";
+import {AuxTextBoxProps} from "../../AuxCommon/AuxTextBox/types";
+import {OnGetChildrenIds} from "../../AuxCommon/AuxUiCompGenerator/types";
 
 const WorksTree: React.FC<WorksTreeProps> = ({ projectApi, rootWorkNode,
+                                               worksTreeMap, defaultSortColumn,
                                                onRebuildWorksTree, onChangeWorkAttrValue,
                                                onScroll, onRowSelect,
-                                               onExpanderRows,
-                                               onHeader, id, className}
+                                               onExpanderRows, onHeader,
+                                               id, className}
 ) => {
 
-  const { header, works } = useProjectWorksTableView(
+  const { header, works } = useProjectWorksTableView<ApiProjectAttribAllIds>(
     projectApi.projectHeaderAttributes,
-    new Map<ApiProjectAttribAllIds, UseProjectWorksTableViewMap<ApiProjectAttribAllIds>>([
+    new Map([
       [EProjAttrs.WBS, (props) => {
         const result = mapCellBaseWithStringValue(props);
         if (props.isHeader && result.componentProps.props) {
-          result.componentProps.props.isMonospaced = true;
+          result.componentProps.props = {
+            ...result.componentProps.props,
+            ...HEADER_PROPS_DEFAULT,
+          };
           return result;
         }
 
-        result.componentProps.onChange = (value, prevValue) => {
+        result.componentProps.onChange = (value: string, prevValue?: string) => {
           if (props.workNode && result.componentProps.type === EAuxTextBoxType.TEXT && value && value !== STR_HTML_SPACE) {
             if (prevValue === STR_HTML_SPACE && onRebuildWorksTree) {
               projectApi[EProjProps.WORKS_LIST].push({ ...DEFAULT_WORK, wbs_code: value, length: 1 });
@@ -71,12 +81,20 @@ const WorksTree: React.FC<WorksTreeProps> = ({ projectApi, rootWorkNode,
           }
         }
 
+        result.componentProps.props = {
+          ...result.componentProps.props,
+          ...DATA_PROPS_DEFAULT,
+        }
+
         return result;
       }],
       [EProjAttrs.NAME, (props) => {
         const result = mapCellBaseWithStringValue(props);
         if (props.isHeader && result.componentProps.props) {
-          result.componentProps.props.isMonospaced = true;
+          result.componentProps.props = {
+            ...result.componentProps.props,
+            ...HEADER_PROPS_DEFAULT,
+          };
           return result;
         }
 
@@ -88,17 +106,26 @@ const WorksTree: React.FC<WorksTreeProps> = ({ projectApi, rootWorkNode,
             level: props.level,
             isExpanderVisible: !props.isLastLevel,
             isExpanded: true,
+            props: {
+              ...result.componentProps.props,
+              ...DATA_PROPS_DEFAULT,
+            }
           }
         };
       }],
       [EProjAttrs.LEN, (props) => {
         const result = mapCellBaseWithNumberValue(props, props.isLastLevel, projectApi.isSuppressZeros);
         if (props.isHeader && result.componentProps.props) {
-          result.componentProps.props.isMonospaced = true;
+          result.componentProps.props = {
+            ...result.componentProps.props,
+            ...HEADER_PROPS_DEFAULT,
+          };
           return result;
         }
 
-        result.componentProps.onChange = (value) => {
+        if (props.workNode?.children.length) result.isGroupHighlighting = true;
+
+        result.componentProps.onChange = (value: string) => {
           if (props.workNode && result.componentProps.type === EAuxTextBoxType.NUM) {
             const numVal = Number(value);
             if (!isNaN(numVal) && onChangeWorkAttrValue) {
@@ -107,40 +134,43 @@ const WorksTree: React.FC<WorksTreeProps> = ({ projectApi, rootWorkNode,
           }
         }
 
+        result.componentProps.props = {
+          ...result.componentProps.props,
+          ...DATA_PROPS_DEFAULT,
+        };
+
         return result;
       }],
       [EProjAttrs.COMPLETE, (props) => {
-        const result = mapCellBaseWithNumberValue(props, props.isLastLevel, projectApi.isSuppressZeros);
-        if (props.isHeader && result.componentProps.props) {
-          result.componentProps.props.isMonospaced = true;
-        }
-        return result;
+        return mapWorkHeaderDataDefault(props, mapCellBaseWithNumberValue(props, props.isLastLevel, projectApi.isSuppressZeros));
       }],
       [EProjAttrs.S_DATE, (props) => {
-        const result = mapCellBaseWithDateValue(props, false, projectApi.dateDisplayTemplate);
-        if (props.isHeader && result.componentProps.props) {
-          result.componentProps.props.isMonospaced = true;
-        }
-        return result;
+        return mapWorkHeaderDataDefault(props, mapCellBaseWithDateValue(props, false, projectApi.dateDisplayTemplate));
       }],
       [EProjAttrs.F_DATE, (props) => {
-        const result = mapCellBaseWithDateValue(props, false, projectApi.dateDisplayTemplate);
-        if (props.isHeader && result.componentProps.props) {
-          result.componentProps.props.isMonospaced = true;
-        }
-        return result;
+        return mapWorkHeaderDataDefault(props, mapCellBaseWithDateValue(props, false, projectApi.dateDisplayTemplate));
       }],
       [EProjAttrs.PREV, (props) => {
         const result = mapCellBaseWithStringArrayValue(props, props.isLastLevel);
         if (props.isHeader && result.componentProps.props) {
-          result.componentProps.props.isMonospaced = true;
+          result.componentProps.props = {
+            ...result.componentProps.props,
+            ...HEADER_PROPS_DEFAULT,
+          };
           return result;
         }
 
-        result.componentProps.onChange = (value) => {
+        if (props.workNode?.children.length) result.isGroupHighlighting = true;
+
+        result.componentProps.onChange = (value: string) => {
           if (props.workNode && result.componentProps.type === EAuxTextBoxType.TEXT && onChangeWorkAttrValue) {
             onChangeWorkAttrValue(props.workNode.wbs_code.toString(), { prev_works: value.split(',') });
           }
+        }
+
+        result.componentProps.props = {
+          ...result.componentProps.props,
+          ...DATA_PROPS_DEFAULT,
         }
 
         return result;
@@ -152,7 +182,7 @@ const WorksTree: React.FC<WorksTreeProps> = ({ projectApi, rootWorkNode,
   );
 
   const [multilineHeader, setMultilineHeader] =
-    React.useState<AdvTblCellProps<AuxCompsProps>[][]>();
+    React.useState<AdvTblCellProps<AuxTextBoxProps>[][]>();
   const [headerCellUnionsMap, setHeaderCellUnionsMap] =
     useState<Map<string, number>>();
 
@@ -160,21 +190,21 @@ const WorksTree: React.FC<WorksTreeProps> = ({ projectApi, rootWorkNode,
     if (!header) return;
 
     const mapping = new Map<string, number>();
-    const firstHeaderLine: AdvTblCellProps<AuxCompsProps>[] = [];
+    const firstHeaderLine: AdvTblCellProps<AuxTextBoxProps>[] = [];
     const secondHeaderLine: typeof firstHeaderLine = [];
 
     header.forEach(attr => {
-      const attrId = attr.componentProps.extData?.currColumnName;
+      const attrId = attr.extData?.currColumnName;
       if (!attrId) return;
 
       switch (attrId) {
         case EProjAttrs.S_DATE:
           firstHeaderLine.push({
             ...attr,
+            extData: { currColumnName: DATES_GROUP_COLUMN_ID },
             componentProps: {
               ...attr.componentProps,
               value: DATES_GROUP_COLUMN_TITLE,
-              extData: { currColumnName: DATES_GROUP_COLUMN_ID },
               props: {
                 ...attr.componentProps.props,
                 alignH: EAuxAlignH.C,
@@ -198,19 +228,25 @@ const WorksTree: React.FC<WorksTreeProps> = ({ projectApi, rootWorkNode,
     if (onHeader) onHeader(header);
   }, [header]);
 
-  if (!works || !multilineHeader || !headerCellUnionsMap) return undefined;
+  const onGetChildrenIds = useCallback<OnGetChildrenIds>((parentId) => {
+    return [...worksTreeMap.keys()]
+      .filter(key => key !== parentId && key.startsWith(parentId))
+      .sort((a,b) => a < b ? -1 : a > b ? 1 : 0);
+    }, []
+  );
 
-  const defaultSortColumn = getDefaultSortColumn(projectApi.projectHeaderAttributes, EProjAttrs.WBS);
+  if (!works || !multilineHeader || !headerCellUnionsMap) return undefined;
 
   return (
     <div id={id} key={id} className={clsx(className, s['works-tree'])} onScroll={onScroll}>
       <AdvancedTable id={`${id}-table`}
                      header={multilineHeader}
                      headerCellUnionsMapping={headerCellUnionsMap}
-                     works={works}
+                     data={works}
                      isWithRowNums
                      freeRowsCount={3}
                      defaultSortColumn={defaultSortColumn}
+                     onGetChildrenIds={onGetChildrenIds}
                      onRowSelect={onRowSelect}
                      onExpanderRows={onExpanderRows}
       />

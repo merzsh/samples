@@ -16,3 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
+import {EAuxGantBoxCellKind} from "./types";
+import {isWeekend} from "date-fns";
+
+export function checkIsWeekendLevel(isoDate?: string, cellKind?: EAuxGantBoxCellKind): [boolean, boolean] {
+  const resIsWeekend = !isoDate ? false : isWeekend(new Date(isoDate));
+  const resIsLeveled = cellKind === undefined
+    ? false
+    : cellKind === EAuxGantBoxCellKind.EMPTY_LEVEL || cellKind === EAuxGantBoxCellKind.SUM || cellKind === EAuxGantBoxCellKind.SUM_SIDE;
+
+  return [resIsWeekend, resIsLeveled];
+}

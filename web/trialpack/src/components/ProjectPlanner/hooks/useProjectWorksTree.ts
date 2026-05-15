@@ -18,10 +18,13 @@
  */
 
 import {
-  ApiProject, ApiProjectAttribAllIds, ApiProjectWork, EProjAttrs,
+  ApiProject,
+  ApiProjectWork,
+  EProjAttrs,
   EProjWorkNodeProps,
   ProjectWorkNode,
-  UseProjectWorksTree, UseProjectWorksTreeSetWorkAttrValue,
+  UseProjectWorksTree,
+  UseProjectWorksTreeSetWorkAttrValue,
 } from "../types";
 import {useCallback, useEffect, useRef, useState} from "react";
 import {calcLenDates4SumNode, calcWorkNodeDates, getParentWbs} from "../utils";
@@ -29,7 +32,7 @@ import {STR_INIT} from "../../AuxCommon/constants";
 import {findTreeNode} from "../../../utils/utils";
 import {ROOT_WBS_CODE} from "../constants";
 
-export const useProjectWorksTree = (project: ApiProject<ApiProjectAttribAllIds>): UseProjectWorksTree => {
+export const useProjectWorksTree = (project: ApiProject): UseProjectWorksTree => {
   const [refreshCalcTrigger, setRefreshCalcTrigger] = useState<any>();
   const [rootWorkNode, setRootWorkNode] = useState<ProjectWorkNode>();
   const [worksTreeMap, setWorksTreeMap] = useState<Map<string, ProjectWorkNode>>();
@@ -39,12 +42,15 @@ export const useProjectWorksTree = (project: ApiProject<ApiProjectAttribAllIds>)
     if (!project.projectWorksList.find(work => work.wbs_code === ROOT_WBS_CODE)) return;
 
     const workTreeInt = new Map<string, ProjectWorkNode>(
-      project.projectWorksList.map(work => [work.wbs_code.toString(), {
-        ...work,
-        children: [],
-        predecessors: [],
-        followers: [],
-      }])
+      project.projectWorksList
+        .sort((a,b) =>
+          a.wbs_code < b.wbs_code ? 1 : a.wbs_code > b.wbs_code ? -1 : 0)
+        .map(work => [work.wbs_code.toString(), {
+          ...work,
+          children: [],
+          predecessors: [],
+          followers: [],
+        }])
     );
 
     // build tree
@@ -77,44 +83,54 @@ export const useProjectWorksTree = (project: ApiProject<ApiProjectAttribAllIds>)
 
     const projStartDate = new Date(project.projectStartDate);
 
-    // calc non-summary works dates
     [...worksTreeMapRef.current.values()]
-      .filter(edgeNode => !edgeNode.children.length && !edgeNode.followers.length)
-      .forEach(edgeNode => {
-        findTreeNode(edgeNode, {}, EProjWorkNodeProps.PREDECESSORS, (node) => {
-          const [startDate, finishDate] = calcWorkNodeDates(node, projStartDate);
-          if (startDate) node.start_date = startDate;
-          if (finishDate) node.finish_date = finishDate;
-        });
-      });
-
-    // calc lengths and dates for summary tasks
-    [...worksTreeMapRef.current.values()]
-      .filter(node => node.children.length)
-      .sort((a,b) =>
-        a.wbs_code < b.wbs_code ? 1 : a.wbs_code > b.wbs_code ? -1 : 0)
       .forEach(node => {
-        if (!worksTreeMapRef.current) return;
+        if (node.children.length && worksTreeMapRef.current) {
+          // calc lengths, dates for summary tasks
+          calcLenDates4SumNode(node, worksTreeMapRef.current, (node, milestone) => {
+            let minDate = new Date(projStartDate), maxDate = new Date(0);
+            minDate.setFullYear(projStartDate.getFullYear() + 25);
 
-        calcLenDates4SumNode(node, worksTreeMapRef.current, (node, milestone) => {
-          let minDate = new Date(projStartDate), maxDate = new Date(0);
-          minDate.setFullYear(projStartDate.getFullYear() + 25);
+            findTreeNode(milestone, {}, EProjWorkNodeProps.PREDECESSORS, (node) => {
+              if (node.start_date instanceof Date && node.start_date.getTime() < minDate.getTime()) {
+                minDate = node.start_date;
+              }
+              if (node.finish_date instanceof Date && node.finish_date.getTime() > maxDate.getTime()) {
+                maxDate = node.finish_date;
+              }
+            });
 
-          findTreeNode(milestone, {}, EProjWorkNodeProps.PREDECESSORS, (node) => {
-            if (node.start_date instanceof Date && node.start_date.getTime() < minDate.getTime()) {
-              minDate = node.start_date;
-            }
-            if (node.finish_date instanceof Date && node.finish_date.getTime() > maxDate.getTime()) {
-              maxDate = node.finish_date;
-            }
+            node.start_date = minDate;
+            node.finish_date = maxDate;
+
+            const deltaMs = Math.abs(maxDate.getTime() - minDate.getTime());
+            node.length = Math.floor(deltaMs / (1000 * 60 * 60 * 24)) + 1;
           });
+        } else if (!node.children.length && !node.followers.length) {
+          // calc non-summary works dates
+          findTreeNode(node, {}, EProjWorkNodeProps.PREDECESSORS, (node) => {
+            const [startDate, finishDate] = calcWorkNodeDates(node, projStartDate);
+            if (startDate) node.start_date = startDate;
+            if (finishDate) node.finish_date = finishDate;
+          });
+        }
 
-          node.start_date = minDate;
-          node.finish_date = maxDate;
+        // calc % completions for every work
+        if (node.start_date instanceof Date && node.finish_date instanceof Date) {
+          const now = new Date();
+          now.setHours(0, 0, 0, 0);
 
-          const deltaMs = Math.abs(maxDate.getTime() - minDate.getTime());
-          node.length = Math.floor(deltaMs / (1000 * 60 * 60 * 24)) + 1;
-        });
+          if (node.finish_date < now) {
+            node.percent_complete = 100;
+          } else if (node.start_date > now) {
+            node.percent_complete = 0;
+          } else {
+            const workLenFull = node.finish_date.getTime() - node.start_date.getTime();
+            const workLenDone = now.getTime() - node.start_date.getTime();
+
+            node.percent_complete = Math.round(100 * workLenDone / workLenFull);
+          }
+        }
       });
 
     const rootNode = worksTreeMapRef.current.get(ROOT_WBS_CODE);
@@ -195,9 +211,10 @@ export const useProjectWorksTree = (project: ApiProject<ApiProjectAttribAllIds>)
       });
 
       setRefreshCalcTrigger({ });
-    }, []);
+    }, []
+  );
 
-  if (!rootWorkNode) return { setWorkAttrValue };
+  if (!rootWorkNode || !worksTreeMap) return { setWorkAttrValue };
 
   return {
     rootWorkNode,

@@ -26,8 +26,20 @@
 .aux-level-text-box {
   display: flex;
   align-items: center;
-  gap: 5px;
   height: 100%;
+  width: 100%;
+
+  &_leveled-1 {
+    background-color: rgb(from var(--firstLevelColor) r g b / 0.6);
+  }
+
+  &_leveled-2 {
+    background-color: rgb(from var(--secondLevelColor) r g b / 0.6);
+  }
+
+  &_leveled-3 {
+    background-color: rgb(from var(--thirdLevelColor) r g b / 0.6);
+  }
 
   &-tab {
     display: flex;
@@ -44,18 +56,6 @@
 
       &_is-medium-sized {
         font-size: smaller;
-      }
-
-      &_leveled-1 {
-        background-color: var(--firstLevelColor);
-      }
-
-      &_leveled-2 {
-        background-color: var(--secondLevelColor);
-      }
-
-      &_leveled-3 {
-        background-color: var(--thirdLevelColor);
       }
     }
   }
@@ -87,6 +87,7 @@
 
   &__inner-text-box {
     width: 100%;
+    margin-left: 3px;
 
     &_tabbed {
       margin-left: 1rem;

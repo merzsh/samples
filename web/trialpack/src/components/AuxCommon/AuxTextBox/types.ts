@@ -17,12 +17,14 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {EAuxAlignH, EAuxAlignV, EAuxSize} from "../types";
+import {AuxCommonTextBoxProps, EAuxAlignH, EAuxAlignV, EAuxSize} from "../types";
 
 export type AuxTextBoxConfig = {
   fontSize?: EAuxSize;
   alignH?: EAuxAlignH;
   alignV?: EAuxAlignV;
+  paddingLeft?: string;
+  paddingRight?: string;
   isBold?: boolean;
   isMonospaced?: boolean;
   isNonSelectable?: boolean;
@@ -31,3 +33,7 @@ export type AuxTextBoxConfig = {
   isSuppressZeros?: boolean;
   dateDisplayTemplate?: string;
 }
+
+export type AuxTextBoxProps = AuxCommonTextBoxProps & {
+  props?: AuxTextBoxConfig;
+};

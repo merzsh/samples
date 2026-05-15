@@ -16,10 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
+
 import {
   ApiGantAttribIds,
   ApiProjectAttribAllIds,
-  ApiProjectAttribNodeSpecIds,
+  ApiProjectAttribNodeKeyIds,
   ApiProjectHeaderAttribute,
   ProjectWorkNode,
   ProjectWorkNodeProps,
@@ -27,19 +28,20 @@ import {
   UseProjectWorksTableViewMap
 } from "../types";
 import {useCallback, useEffect, useState} from "react";
-import {AdvTblCellProps, AuxCompsProps} from "../../AuxCommon/AdvancedTable/types";
-import {AuxTextBoxProps} from "../../AuxCommon/types";
+import {AdvTblCellProps} from "../../AuxCommon/AdvancedTable/types";
 import {findTreeNode} from "../../../utils/utils";
-import {INIT_TEXT_BOX_CELL_PROPS} from "../../AuxCommon/AdvancedTable/constants";
-import {getColIdBySeqNumber} from "../../AuxCommon/AdvancedTable/utils";
+import {INIT_TEXT_BOX_CELL_PROPS} from "../constants";
+import {AuxTextBoxProps} from "../../AuxCommon/AuxTextBox/types";
+import {AuxCompsProps} from "../../AuxCommon/AuxUiCompGenerator/types";
+import {getColIdBySeqNumber} from "../../AuxCommon/utils";
 
 export const useProjectWorksTableView = <T extends ApiProjectAttribAllIds | ApiGantAttribIds>(
   headerAttrs: ApiProjectHeaderAttribute<T>[], mappings: Map<T, UseProjectWorksTableViewMap<T>>,
-  parentWorkAttr: ApiProjectAttribNodeSpecIds, childrenProp: keyof ProjectWorkNodeProps, rootWorkNode?: ProjectWorkNode
+  parentWorkAttr: ApiProjectAttribNodeKeyIds, childrenProp: keyof ProjectWorkNodeProps, rootWorkNode?: ProjectWorkNode
 ): UseProjectWorksTableView => {
 
   const [rootWorkNodeInt, setRootWorkNodeInt] = useState<typeof rootWorkNode>();
-  const [header, setHeader] = useState<AdvTblCellProps<AuxCompsProps>[]>();
+  const [header, setHeader] = useState<AdvTblCellProps<AuxTextBoxProps>[]>();
   const [works, setWorks] = useState<AdvTblCellProps<AuxCompsProps>[][]>();
 
   useEffect(() => {
@@ -67,7 +69,7 @@ export const useProjectWorksTableView = <T extends ApiProjectAttribAllIds | ApiG
           isHeader: true,
           isNonSelectable: true,
           isReadOnlyMarkDisabled: true,
-        })
+        }) as AdvTblCellProps<AuxTextBoxProps>
         : INIT_TEXT_BOX_CELL_PROPS);
     });
     setHeader(headerResult);

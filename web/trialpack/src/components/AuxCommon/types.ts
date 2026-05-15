@@ -17,29 +17,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {AuxTextBoxConfig} from "./AuxTextBox/types";
 import React from "react";
-import {AdvTblCellProps, AuxCompsProps} from "./AdvancedTable/types";
-import {AuxGantBoxConfig} from "./AuxGantBox/types";
 
-export enum EAuxSize { S, M, L }
+export enum EAuxSize { S, M, /* L */ }
 export enum EAuxAlignH { L, C, R }
-export enum EAuxAlignV { T, M, B }
+export enum EAuxAlignV { T, /* M, B */ }
 
 export enum EColID { A = 'A', B = 'B', C = 'C', D = 'D', E = 'E', F = 'F', G = 'G', H = 'H', I = 'I', J = 'J', K = 'K', L = 'L',
   M = 'M', N = 'N', O = 'O', P = 'P', Q = 'Q', R = 'R', S = 'S', T = 'T', U = 'U', V = 'V', W = 'W', X = 'X', Y = 'Y', Z = 'Z', }
 export enum EAuxTextBoxType { TEXT = 'text', NUM = 'number', DATE = 'date' }
 
-export enum EAuxCompExtData { CURR_COL_NAME = 'currColumnName', KEY_COL_VALUE = 'keyColumnValue' }
-
-export type AuxCompExtData = {
-  [EAuxCompExtData.CURR_COL_NAME]?: string;
-  [EAuxCompExtData.KEY_COL_VALUE]?: string;
-}
-
 export type AuxCommonProps = {
   id?: string;
-  extData?: any;
   className?: string;
 };
 
@@ -50,43 +39,10 @@ export type AuxCommonTextBoxProps = AuxCommonProps & {
   onChange?: (value: string, prevValue?: string) => void;
 };
 
-export type AuxTextBoxProps = AuxCommonTextBoxProps & {
-  props?: AuxTextBoxConfig;
-};
-
-export type AuxGantBoxProps = AuxCommonTextBoxProps & {
-  props?: AuxGantBoxConfig;
-};
-
 export type OnExpanderRowsProps = {
   rowNums: number[];
   isExpanded?: boolean;
 }
-
-export type OnExpanderRowsTabProps = OnExpanderRowsProps & {
-  tableId?: string;
-  defaultSortColumn?: EColID;
-  works?: AdvTblCellProps<AuxCompsProps>[][];
-}
-
-export type AuxLevelTextBoxProps = AuxTextBoxProps & {
-  isExpanded?: boolean;
-  isExpanderVisible?: boolean;
-  onExpanderClick?: (id: string) => number[];
-  onExpanderRows?: (props: OnExpanderRowsProps) => void;
-};
-
-export type AdvancedTableProps = AuxCommonProps & {
-  header: AdvTblCellProps<AuxTextBoxProps>[][];
-  works: AdvTblCellProps<AuxCompsProps>[][];
-  headerCellUnionsMapping?: Map<string, number>;
-  defaultSortColumn?: EColID;
-  isWithRowNums?: boolean;
-  freeRowsCount?: number;
-  onScroll?: (event: React.UIEvent<HTMLDivElement>) => void;
-  onRowSelect?: (cellId: string, isRowSelected: boolean) => void;
-  onExpanderRows?: (props: OnExpanderRowsProps) => void;
-};
 
 export type AuxViewsProps = AuxCommonProps & {
   resizerScreenAdjustmentInPx?: number;

@@ -20,12 +20,32 @@
 import * as s from './AuxGantBox.modules.scss';
 import React from 'react';
 import clsx from 'clsx';
-import {AuxGantBoxProps} from "../types";
+import {AuxGantBoxProps, EAuxGantBoxCellKind} from "./types";
+import {checkIsWeekendLevel} from "./utils";
 
-export const AuxGantBox: React.FC<AuxGantBoxProps> = ({id, className}) => {
+export const AuxGantBox: React.FC<AuxGantBoxProps> = (
+  {id, className, value, level, props}
+) => {
+  const [isWeekend, isLevel] = checkIsWeekendLevel(value, props?.cellKind);
+
   return (
-    <div id={`atb-${id}`} className={clsx(className, s['aux-gant-box'])}>
-      123
+    <div id={`atb-${id}`} className={clsx(className, s['aux-gant-box'], {
+      [`${s['aux-gant-box_non-selectable']}`]: props?.isNonSelectable,
+      [`${s['aux-gant-box_as-aside-summed-task']}`]: props?.cellKind === EAuxGantBoxCellKind.SUM_SIDE,
+      [`${s['aux-gant-box_as-weekend-day-leveled-1']}`]: isWeekend && isLevel && level === 0,
+      [`${s['aux-gant-box_as-weekend-day-leveled-2']}`]: isWeekend && isLevel && level === 1,
+      [`${s['aux-gant-box_as-weekend-day-leveled-3']}`]: isWeekend && isLevel && level === 2,
+      [`${s['aux-gant-box_as-weekend-day-leveled-4-and-more']}`]: isWeekend && !isLevel,
+    })}>
+      <div className={clsx(s['aux-gant-box-item'], {
+        [`${s['aux-gant-box-item_summed-task']}`]: props?.cellKind === EAuxGantBoxCellKind.SUM || props?.cellKind === EAuxGantBoxCellKind.SUM_SIDE,
+        [`${s['aux-gant-box-item_done-task']}`]: props?.cellKind === EAuxGantBoxCellKind.FACT,
+        [`${s['aux-gant-box-item_planned-task']}`]: props?.cellKind === EAuxGantBoxCellKind.PLAN,
+        [`${s['aux-gant-box-item_milestone-task']}`]: props?.cellKind === EAuxGantBoxCellKind.MILESTONE,
+      })} />
+      {props?.cellKind === EAuxGantBoxCellKind.SUM_SIDE && (
+        <div className={clsx(s['aux-gant-box-sub-item'])}/>
+      )}
     </div>
   );
 };

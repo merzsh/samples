@@ -21,13 +21,13 @@ import * as s from './AuxLevelTextBox.modules.scss';
 import React from 'react';
 import clsx from 'clsx';
 import AuxTextBox from "../AuxTextBox";
-import {AuxLevelTextBoxProps, EAuxSize} from "../types";
+import {EAuxSize} from "../types";
 import {STR_HTML_SPACE} from "../constants";
+import {AuxLevelTextBoxProps} from "./types";
 
 export const AuxLevelTextBox: React.FC<AuxLevelTextBoxProps> = ({ level, isExpanderVisible,
-                                                                  value, props,
-                                                                  id, extData,
-                                                                  isExpanded, className,
+                                                                  value, props, id,
+                                                                  className, isExpanded,
                                                                   onExpanderClick, onExpanderRows}) => {
   const [isExpandedState, setExpandedState] = React.useState<boolean>(isExpanded ?? false);
 
@@ -58,24 +58,31 @@ export const AuxLevelTextBox: React.FC<AuxLevelTextBoxProps> = ({ level, isExpan
             <div key={`lev-${levNo}`} className={clsx(s['aux-level-text-box-tab__content'], {
               [`${s['aux-level-text-box-tab__content_is-medium-sized']}`]: props?.fontSize === EAuxSize.M,
               [`${s['aux-level-text-box-tab__content_is-small-sized']}`]: props?.fontSize === EAuxSize.S,
-              [`${s['aux-level-text-box-tab__content_leveled-1']}`]: levNo === 0,
-              [`${s['aux-level-text-box-tab__content_leveled-2']}`]: levNo === 1,
-              [`${s['aux-level-text-box-tab__content_leveled-3']}`]: levNo === 2,
+              [`${s['aux-level-text-box_leveled-1']}`]: levNo === 0,
+              [`${s['aux-level-text-box_leveled-2']}`]: levNo === 1,
+              [`${s['aux-level-text-box_leveled-3']}`]: levNo === 2 && (isExpanderVisible || !isExpanderVisible && level === 3),
             })}>{STR_HTML_SPACE}</div>
           );
         })}
       </div>
-      {isExpanderVisible ? (<div className={clsx(s['aux-level-text-box-expander'], {
-        [`${s['aux-level-text-box-expander_opened']}`]: isExpandedState,
-        [`${s['aux-level-text-box-expander_closed']}`]: isExpandedState !== undefined && !isExpandedState,
-      })} onClick={onExpand}>
-        <div className={s['aux-level-text-box-expander__arrow']}/>
-      </div>) : undefined}
-      <AuxTextBox id={id} extData={extData}
-                  className={clsx(s['aux-level-text-box__inner-text-box'], {
-                    [`${s['aux-level-text-box__inner-text-box_tabbed']}`]: !isExpanderVisible && isExpanded !== undefined,
-                  })}
-                  value={value} props={{...props}}/>
+      <div className={clsx(s['aux-level-text-box'], {
+        [`${s['aux-level-text-box_leveled-1']}`]: level === 0 && isExpanderVisible,
+        [`${s['aux-level-text-box_leveled-2']}`]: level === 1 && isExpanderVisible,
+        [`${s['aux-level-text-box_leveled-3']}`]: level === 2 && isExpanderVisible,
+      })}>
+        {isExpanderVisible ? (<div className={clsx(s['aux-level-text-box-expander'], {
+          [`${s['aux-level-text-box-expander_opened']}`]: isExpandedState,
+          [`${s['aux-level-text-box-expander_closed']}`]: isExpandedState !== undefined && !isExpandedState,
+        })} onClick={onExpand}>
+          <div className={s['aux-level-text-box-expander__arrow']}/>
+        </div>) : undefined}
+        <AuxTextBox id={id}
+                    className={clsx(s['aux-level-text-box__inner-text-box'], {
+                      [`${s['aux-level-text-box__inner-text-box_tabbed']}`]: !isExpanderVisible && isExpanded !== undefined,
+                    })}
+                    value={value} props={{...props}}
+        />
+      </div>
     </div>
   );
 };

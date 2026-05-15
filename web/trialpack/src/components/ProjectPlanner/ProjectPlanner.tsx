@@ -22,14 +22,15 @@ import React, {useCallback, useRef, useState} from 'react';
 import AuxViews from "../AuxCommon/AuxViews";
 import WorksTree from "./WorksTree";
 import {GANT_VIEW_ID, TREE_VIEW_ID} from "./constants";
-import {castApiRawResponse, getWorksViewsIds} from "./utils";
+import {castApiRawResponse, getDefaultSortColumn, getWorksViewsIds} from "./utils";
 import {projectSampleDataApiRawResponse} from "./fixtures";
 import {useProjectWorksTree} from "./hooks/useProjectWorksTree";
 import GantChart from "./GantChart";
 import {setRowSelection} from "../AuxCommon/AdvancedTable/utils";
 import {OnExpanderRowsProps} from "../AuxCommon/types";
-import {ApiProjectWork} from "./types";
-import {AdvTblCellProps, AuxCompsProps} from "../AuxCommon/AdvancedTable/types";
+import {ApiProjectWork, EProjAttrs} from "./types";
+import {AdvTblCellProps} from "../AuxCommon/AdvancedTable/types";
+import {AuxCompsProps} from "../AuxCommon/AuxUiCompGenerator/types";
 
 type ProjectPlannerProps = {
   title?: string;
@@ -38,7 +39,8 @@ type ProjectPlannerProps = {
 export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
   const [projectApi, setProjectApi] = useState(castApiRawResponse(projectSampleDataApiRawResponse));
 
-  const { rootWorkNode, setWorkAttrValue } = useProjectWorksTree(projectApi);
+  const { rootWorkNode, setWorkAttrValue,
+    worksTreeMap } = useProjectWorksTree(projectApi);
 
   const treeViewDivRef = useRef<HTMLDivElement>();
   const treeViewColsCountRef = useRef<number>();
@@ -81,12 +83,17 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
     setRows2Expand(props);
   }, []);
 
-  if (!rootWorkNode) return undefined;
+  const defaultSortColumn = getDefaultSortColumn(projectApi.projectHeaderAttributes, EProjAttrs.WBS);
+
+  if (!rootWorkNode || !worksTreeMap) return undefined;
 
   return (
     <AuxViews className={`${s['proj-plan']}`} resizerScreenAdjustmentInPx={250}>
       <WorksTree id={TREE_VIEW_ID} className={s['proj-plan__view']}
-                 projectApi={projectApi} rootWorkNode={rootWorkNode}
+                 projectApi={projectApi}
+                 rootWorkNode={rootWorkNode}
+                 worksTreeMap={worksTreeMap}
+                 defaultSortColumn={defaultSortColumn}
                  onRebuildWorksTree={onRebuildWorksTree}
                  onChangeWorkAttrValue={onChangeWorkAttrValue}
                  onScroll={onScrollTree}
@@ -96,7 +103,9 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
       />
 
       <GantChart id={GANT_VIEW_ID} className={s['proj-plan__view']}
-                 projectApi={projectApi} rootWorkNode={rootWorkNode}
+                 rootWorkNode={rootWorkNode}
+                 projectStartDate={new Date(projectApi.projectStartDate)}
+                 defaultSortColumn={defaultSortColumn}
                  rows2Expand={rows2Expand}
                  onScroll={onScrollGant}
                  onHeader={onHeaderGant}

@@ -20,9 +20,10 @@
 import * as s from './AuxTextBox.modules.scss';
 import React, {useCallback, useRef} from 'react';
 import clsx from 'clsx';
-import {AuxTextBoxProps, EAuxAlignH, EAuxSize, EAuxTextBoxType} from "../types";
+import {EAuxAlignH, EAuxSize, EAuxTextBoxType} from "../types";
 import {getFormattedValue} from "./utils";
 import {NUM_INIT, STR_HTML_SPACE, STR_INIT, STR_KEY_ENTER, STR_KEY_ESCAPE} from "../constants";
+import {AuxTextBoxProps} from "./types";
 
 export const AuxTextBox: React.FC<AuxTextBoxProps> = ({value, type,
                                                         onChange, props,
@@ -107,12 +108,14 @@ export const AuxTextBox: React.FC<AuxTextBoxProps> = ({value, type,
           }}
         />
       ) : (
-        <div className={clsx(s['aux-text-box-text'], {
-          [`${s['aux-text-box-text_as-center']}`]: props?.alignH === EAuxAlignH.C,
-          [`${s['aux-text-box-text_as-right']}`]: props?.alignH === EAuxAlignH.R,
-          [`${s['aux-text-box-text_as-read-only']}`]: !props?.isEditable && !props?.isReadOnlyMarkDisabled,
-          [`${s['aux-text-box_is-monospaced']}`]: props?.isMonospaced,
-        })}>
+        <div style={{ paddingLeft: props?.paddingLeft, paddingRight: props?.paddingRight }}
+             className={clsx(s['aux-text-box-text'], {
+               [`${s['aux-text-box-text_as-center']}`]: props?.alignH === EAuxAlignH.C,
+               [`${s['aux-text-box-text_as-right']}`]: props?.alignH === EAuxAlignH.R,
+               [`${s['aux-text-box-text_as-read-only']}`]: !props?.isEditable && !props?.isReadOnlyMarkDisabled,
+               [`${s['aux-text-box_is-monospaced']}`]: props?.isMonospaced,
+             })}
+        >
           {getFormattedValue(valueInt ?? STR_INIT, type, props?.isSuppressZeros, props?.dateDisplayTemplate)}
         </div>
       )}

@@ -62,7 +62,6 @@
     &-resizer {
       cursor: col-resize;
       width: 3px;
-      margin-left: 3px;
       background-color: lightgrey;
     }
 
@@ -73,12 +72,10 @@
     }
 
     &_dated {
-      padding-right: 3px;
       cursor: cell;
     }
 
     &_dated-row-num {
-      padding: 0 3px;
       cursor: cell;
     }
 
@@ -94,16 +91,16 @@
       background-color: PaleTurquoise;
     }
 
+    &_border-left-timeline {
+      border-left: 2px solid rgb(SandyBrown, 0.5);
+    }
+
     &_border-left {
       border-left: 1px solid lightgrey;
     }
 
     &_border-right {
       border-right: 1px solid lightgrey;
-    }
-
-    &_border-right-timeline {
-      border-right: 2px solid royalblue;
     }
 
     &_border-top {
@@ -115,15 +112,15 @@
     }
 
     &_leveled-1 {
-      background-color: var(--firstLevelColor);
+      background-color: rgb(from var(--firstLevelColor) r g b / 0.6);
     }
 
     &_leveled-2 {
-      background-color: var(--secondLevelColor);
+      background-color: rgb(from var(--secondLevelColor) r g b / 0.6);
     }
 
     &_leveled-3 {
-      background-color: var(--thirdLevelColor);
+      background-color: rgb(from var(--thirdLevelColor) r g b / 0.6);
     }
   }
 }
@@ -135,17 +132,4 @@
 .comp-row-regular {
   width: 100%;
   margin: 3px 0;
-}
-
-.debug {
-  border-collapse: collapse;
-  table-layout: fixed;
-  margin-top: 30px;
-
-  &__td {
-    height: 32px;
-    width: 64px;
-    border: 1px solid lightgrey;
-    vertical-align: middle;
-  }
 }

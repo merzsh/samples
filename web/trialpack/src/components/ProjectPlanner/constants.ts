@@ -17,10 +17,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {AdvTblCellBorder, EBorderType} from "../AuxCommon/AdvancedTable/types";
+import {AdvTblCellBorder, AdvTblCellProps, EBorderType} from "../AuxCommon/AdvancedTable/types";
 import {ApiProjectWork,} from "./types";
+import AuxTextBox from "../AuxCommon/AuxTextBox";
+import {AuxTextBoxConfig, AuxTextBoxProps} from "../AuxCommon/AuxTextBox/types";
 
-export const BORDER_FULL: AdvTblCellBorder = { left: true, right: EBorderType.REGULAR, top: true, bottom: true };
+export const BORDER_FULL: AdvTblCellBorder = { left: EBorderType.REGULAR, right: true, top: true, bottom: true };
 
 export const ROOT_WBS_CODE = '';
 
@@ -38,3 +40,17 @@ export const DATES_GROUP_COLUMN_ID = 'dates';
 export const DATES_GROUP_COLUMN_TITLE = 'Dates';
 export const DATE_TEMPLATE_DAY = 'dd';
 export const DATE_TEMPLATE_WEEK_DAY = 'iiiii';
+
+export const INIT_TEXT_BOX_CELL_PROPS: AdvTblCellProps<AuxTextBoxProps> = {
+  id: '', border: BORDER_FULL, component: AuxTextBox, componentProps: { }
+};
+
+export const DATA_PROPS_DEFAULT: AuxTextBoxConfig = {
+  paddingLeft: '4px',
+  paddingRight: '4px',
+}
+
+export const HEADER_PROPS_DEFAULT: AuxTextBoxConfig = {
+  ...DATA_PROPS_DEFAULT,
+  isMonospaced: true,
+}

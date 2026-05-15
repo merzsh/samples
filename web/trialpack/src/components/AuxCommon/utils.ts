@@ -1,6 +1,39 @@
+/**
+ * TrialPack is web application contains several basic samples to ease web development experience.
+ * Copyright (c) 2024-2026 Andrew Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
+ *
+ * This file is part of TrialPack.
+ *
+ * TrialPack is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 import React from "react";
 import {AuxOnColumnResize} from "./types";
-import {NUM_VIEW_SEPARATOR_WIDTH} from "./constants";
+import {colIds, NUM_VIEW_SEPARATOR_WIDTH, TOTAL_ABC_CAPACITY} from "./constants";
+
+export function getColIdBySeqNumber(colNum: number): string {
+  if (colNum < 0 || colNum > 625) {
+    throw new RangeError('AdvancedTable.getColIdBySeqNumber(colNum): colNum might be between 0 and 625' +
+      `current value is ${colNum}`);
+  }
+
+  const posCount = Math.floor(colNum / TOTAL_ABC_CAPACITY);
+  if (!posCount) {
+    return colIds[colNum];
+  }
+
+  return colIds[posCount - 1] + colIds[colNum % TOTAL_ABC_CAPACITY];
+}
 
 export const onResize = (elemId: string, onCalcMaxWidth: (target: HTMLDivElement) => number,
                          resizerScreenAdjustmentInPx = 0): AuxOnColumnResize => {

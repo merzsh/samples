@@ -16,9 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-import {AdvTblCellProps, AuxCompsProps} from "../AuxCommon/AdvancedTable/types";
+
+import {AdvTblCellProps} from "../AuxCommon/AdvancedTable/types";
 import React from "react";
-import {AuxCommonProps, OnExpanderRowsProps} from "../AuxCommon/types";
+import {AuxCommonProps, EColID, OnExpanderRowsProps} from "../AuxCommon/types";
+import {AuxCompsProps} from "../AuxCommon/AuxUiCompGenerator/types";
+import {AuxTextBoxProps} from "../AuxCommon/AuxTextBox/types";
 
 export enum EProjAttrs {
   WBS = 'wbs_code',
@@ -28,6 +31,7 @@ export enum EProjAttrs {
   S_DATE = 'start_date',
   F_DATE = 'finish_date',
   PREV = 'prev_works',
+  DEFAULT = 'default',
 }
 
 export enum EProjProps {
@@ -53,11 +57,13 @@ export enum EProjWorkNodeProps {
 }
 
 export type ApiProjectAttribValueTypes = string | string[] | number | Date;
-export type ApiProjectAttribNodeSpecIds = EProjAttrs.WBS | EProjAttrs.NAME;
-export type ApiProjectAttribLeafSpecIds =  EProjAttrs.LEN |  EProjAttrs.COMPLETE |
+export type ApiProjectAttribNodeKeyIds = EProjAttrs.WBS;
+export type ApiProjectAttribNodeExtIds = EProjAttrs.DEFAULT;
+export type ApiProjectAttribLeafSpecIds =  EProjAttrs.NAME | EProjAttrs.LEN |  EProjAttrs.COMPLETE |
   EProjAttrs.S_DATE | EProjAttrs.F_DATE | EProjAttrs.PREV;
-export type ApiProjectAttribAllIds = ApiProjectAttribNodeSpecIds | ApiProjectAttribLeafSpecIds;
-export type ApiGantAttribIds = EProjAttrs.WBS | string;
+
+export type ApiProjectAttribAllIds = ApiProjectAttribNodeKeyIds | ApiProjectAttribLeafSpecIds;
+export type ApiGantAttribIds = ApiProjectAttribNodeKeyIds | ApiProjectAttribNodeExtIds;
 
 export type ApiProjectHeaderAttribute<T extends ApiProjectAttribAllIds | ApiGantAttribIds> = {
   [EProjHeaderProps.ID]: T;
@@ -65,15 +71,15 @@ export type ApiProjectHeaderAttribute<T extends ApiProjectAttribAllIds | ApiGant
   [EProjHeaderProps.IS_OPTIONAL4LEAF]?: boolean;
 };
 
-export type ApiProjectWork = Record<ApiProjectAttribNodeSpecIds, ApiProjectAttribValueTypes> &
+export type ApiProjectWork = Record<ApiProjectAttribNodeKeyIds, ApiProjectAttribValueTypes> &
   Partial<Record<ApiProjectAttribLeafSpecIds, ApiProjectAttribValueTypes>>;
 
-export type ApiProject<T extends ApiProjectAttribAllIds | ApiGantAttribIds> = {
+export type ApiProject = {
   [EProjProps.PROJ_START_DATE]: string;
   [EProjProps.CURR_DATE]?: string;
   [EProjProps.DATE_TEMPLATE]?: string;
   [EProjProps.IS_SUPPRESS_ZEROS]?: boolean;
-  [EProjProps.HEADER_ATTRIBS]: ApiProjectHeaderAttribute<T>[];
+  [EProjProps.HEADER_ATTRIBS]: ApiProjectHeaderAttribute<ApiProjectAttribAllIds>[];
   [EProjProps.WORKS_LIST]: ApiProjectWork[];
 };
 
@@ -96,43 +102,43 @@ export type UseProjectWorksTree = {
 
 export type UseProjectWorksTableViewMapArg<T extends ApiProjectAttribAllIds | ApiGantAttribIds> = {
   workAttr: ApiProjectHeaderAttribute<T>;
-  parentWorkAttr: ApiProjectAttribNodeSpecIds;
+  parentWorkAttr: ApiProjectAttribNodeKeyIds;
   workNode?: ProjectWorkNode;
   colId?: string;
   isHeader?: boolean;
   isEditable?: boolean;
   isNonSelectable?: boolean;
   isReadOnlyMarkDisabled?: boolean;
-  isRightBorderAsTimeline?: boolean;
   level?: number;
   isLastLevel?: boolean;
-} & Pick<ApiProject<T>, EProjProps.IS_SUPPRESS_ZEROS | EProjProps.DATE_TEMPLATE>;
+} & Pick<ApiProject, EProjProps.IS_SUPPRESS_ZEROS | EProjProps.DATE_TEMPLATE>;
 
 export type UseProjectWorksTableViewMap<T extends ApiProjectAttribAllIds | ApiGantAttribIds> =
   (props: UseProjectWorksTableViewMapArg<T>) => AdvTblCellProps<AuxCompsProps>;
 
 export type UseProjectWorksTableView = {
-  header?: AdvTblCellProps<AuxCompsProps>[];
+  header?: AdvTblCellProps<AuxTextBoxProps>[];
   works?: AdvTblCellProps<AuxCompsProps>[][];
   refreshView: () => void;
 };
 
-export type AdvancedTableViewProps<T extends ApiProjectAttribAllIds | ApiGantAttribIds> =
-  AuxCommonProps & {
+export type AdvancedTableViewProps = AuxCommonProps & {
   rootWorkNode: ProjectWorkNode;
-  projectApi: ApiProject<T>;
+  defaultSortColumn?: EColID;
   onRebuildWorksTree?: () => void;
   onChangeWorkAttrValue?: UseProjectWorksTreeSetWorkAttrValue;
   onScroll?: (event: React.UIEvent<HTMLDivElement>) => void;
   onRowSelect?: (cellId: string, isRowSelected: boolean) => void;
   onExpanderRows?: (props: OnExpanderRowsProps) => void;
   onHeader?: (header: AdvTblCellProps<AuxCompsProps>[]) => void;
-}
+};
 
-export type WorksTreeProps = AdvancedTableViewProps<ApiProjectAttribAllIds> & {
-  flag?: boolean;
-}
+export type WorksTreeProps = AdvancedTableViewProps &
+  Required<Pick<UseProjectWorksTree, 'worksTreeMap'>> & {
+  projectApi: ApiProject;
+};
 
-export type GantChartProps = AdvancedTableViewProps<ApiGantAttribIds> & {
+export type GantChartProps = AdvancedTableViewProps & {
+  projectStartDate?: Date;
   rows2Expand?: OnExpanderRowsProps;
-}
+};

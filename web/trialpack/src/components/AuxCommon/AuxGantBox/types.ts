@@ -17,6 +17,15 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {AuxCommonTextBoxProps} from "../types";
+
+export enum EAuxGantBoxCellKind { EMPTY_LEVEL, SUM, SUM_SIDE, MILESTONE, PLAN, FACT }
+
 export type AuxGantBoxConfig = {
-  flag?: boolean;
+  cellKind?: EAuxGantBoxCellKind;
+  isNonSelectable?: boolean;
 }
+
+export type AuxGantBoxProps = AuxCommonTextBoxProps & {
+  props?: AuxGantBoxConfig;
+};

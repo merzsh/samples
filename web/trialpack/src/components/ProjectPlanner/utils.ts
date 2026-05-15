@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
+
 import {
   ApiGantAttribIds,
   ApiProject,
@@ -30,16 +31,16 @@ import {
   UseProjectWorksTableViewMapArg
 } from "./types";
 import {prop} from "../../utils/utils";
-import {BORDER_FULL} from "./constants";
-import {AdvTblCellProps, EAdvTblBackground, EBorderType} from "../AuxCommon/AdvancedTable/types";
-import {AuxCompExtData, AuxTextBoxProps, EAuxAlignH, EAuxSize, EAuxTextBoxType, EColID} from "../AuxCommon/types";
-import {BOOL_INIT, NUM_INIT, STR_INIT} from "../AuxCommon/constants";
-import {colIds, INIT_TEXT_BOX_CELL_PROPS, TOTAL_ABC_CAPACITY} from "../AuxCommon/AdvancedTable/constants";
+import {BORDER_FULL, DATA_PROPS_DEFAULT, HEADER_PROPS_DEFAULT, INIT_TEXT_BOX_CELL_PROPS} from "./constants";
+import {AdvTblCellProps, AuxCompExtData, EAdvTblBackground} from "../AuxCommon/AdvancedTable/types";
+import {EAuxAlignH, EAuxSize, EAuxTextBoxType, EColID} from "../AuxCommon/types";
+import {BOOL_INIT, colIds, NUM_INIT, STR_INIT, TOTAL_ABC_CAPACITY} from "../AuxCommon/constants";
 import {format} from "date-fns";
 import {STR_ISO_DATE_TEMPLATE} from "../../utils/constants";
+import {AuxTextBoxProps} from "../AuxCommon/AuxTextBox/types";
 
-export function castApiRawResponse(rawAnswerObject: any): ApiProject<ApiProjectAttribAllIds> {
-  const result: ApiProject<ApiProjectAttribAllIds> = {
+export function castApiRawResponse(rawAnswerObject: any): ApiProject {
+  const result: ApiProject = {
     [EProjProps.PROJ_START_DATE]: STR_INIT,
     [EProjProps.HEADER_ATTRIBS]: [],
     [EProjProps.WORKS_LIST]: [],
@@ -88,14 +89,11 @@ export function castApiRawResponse(rawAnswerObject: any): ApiProject<ApiProjectA
 
 export const mapCellBase = <T extends ApiProjectAttribAllIds | ApiGantAttribIds>(
   { workAttr, parentWorkAttr, workNode,
-    colId, isHeader, isEditable, isNonSelectable, isReadOnlyMarkDisabled, isRightBorderAsTimeline,
+    colId, isHeader, isEditable, isNonSelectable, isReadOnlyMarkDisabled,
     isLastLevel, isSuppressZeros, dateDisplayTemplate, level }: UseProjectWorksTableViewMapArg<T>,
   onGetValue?: () => [string, EAuxTextBoxType]
 ): AdvTblCellProps<AuxTextBoxProps> => {
   const result: AdvTblCellProps<AuxTextBoxProps> = { ...INIT_TEXT_BOX_CELL_PROPS };
-  const extData: AuxCompExtData = { };
-  extData.currColumnName = workAttr.attrId;
-  extData.keyColumnValue = workNode ? workNode[parentWorkAttr].toString() : STR_INIT;
 
   let value = STR_INIT, type = EAuxTextBoxType.TEXT, alignH = EAuxAlignH.L;
 
@@ -109,18 +107,26 @@ export const mapCellBase = <T extends ApiProjectAttribAllIds | ApiGantAttribIds>
     }
   }
 
+  value = isHeader ? workAttr.attrName : value;
+
+  const extData: AuxCompExtData = {
+    currColumnName: workAttr.attrId,
+    keyColumnValue: workNode ? workNode[parentWorkAttr].toString() : STR_INIT,
+    rawValue: value,
+  };
+
   return {
     ...result,
     id: colId ?? '',
     background: isHeader ? EAdvTblBackground.HEADER : undefined,
-    border: isRightBorderAsTimeline ? {...BORDER_FULL, right: EBorderType.TIMELINE} : BORDER_FULL,
+    border: BORDER_FULL,
     isHorizResizable: isHeader,
+    extData,
     componentProps: {
       id: colId ?? '',
-      value: isHeader ? workAttr.attrName : value,
       type,
       level,
-      extData,
+      value,
       props: {
         fontSize: EAuxSize.M,
         isEditable: isHeader ? false : isEditable,
@@ -135,7 +141,9 @@ export const mapCellBase = <T extends ApiProjectAttribAllIds | ApiGantAttribIds>
   };
 }
 
-export const mapCellBaseWithStringValue = (props: UseProjectWorksTableViewMapArg<ApiProjectAttribAllIds>): AdvTblCellProps<AuxTextBoxProps> => {
+export const mapCellBaseWithStringValue = (
+  props: UseProjectWorksTableViewMapArg<ApiProjectAttribAllIds>
+): AdvTblCellProps<AuxTextBoxProps> => {
   return mapCellBase(props, () => {
     let value = '', type = EAuxTextBoxType.TEXT;
     if (!props.workNode) return [value, type];
@@ -210,15 +218,41 @@ export const mapCellBaseWithStringArrayValue = (props: UseProjectWorksTableViewM
     });
 }
 
+export function mapWorkHeaderDataDefault(
+  props: UseProjectWorksTableViewMapArg<ApiProjectAttribAllIds>, cell: AdvTblCellProps<AuxTextBoxProps>
+): AdvTblCellProps<AuxTextBoxProps> {
+  const result: AdvTblCellProps<AuxTextBoxProps> = { ...cell };
+
+  if (props.isHeader && cell.componentProps.props) {
+    result.componentProps.props = {
+      ...result.componentProps.props,
+      ...HEADER_PROPS_DEFAULT,
+    };
+    return result;
+  }
+
+  if (props.workNode?.children.length) result.isGroupHighlighting = true;
+
+  result.componentProps.props = {
+    ...result.componentProps.props,
+    ...DATA_PROPS_DEFAULT,
+  };
+
+  return result;
+}
+
 export function getDefaultSortColumn<T extends ApiProjectAttribAllIds | ApiGantAttribIds>(
   attrs: ApiProjectHeaderAttribute<T>[], attribId: EProjAttrs): EColID {
 
-  let result = EColID.A;
+  let result = EColID.A, pos = 0;
 
-  const found = attrs.find(item => item.attrId === attribId);
-  if (found) {
-    const index = attrs.indexOf(found);
-    if (index <= TOTAL_ABC_CAPACITY) result = colIds[index];
+  const found = attrs.find((item, index) => {
+    pos = index;
+    return item.attrId === attribId;
+  });
+
+  if (found && pos <= TOTAL_ABC_CAPACITY) {
+    result = colIds[pos];
   }
 
   return result;
