@@ -23,6 +23,8 @@ import clsx from 'clsx';
 import {
   AdvancedTableProps,
   AdvTblCellProps,
+  DataCacheCol,
+  DataCacheRow,
   EAdvTblBackground,
   EBorderType,
 } from "./types";
@@ -31,28 +33,27 @@ import {
   EColID,
 } from "../types";
 import {
-  genEmptyRows,
+  genEmptyRow,
   genRowNumCell,
   getColNameByCellId,
   getComponentClass,
   getRowNumByCellId,
   getTableShortId,
-  sortDataRows
 } from "./utils";
 import {onResize} from "../utils";
-import {AuxCompsProps, OnGetPropsByCellId, OnGetRowNumByValue} from "../AuxUiCompGenerator/types";
+import {AuxCompsProps, OnGetPropsByCellId, OnGetRowNumByValue, OnGetChildrenIds} from "../AuxUiCompGenerator/types";
 import {colIds, colIdsMap} from "../constants";
 import AuxUiCompGenerator from "../AuxUiCompGenerator";
 
 export const AdvancedTable: React.FC<AdvancedTableProps> =
   ({header, headerCellUnionsMapping, data,
-     defaultSortColumn = EColID.A, isWithRowNums, freeRowsCount, onGetChildrenIds,
+     defaultSortColumn = EColID.A, isWithRowNums, freeRowsCount, defaultSortColumnOrderedValues,
      onRowSelect, onExpanderRows, className, id}) => {
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const dataRef = useRef<typeof data>([]);
-  const dataCacheRef = useRef(new Map<string, number>());
+  const dataCacheRef = useRef(new Map<string, DataCacheRow | undefined>());
+  const dataNonSumWorkRow = useRef<AdvTblCellProps<AuxCompsProps>[]>();
   const currCellIdRef = useRef('');
   const resizeHandlersRef = useRef(new Map<string, AuxOnColumnResize>());
 
@@ -60,38 +61,45 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
     if (!data.length) return;
     setIsLoading(true);
 
-    let [newRow] = data;
-    const result = new Array<typeof newRow>(data.length);
+    if (dataCacheRef.current.size) dataCacheRef.current.clear();
 
-    for (let i = 0; i < data.length; i++) {
-      if (!data[i].length) return;
-      newRow = new Array<AdvTblCellProps<AuxCompsProps>>(data[i].length);
-
-      for (let j = 0; j < data[i].length; j++) {
-        const curCell = data[i][j];
-        newRow[j] = { ...curCell};
-        newRow[j].component = curCell.component;
-        newRow[j].extData = { ...curCell.extData };
-        newRow[j].componentProps = { ...curCell.componentProps };
-        newRow[j].componentProps.props = { ...curCell.componentProps.props };
-      }
-
-      result[i] = newRow;
-    }
-
-    result.sort((a, b) => sortDataRows(a, b, defaultSortColumn));
-
-    const defaultSortColumnNum = colIdsMap.get(defaultSortColumn);
-    if (defaultSortColumnNum !== undefined) {
-      result.forEach((item, index) => {
-        const cell = item?.[defaultSortColumnNum];
-        if (cell && cell.extData?.rawValue) {
-          dataCacheRef.current.set(cell.extData.rawValue, index);
-        }
+    if (defaultSortColumnOrderedValues?.length) {
+      defaultSortColumnOrderedValues.forEach((rowId, index) => {
+        dataCacheRef.current.set(rowId, { currRowNum: index, dataRowNum: 0, cols: [] });
       });
     }
 
-    dataRef.current = [...result , ...genEmptyRows(result, freeRowsCount ?? 1)];
+    const defaultSortColumnNum = colIdsMap.get(defaultSortColumn) ?? 0;
+
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      if (defaultSortColumnNum >= row.length) break;
+
+      const rowId = row[defaultSortColumnNum].extData?.rawValue ?? '',
+        cols = new Array<DataCacheCol>(row.length);
+      let cacheRow = dataCacheRef.current.get(rowId);
+
+      if (cacheRow) {
+        cacheRow.dataRowNum = i;
+        cacheRow.cols = cols;
+      } else {
+        cacheRow = {
+          dataRowNum: i,
+          currRowNum: i,
+          cols,
+        };
+      }
+
+      dataCacheRef.current.set(rowId, cacheRow);
+    }
+
+    [dataNonSumWorkRow.current] = data;
+
+    if (freeRowsCount) {
+      [...Array(freeRowsCount).keys()].forEach(index => {
+        dataCacheRef.current.set(`~${index}`, undefined);
+      });
+    }
 
     setIsLoading(false);
   }, [data]);
@@ -129,16 +137,26 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
 
   const onGetRowNumByValue = useCallback<OnGetRowNumByValue>((value) => {
     const rowNum = dataCacheRef.current.get(value);
-    return rowNum !== undefined ? rowNum + 1 : 0;
+    return rowNum ? rowNum.currRowNum + 1 : 0;
   },[]);
+
+  const onGetChildrenIds = useCallback<OnGetChildrenIds>((parentId) => {
+      return [...dataCacheRef.current.keys()]
+        .filter(key => key !== parentId && key.startsWith(parentId))
+        .sort((a,b) => a < b ? -1 : a > b ? 1 : 0);
+    }, []
+  );
 
   const onGetPropsByCellId = useCallback<OnGetPropsByCellId>((id, colId) => {
     if (!id) return undefined;
 
     const rowNum = getRowNumByCellId(id);
-    if (!rowNum) return undefined;
+    if (!rowNum || rowNum <= 0 || rowNum > dataCacheRef.current.size) return undefined;
 
-    const row = dataRef.current?.[rowNum - 1];
+    const rowCache = [...dataCacheRef.current.values()][rowNum - 1];
+    if (rowCache?.dataRowNum === undefined) return undefined;
+
+    const row = data[rowCache.dataRowNum];
     if (!row) return undefined;
 
     let colIdInt: EColID | undefined;
@@ -156,7 +174,7 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
     if (colNum === undefined) return undefined;
 
     return row?.[colNum].componentProps;
-  },[]);
+  },[data]);
 
   if (!header.length || !data.length || isLoading) return undefined;
 
@@ -170,7 +188,7 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
               <tr key={`${id}-header-row-${headerRowIndex}`}>
                 {(isWithRowNums && !headerRowIndex ? [genRowNumCell(headerRow, 0), ...headerRow] : headerRow).map(col => {
                   let resizeHandler;
-                  const resizerId = `col-resizer-${col.id}`
+                  const resizerId = `col-resizer-${col.id}`;
 
                   if (!(resizeHandler = resizeHandlersRef.current.get(resizerId))) {
                     resizeHandler = onResize(resizerId, () => 512);
@@ -236,27 +254,37 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
         }
         </thead>
         <tbody>
-        {dataRef.current.map((row, rowIndex) => {
-          const tableId = getTableShortId(id);
+        {[...dataCacheRef.current.entries()].map((rowMap, rowIndex) => {
+          const tableId = getTableShortId(id), [key, val] = rowMap;
+
+          let row: typeof dataNonSumWorkRow.current;
+          const isEmptyRow = key.startsWith('~');
+
+          if (!isEmptyRow && val) row = data?.[val.dataRowNum ?? 0];
+          else if (isEmptyRow && dataNonSumWorkRow.current) row = genEmptyRow(dataNonSumWorkRow.current);
+          else if (!row) return undefined;
 
           return (
             <tr id={`${tableId}${rowIndex + 1}`} key={`${rowIndex + 1}`} className={s['adv-table__tr']}>
-              {(isWithRowNums ? [genRowNumCell(row, rowIndex + 1), ...row] : row).map((col) => {
-                if (!col.id.startsWith('_')) {
-                  const cellId = `${tableId}${col.id}${rowIndex + 1}`;
-                  col.id = cellId;
-                  col.componentProps.id = cellId;
+              {(isWithRowNums ? [genRowNumCell(row, rowIndex + 1), ...row] : row).map((col, colIndex) => {
+                let cellId = col.id;
+
+                if (!col.id.startsWith('_') && val?.cols && colIndex < val.cols.length) {
+                  cellId = `${tableId}${col.id}${rowIndex + 1}`;
+
+                  if (!val.cols[colIndex]) val.cols[colIndex] = { cellId };
+                  else val.cols[colIndex].cellId = cellId;
                 }
 
                 const rowKey: string = col.extData?.keyColumnValue
                   ? (col.extData.keyColumnValue ? col.extData.keyColumnValue : '_')
                   : `${rowIndex + 1}`;
-                const cellKey = `${rowKey}~${col.id}~${col.componentProps.value}`;
+                const cellKey = `${rowKey}~${cellId}~${col.componentProps.value}`;
 
                 const isLevelColored = !col.id.startsWith('_') && col.isGroupHighlighting;
 
                 return (
-                  <td id={col.id} key={cellKey}
+                  <td id={cellId} key={cellKey}
                       className={clsx(s['adv-table__th'], s['adv-table__cell'], {
                         [`${s['adv-table__cell_dated-row-num']}`]: col.id.startsWith('_'),
                         [`${s['adv-table__cell_dated']}`]: !col.id.startsWith('_'),
@@ -275,6 +303,7 @@ export const AdvancedTable: React.FC<AdvancedTableProps> =
                     <AuxUiCompGenerator {...{
                       component: col.component as React.FC<AuxCompsProps>,
                       componentProps: col.componentProps,
+                      compId: cellId,
                       tableId,
                       defaultSortColumn,
                       onGetChildrenIds,

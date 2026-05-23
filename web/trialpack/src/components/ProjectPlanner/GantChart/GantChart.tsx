@@ -30,13 +30,12 @@ import {STR_ISO_DATE_TEMPLATE} from "../../../utils/constants";
 import {MSG_DATE_FORMATTING_ERROR} from "../../AuxCommon/constants";
 import {DATA_PROPS_DEFAULT, DATE_TEMPLATE_DAY, DATE_TEMPLATE_WEEK_DAY, HEADER_PROPS_DEFAULT} from "../constants";
 import {AdvTblCellProps, EBorderType} from "../../AuxCommon/AdvancedTable/types";
-import {getTableShortId} from "../../AuxCommon/AdvancedTable/utils";
 import {AuxTextBoxProps} from "../../AuxCommon/AuxTextBox/types";
 import AuxGantBox from "../../AuxCommon/AuxGantBox";
 import {AuxGantBoxConfig, EAuxGantBoxCellKind} from "../../AuxCommon/AuxGantBox/types";
 
 const GantChart: React.FC<GantChartProps> = ({rootWorkNode, defaultSortColumn, projectStartDate,
-                                               rows2Expand, onScroll,
+                                               worksTreeMap, onScroll,
                                                onHeader, id, className}
 ) => {
 
@@ -211,20 +210,6 @@ const GantChart: React.FC<GantChartProps> = ({rootWorkNode, defaultSortColumn, p
     if (onHeader) onHeader(header);
   }, [header]);
 
-  useEffect(() => {
-    if (!rows2Expand) return;
-    const tableId = getTableShortId(id);
-
-    rows2Expand.rowNums.forEach(item => {
-      if (!item) return;
-
-      const row = document.getElementById(`${tableId}${(item > 0 ? item : -1 * item) }`);
-      if (row) {
-        row.style.display = item > 0 ? 'table-row' : 'none';
-      }
-    });
-  }, [rows2Expand]);
-
   if (!works || !multilineHeader || !headerCellUnionsMap) return undefined;
 
   return (
@@ -235,6 +220,7 @@ const GantChart: React.FC<GantChartProps> = ({rootWorkNode, defaultSortColumn, p
                      data={works}
                      freeRowsCount={3}
                      defaultSortColumn={defaultSortColumn}
+                     defaultSortColumnOrderedValues={worksTreeMap ? [...worksTreeMap.keys()] : undefined}
       />
     </div>
   );

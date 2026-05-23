@@ -26,6 +26,7 @@ import {onExpanderClickHandler, onExpanderRowsHandler} from "./utils";
 
 export const AuxUiCompGenerator: React.FC<AuxUiCompGeneratorProps> = (
   { component, componentProps, tableId, defaultSortColumn,
+    compId,
     onGetChildrenIds, onGetPropsByCellId, onGetRowNumByValue,
     onExpanderRows}
 ): ReactElement | undefined => {
@@ -42,16 +43,16 @@ export const AuxUiCompGenerator: React.FC<AuxUiCompGeneratorProps> = (
 
   switch (component) {
     case AuxTextBox:
-      return <AuxTextBox { ...componentProps as AuxFcCompsProps<typeof AuxTextBox> } />;
+      return <AuxTextBox { ...componentProps as AuxFcCompsProps<typeof AuxTextBox>} id={compId} />;
     case AuxLevelTextBox:
       const propsAuxLevelTextBox = {
         ...componentProps as AuxFcCompsProps<typeof AuxLevelTextBox>,
         onExpanderClick: onExpanderClickCallback,
         onExpanderRows: onExpanderRowsCallback,
       };
-      return <AuxLevelTextBox { ...propsAuxLevelTextBox } />;
+      return <AuxLevelTextBox { ...propsAuxLevelTextBox } id={compId} />;
     case AuxGantBox:
-      return <AuxGantBox {...componentProps as AuxFcCompsProps<typeof AuxGantBox>} />;
+      return <AuxGantBox {...componentProps as AuxFcCompsProps<typeof AuxGantBox>} id={compId} />;
     default:
       return undefined;
   }

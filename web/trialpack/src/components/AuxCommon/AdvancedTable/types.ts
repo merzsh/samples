@@ -23,7 +23,7 @@ import {
   EColID,
   OnExpanderRowsProps
 } from "../types";
-import {AuxCompsProps, OnGetChildrenIds} from "../AuxUiCompGenerator/types";
+import {AuxCompsProps} from "../AuxUiCompGenerator/types";
 
 export enum EAdvTblBackground { HEADER }
 
@@ -60,10 +60,20 @@ export type AdvancedTableProps = AuxCommonProps & {
   data: AdvTblCellProps<AuxCompsProps>[][];
   headerCellUnionsMapping?: Map<string, number>;
   defaultSortColumn?: EColID;
+  defaultSortColumnOrderedValues?: string[];
   isWithRowNums?: boolean;
   freeRowsCount?: number;
-  onGetChildrenIds?: OnGetChildrenIds;
   onScroll?: (event: React.UIEvent<HTMLDivElement>) => void;
   onRowSelect?: (cellId: string, isRowSelected: boolean) => void;
   onExpanderRows?: (props: OnExpanderRowsProps) => void;
+};
+
+export type DataCacheCol = {
+  cellId: string;
+};
+
+export type DataCacheRow = {
+  currRowNum: number;
+  dataRowNum: number;
+  cols: DataCacheCol[];
 };

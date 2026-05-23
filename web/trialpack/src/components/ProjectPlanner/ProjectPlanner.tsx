@@ -26,7 +26,7 @@ import {castApiRawResponse, getDefaultSortColumn, getWorksViewsIds} from "./util
 import {projectSampleDataApiRawResponse} from "./fixtures";
 import {useProjectWorksTree} from "./hooks/useProjectWorksTree";
 import GantChart from "./GantChart";
-import {setRowSelection} from "../AuxCommon/AdvancedTable/utils";
+import {getTableShortId, setRowSelection} from "../AuxCommon/AdvancedTable/utils";
 import {OnExpanderRowsProps} from "../AuxCommon/types";
 import {ApiProjectWork, EProjAttrs} from "./types";
 import {AdvTblCellProps} from "../AuxCommon/AdvancedTable/types";
@@ -47,8 +47,6 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
 
   const gantViewDivRef = useRef<HTMLDivElement>();
   const gantViewColsCountRef = useRef<number>();
-
-  const [rows2Expand, setRows2Expand] = useState<OnExpanderRowsProps>();
 
   const onRebuildWorksTree = useCallback<() => void>(() => setProjectApi({ ...projectApi }), [projectApi]);
 
@@ -80,7 +78,17 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
   }, []);
 
   const onExpanderRows = useCallback<(props: OnExpanderRowsProps) => void>((props) => {
-    setRows2Expand(props);
+    if (!props.rowNums.length) return;
+    const tableId = getTableShortId(GANT_VIEW_ID);
+
+    props.rowNums.forEach(item => {
+      if (!item) return;
+
+      const row = document.getElementById(`${tableId}${(item > 0 ? item : -1 * item)}`);
+      if (row) {
+        row.style.display = item > 0 ? 'table-row' : 'none';
+      }
+    });
   }, []);
 
   const defaultSortColumn = getDefaultSortColumn(projectApi.projectHeaderAttributes, EProjAttrs.WBS);
@@ -104,9 +112,9 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
 
       <GantChart id={GANT_VIEW_ID} className={s['proj-plan__view']}
                  rootWorkNode={rootWorkNode}
+                 worksTreeMap={worksTreeMap}
                  projectStartDate={new Date(projectApi.projectStartDate)}
                  defaultSortColumn={defaultSortColumn}
-                 rows2Expand={rows2Expand}
                  onScroll={onScrollGant}
                  onHeader={onHeaderGant}
       />

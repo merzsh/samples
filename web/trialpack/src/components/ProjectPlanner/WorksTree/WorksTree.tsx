@@ -20,7 +20,7 @@
 import * as s from './WorksTree.modules.scss';
 import clsx from 'clsx';
 import {EAuxAlignH, EAuxTextBoxType} from "../../AuxCommon/types";
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {
   mapCellBaseWithDateValue,
   mapCellBaseWithNumberValue,
@@ -47,7 +47,6 @@ import AuxLevelTextBox from "../../AuxCommon/AuxLevelTextBox";
 import AdvancedTable from "../../AuxCommon/AdvancedTable";
 import {AdvTblCellProps} from "../../AuxCommon/AdvancedTable/types";
 import {AuxTextBoxProps} from "../../AuxCommon/AuxTextBox/types";
-import {OnGetChildrenIds} from "../../AuxCommon/AuxUiCompGenerator/types";
 
 const WorksTree: React.FC<WorksTreeProps> = ({ projectApi, rootWorkNode,
                                                worksTreeMap, defaultSortColumn,
@@ -56,7 +55,6 @@ const WorksTree: React.FC<WorksTreeProps> = ({ projectApi, rootWorkNode,
                                                onExpanderRows, onHeader,
                                                id, className}
 ) => {
-
   const { header, works } = useProjectWorksTableView<ApiProjectAttribAllIds>(
     projectApi.projectHeaderAttributes,
     new Map([
@@ -228,13 +226,6 @@ const WorksTree: React.FC<WorksTreeProps> = ({ projectApi, rootWorkNode,
     if (onHeader) onHeader(header);
   }, [header]);
 
-  const onGetChildrenIds = useCallback<OnGetChildrenIds>((parentId) => {
-    return [...worksTreeMap.keys()]
-      .filter(key => key !== parentId && key.startsWith(parentId))
-      .sort((a,b) => a < b ? -1 : a > b ? 1 : 0);
-    }, []
-  );
-
   if (!works || !multilineHeader || !headerCellUnionsMap) return undefined;
 
   return (
@@ -246,7 +237,7 @@ const WorksTree: React.FC<WorksTreeProps> = ({ projectApi, rootWorkNode,
                      isWithRowNums
                      freeRowsCount={3}
                      defaultSortColumn={defaultSortColumn}
-                     onGetChildrenIds={onGetChildrenIds}
+                     defaultSortColumnOrderedValues={worksTreeMap ? [...worksTreeMap.keys()] : undefined}
                      onRowSelect={onRowSelect}
                      onExpanderRows={onExpanderRows}
       />

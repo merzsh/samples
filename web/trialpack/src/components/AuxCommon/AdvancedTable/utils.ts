@@ -21,7 +21,6 @@ import {AdvTblCellProps, EAdvTblBackground} from "./types";
 import AuxTextBox from "../AuxTextBox";
 import {
   EAuxAlignH,
-  EColID,
 } from "../types";
 import {STR_DIGITS} from "../constants";
 import {ROW_SELECTION_STYLES} from "./constants";
@@ -29,37 +28,29 @@ import {AuxCompsProps} from "../AuxUiCompGenerator/types";
 import {getColIdBySeqNumber} from "../utils";
 import {cloneCompProps} from "../AuxUiCompGenerator/utils";
 
-export function genEmptyRows(array: AdvTblCellProps<AuxCompsProps>[][], addedRowsCount: number):
-  AdvTblCellProps<AuxCompsProps>[][] {
+export function genEmptyRow(templateRow: AdvTblCellProps<AuxCompsProps>[]):
+  AdvTblCellProps<AuxCompsProps>[] {
 
-  if (!array.length || !addedRowsCount) return [];
+  if (!templateRow.length) return [];
 
-  const result: typeof array = [];
+  const result: typeof templateRow = [];
 
-  const cols = array[array.length - 1];
+  templateRow.forEach((col, ind) => {
+    const id = `${getColIdBySeqNumber(ind)}`;
 
-  for (let i = 0; i < addedRowsCount; i++) {
-    const colsCopy: typeof cols = [];
+    const newCellProps: typeof col = {
+      ...col,
+      extData: {
+        ...col.extData,
+      },
+      border: {
+        ...col.border,
+      }
+    };
+    newCellProps.componentProps = cloneCompProps(col.componentProps, id, true);
 
-    cols.forEach((col, ind) => {
-      const id = `${getColIdBySeqNumber(ind)}`;
-
-      const newCellProps: typeof col = {
-        ...col,
-        extData: {
-          ...col.extData,
-        },
-        border: {
-          ...col.border,
-        }
-      };
-      newCellProps.componentProps = cloneCompProps(col.componentProps, id, true);
-
-      colsCopy.push(newCellProps);
-    })
-
-    result.push(colsCopy);
-  }
+    result.push(newCellProps);
+  })
 
   return result;
 }
@@ -80,7 +71,6 @@ export function genRowNumCell<T extends AdvTblCellProps<AuxCompsProps>>(colsRow:
     background: EAdvTblBackground.HEADER,
     componentProps: {
       ...templateCol.componentProps,
-      extData: { currColumnName: '_'},
       props: {
         ...templateCol.componentProps.props,
         alignH: EAuxAlignH.C,
@@ -90,26 +80,6 @@ export function genRowNumCell<T extends AdvTblCellProps<AuxCompsProps>>(colsRow:
       value: `${rowNum ? rowNum : ''}`,
     }
   };
-}
-
-export function sortDataRows(a: AdvTblCellProps<AuxCompsProps>[], b: AdvTblCellProps<AuxCompsProps>[],
-                          defaultSortColumn = EColID.A): number {
-
-  const cellA = a.find(
-    item => getColNameByCellId(item.id) === defaultSortColumn);
-  if (!cellA) return 0;
-
-  const cellAData = cellA.componentProps.value;
-  if (!cellAData) return 1;
-
-  const cellB = b.find(
-    item => getColNameByCellId(item.id) === defaultSortColumn);
-  if (!cellB) return 0;
-
-  const cellBData = cellB.componentProps.value;
-  if (!cellBData) return 1;
-
-  return cellAData < cellBData ? -1 : cellAData > cellBData ? 1 : 0;
 }
 
 export function setRowSelection(cellId: string, isRowSelected: boolean, rowColsCount: number, tableId?: string, ): void {

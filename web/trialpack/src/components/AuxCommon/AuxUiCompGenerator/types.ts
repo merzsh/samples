@@ -34,6 +34,7 @@ export type AuxUiCompGeneratorProps = {
   component: React.FC<AuxCompsProps>;
   componentProps: AuxCompsProps;
   tableId: string;
+  compId?: string;
   defaultSortColumn?: EColID;
   onGetChildrenIds?: OnGetChildrenIds;
   onGetPropsByCellId?: OnGetPropsByCellId;

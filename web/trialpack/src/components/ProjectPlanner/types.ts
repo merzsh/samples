@@ -131,14 +131,12 @@ export type AdvancedTableViewProps = AuxCommonProps & {
   onRowSelect?: (cellId: string, isRowSelected: boolean) => void;
   onExpanderRows?: (props: OnExpanderRowsProps) => void;
   onHeader?: (header: AdvTblCellProps<AuxCompsProps>[]) => void;
-};
+} & Pick<UseProjectWorksTree, 'worksTreeMap'>;
 
-export type WorksTreeProps = AdvancedTableViewProps &
-  Required<Pick<UseProjectWorksTree, 'worksTreeMap'>> & {
+export type WorksTreeProps = AdvancedTableViewProps & {
   projectApi: ApiProject;
 };
 
 export type GantChartProps = AdvancedTableViewProps & {
   projectStartDate?: Date;
-  rows2Expand?: OnExpanderRowsProps;
 };

@@ -82,6 +82,7 @@ export const useProjectWorksTree = (project: ApiProject): UseProjectWorksTree =>
     if (refreshCalcTrigger === undefined || !worksTreeMapRef.current) return;
 
     const projStartDate = new Date(project.projectStartDate);
+    const resultWorksTreeArr: string[] = [];
 
     [...worksTreeMapRef.current.values()]
       .forEach(node => {
@@ -131,11 +132,22 @@ export const useProjectWorksTree = (project: ApiProject): UseProjectWorksTree =>
             node.percent_complete = Math.round(100 * workLenDone / workLenFull);
           }
         }
+
+        resultWorksTreeArr.unshift(node.wbs_code.toString());
       });
 
     const rootNode = worksTreeMapRef.current.get(ROOT_WBS_CODE);
     setRootWorkNode(rootNode ? { ...rootNode } : undefined);
-    setWorksTreeMap(new Map<string, ProjectWorkNode>(worksTreeMapRef.current));
+
+    const resultWorksTreeMap = new Map<string, ProjectWorkNode>();
+    resultWorksTreeArr.forEach(id => {
+      const node = worksTreeMapRef.current?.get(id);
+      if (!node) return;
+
+      resultWorksTreeMap.set(id, node);
+    });
+
+    setWorksTreeMap(resultWorksTreeMap);
   }, [refreshCalcTrigger]);
 
   const setWorkAttrValue = useCallback<UseProjectWorksTreeSetWorkAttrValue>(
