@@ -1,6 +1,6 @@
 /**
  * TrialPack is web application contains several basic samples to ease web development experience.
- * Copyright (c) 2024-2026 Andrew Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
+ * Copyright (c) 2024-2026 Andrei Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
  *
  * This file is part of TrialPack.
  *
@@ -75,7 +75,7 @@ class MobxStore {
     let result = Map<string, { shortName: string; name: string }>();
 
     result = result.set(STR_ID_APP_EDITOR2D, {shortName: '2d graphics editor', name: '2D VECTOR GRAPHICS WEB EDITOR'});
-    result = result.set(STR_ID_APP_PROJ_PLAN, {shortName: 'Project planner', name: 'PROJECT PLANNER'});
+    result = result.set(STR_ID_APP_PROJ_PLAN, {shortName: 'Project office', name: 'PROJECT OFFICE'});
     result = result.set(STR_ID_APP_STOPLIGHT, {shortName: 'Stoplight', name: 'STATE MACHINE WITH STOPLIGHT SAMPLE'});
     result = result.set(STR_ID_APP_TELLER, {shortName: 'Teller machine', name: 'AUTOMATED TELLER MACHINE EMULATOR'});
     return result;

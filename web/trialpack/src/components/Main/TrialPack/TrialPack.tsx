@@ -1,6 +1,6 @@
 /**
  * TrialPack is web application contains several basic samples to ease web development experience.
- * Copyright (c) 2024-2026 Andrew Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
+ * Copyright (c) 2024-2026 Andrei Miroshnichenko <merzsh@gmail.com, https://github.com/merzsh>
  *
  * This file is part of TrialPack.
  *
@@ -68,7 +68,7 @@ function TrialPack() {
 
     <footer className={`${styles['trial-pack__footer']}`}>
       <div className={`${styles['trial-pack__footer__left']}`}>
-        <span>Merzsh Technologies</span> <span>is moving toward efficiency!</span><br/>
+        <span>Merzsh Technologies</span> <span>promote the philosophy of efficiency</span><br/>
         All rights reserved &#xA9; <br/><br/>
         Licensed under GPL v.3 <br/>
         {STR_TRAILPACK_VERSION && (
