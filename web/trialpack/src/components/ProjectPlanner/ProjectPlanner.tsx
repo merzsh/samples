@@ -18,12 +18,17 @@
  */
 
 import * as s from './ProjectPlanner.modules.scss';
-import React, {useCallback, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import AuxViews from "../AuxCommon/AuxViews";
 import WorksTree from "./WorksTree";
-import {GANT_VIEW_ID, TREE_VIEW_ID} from "./constants";
+import {
+  API_PROJECT_INITIAL,
+  API_URL_ENDPOINT_PROJECT,
+  API_URL_SUFFIX,
+  GANT_VIEW_ID,
+  TREE_VIEW_ID
+} from "./constants";
 import {castApiRawResponse, getDefaultSortColumn, getWorksViewsIds} from "./utils";
-import {projectSampleDataApiRawResponse} from "./fixtures";
 import {useProjectWorksTree} from "./hooks/useProjectWorksTree";
 import GantChart from "./GantChart";
 import {getTableShortId, setRowSelection} from "../AuxCommon/AdvancedTable/utils";
@@ -31,13 +36,14 @@ import {OnExpanderRowsProps} from "../AuxCommon/types";
 import {ApiProjectWork, EProjAttrs} from "./types";
 import {AdvTblCellProps} from "../AuxCommon/AdvancedTable/types";
 import {AuxCompsProps} from "../AuxCommon/AuxUiCompGenerator/types";
+import {sleep} from "../../utils/utils";
 
 type ProjectPlannerProps = {
   title?: string;
 };
 
 export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
-  const [projectApi, setProjectApi] = useState(castApiRawResponse(projectSampleDataApiRawResponse));
+  const [projectApi, setProjectApi] = useState(API_PROJECT_INITIAL);
 
   const { rootWorkNode, setWorkAttrValue,
     worksTreeMap } = useProjectWorksTree(projectApi);
@@ -93,6 +99,16 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
 
   const defaultSortColumn = getDefaultSortColumn(projectApi.projectHeaderAttributes, EProjAttrs.WBS);
 
+  useEffect(() => {
+    fetchProject()
+      .then(data => {
+        setProjectApi(castApiRawResponse(data));
+      })
+      .catch(error => {
+        console.log('Fetching error', error);
+      });
+  }, []);
+
   if (!rootWorkNode || !worksTreeMap) return undefined;
 
   return (
@@ -123,3 +139,24 @@ export const ProjectPlanner: React.FC<ProjectPlannerProps> = ({}) => {
 };
 
 export default ProjectPlanner;
+
+async function fetchProject(): Promise<any> {
+  // network delay emulation
+  await sleep(1000);
+
+  const url = `/${API_URL_SUFFIX}/${API_URL_ENDPOINT_PROJECT}`;
+
+  const response = await fetch(
+    url,
+    {
+      method: 'GET',
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer YOUR_TOKEN_HERE',
+      },
+      //body: JSON.stringify({ key: 'value' }) // for POST method
+    }
+  );
+  return await response.json();
+}

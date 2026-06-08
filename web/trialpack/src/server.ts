@@ -18,6 +18,7 @@
  */
 
 import { createServer, Server } from 'miragejs';
+import {projectSampleDataApiRawResponse} from "./components/ProjectPlanner/fixtures";
 // import AtmInfoBankSystem from "./components/Teller/classes/AtmInfoBankSystem";
 
 export function makeServer(): Server {
@@ -28,7 +29,7 @@ export function makeServer(): Server {
 
   return createServer({
     models: {},
-    seeds(server) {},
+    seeds(/* server */) {},
     routes() {
       // this.urlPrefix = '/api-module/';
       this.logging = true;
@@ -39,6 +40,7 @@ export function makeServer(): Server {
         return url;
       }
 
+      /*
       this.get(addMockUrl('/api/trialpack/teller/some_endpoint'),
         (schema, request) => {
           console.log(12345, `Mirage.server`);
@@ -50,6 +52,7 @@ export function makeServer(): Server {
 
           return result;
         });
+      */
 
       /*
       // Sample
@@ -61,6 +64,8 @@ export function makeServer(): Server {
           return getDataMock(data);
         });
       */
+
+      this.get(addMockUrl('/api/endpoint'), () => projectSampleDataApiRawResponse);
 
       this.passthrough((request) => {
         let result = false;

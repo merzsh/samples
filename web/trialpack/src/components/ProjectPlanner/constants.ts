@@ -18,7 +18,7 @@
  */
 
 import {AdvTblCellBorder, AdvTblCellProps, EBorderType} from "../AuxCommon/AdvancedTable/types";
-import {ApiProjectWork,} from "./types";
+import {ApiProject, ApiProjectWork} from "./types";
 import AuxTextBox from "../AuxCommon/AuxTextBox";
 import {AuxTextBoxConfig, AuxTextBoxProps} from "../AuxCommon/AuxTextBox/types";
 
@@ -40,6 +40,15 @@ export const DATES_GROUP_COLUMN_ID = 'dates';
 export const DATES_GROUP_COLUMN_TITLE = 'Dates';
 export const DATE_TEMPLATE_DAY = 'dd';
 export const DATE_TEMPLATE_WEEK_DAY = 'iiiii';
+
+export const API_URL_SUFFIX = 'api';
+export const API_URL_ENDPOINT_PROJECT = 'endpoint';
+
+export const API_PROJECT_INITIAL: ApiProject = {
+  projectStartDate: '2026-04-20',
+  projectHeaderAttributes: [],
+  projectWorksList: [],
+};
 
 export const INIT_TEXT_BOX_CELL_PROPS: AdvTblCellProps<AuxTextBoxProps> = {
   id: '', border: BORDER_FULL, component: AuxTextBox, componentProps: { }

@@ -171,14 +171,15 @@ module.exports = {
     compress: true,
     // inline: true,
 
-    /* proxy: [{
+    proxy: [{
       context: ['/api/'],
-      target: `http://${host}:${port}`,
+      target: 'https://www.google.com',
       onProxyReq: (proxyReq) => {
-        proxyReq.setHeader('Host', `${host}:${port}`);
+        proxyReq.setHeader('Host', 'www.google.com');
       },
+      logLevel: 'debug',
       secure: false,
       // changeOrigin: true,
-    },] */
+    },]
   },
 }
