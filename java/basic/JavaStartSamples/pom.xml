@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.github.merzsh</groupId>
+    <artifactId>JavaStartSamples</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.7.1</version>
+                <configuration>
+                    <descriptorRefs>
+                        <!-- Это указывает плагину собрать "толстый" JAR со всеми зависимостями -->
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <!-- Укажите здесь ПОЛНЫЙ путь к вашему классу с методом main -->
+                            <mainClass>com.github.merzsh.JavaStartSamples</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <!-- Привязываем сборку к стандартной фазе package -->
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
+
+    <dependencies>
+        <!-- 0. Драйвер для СУБД PostgreSQL -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.4</version> <!-- Актуальная стабильная версия -->
+        </dependency>
+
+        <!-- 1. Официальный API для всех импортов jakarta.persistence, которые содержат интерфейсы к классам Hibernate (без реализации) -->
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <version>3.1.0</version> <!-- Стабильная современная версия для Hibernate 6+ -->
+        </dependency>
+
+        <!-- 2. Движок Hibernate, который реализует это API -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>6.5.2.Final</version> <!-- Актуальная стабильная версия -->
+        </dependency>
+
+        <!-- 3. Драйвер базы данных.
+             В демо-примерах часто используют легковесную embedded базу H2.
+             Если у вас была MySQL или PostgreSQL — замените этот артефакт -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.2.224</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- 4. Закрывает: context, beans, stereotype (Component, Bean, Autowired, ApplicationContext) -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>6.1.13</version> <!-- Стабильная версия с поддержкой Java 21 -->
+        </dependency>
+
+        <!-- 5. Закрывает: cache (EnableCaching, Cacheable) -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <version>6.1.13</version>
+        </dependency>
+
+        <!-- 6. Закрывает: jdbc, dao (DriverManagerDataSource, NamedParameterJdbcTemplate, RowMapper, DataAccessException) -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>6.1.13</version>
+        </dependency>
+
+        <!-- 7. Закрывает: EnableAspectJAutoProxy (требуется для поддержки АОП) -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.9.22.1</version>
+        </dependency>
+
+        <!-- 8. Закрывает связку Spring-ORM -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+            <version>6.1.13</version>
+        </dependency>
+
+        <!-- 9. Добавляет новый Ehcache 3.x для Spring 6 / Hibernate 6 -->
+        <dependency>
+            <groupId>org.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>3.10.8</version> <!-- Стабильная версия для Java 21 / Spring 6 -->
+            <classifier>jakarta</classifier> <!-- Важно! Использует jakarta.* вместо javax.* -->
+            <!-- Принудительно запрещаем Ehcache скачивать древний сломанный JAXB-пакет -->
+            <!-- (чтобы Maven не падал с ошибкой 'http' из-за старой версии библиотеки, которая использует этот устаревший протокол) -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.glassfish.jaxb</groupId>
+                    <artifactId>jaxb-runtime</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- 10. Добавляет стандарт JCache API -->
+        <dependency>
+            <groupId>javax.cache</groupId>
+            <artifactId>cache-api</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+    </dependencies>
+
+</project>

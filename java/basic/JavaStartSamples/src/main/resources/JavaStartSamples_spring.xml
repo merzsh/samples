@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:util="http://www.springframework.org/schema/util"
+xmlns:context="http://www.springframework.org/schema/context"
+xmlns:aop="http://www.springframework.org/schema/aop"
+xmlns:ehcache="http://www.springmodules.org/schema/ehcache"
+xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+http://www.springframework.org/schema/util
+http://www.springframework.org/schema/util/spring-util-4.3.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context-4.3.xsd
+http://www.springframework.org/schema/aop
+http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+http://www.springmodules.org/schema/ehcache
+http://www.springmodules.org/schema/cache/springmodules-ehcache.xsd">
+
+    <context:component-scan base-package="dummy" />
+
+    <!--bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" /-->
+
+    <!--ehcache>
+        <defaultCache
+            maxElementsInMemory="500"
+            overflowToDisk="false"
+            memoryStoreEvictionPolicy="LFU"
+            eternal="true" />
+
+        <cache name="myCache"
+            maxElementsInMemory="500"
+            overflowToDisk="false"
+            memoryStoreEvictionPolicy="LFU"
+            eternal="true" />
+    </ehcache>
+
+    <ehcache:annotations>
+        <ehcache:caching id="myCacheModel" cacheName="myCache" />
+    </ehcache:annotations-->
+
+    <bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+        <property name="customEditors">
+            <map>
+                <entry key="dummy.Dummy$IUser" value="dummy.Dummy$UserEditor">
+                    <!--bean id="userEditor" class="Dummy$UserEditor">
+                    </bean-->
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="./src/dummy/Dummy.properties" />
+    </bean>
+
+    <bean id="some_conn" class="dummy.Dummy$SomeConnection" />
+    <bean id="misc_conn" class="dummy.Dummy$MiscConnection" />
+
+    <bean id="user_1" class="dummy.Dummy$SomeUser"><constructor-arg value="1" /><constructor-arg value="User I" /></bean>
+    <bean id="user_2" class="dummy.Dummy$SomeUser"><constructor-arg value="2" /><constructor-arg value="User II" /></bean>
+    <bean id="user_3" class="dummy.Dummy$SomeUser"><constructor-arg value="3" /><constructor-arg value="User III" /></bean>
+
+
+    <bean id="base_comp" class="dummy.Dummy$Computer" abstract="true">
+        <property name="Vendor" value="Hewlett Packard Enterprise" />
+    </bean>
+
+    <bean id="work_comp" class="dummy.Dummy$Computer" parent="base_comp">
+        <property name="Segment" value="Workstation" />
+        <property name="Hardware" value="HP Desctop station xTreme Core i9" />
+    </bean>
+
+    <bean id="serv_comp" class="dummy.Dummy$Computer" parent="base_comp">
+        <property name="Segment" value="Server" />
+        <property name="Hardware" value="HP DL 360 G5; old pale :)" />
+    </bean>
+
+
+    <util:set id="users">
+        <bean id="user_a" class="dummy.Dummy$SomeUser" >
+            <constructor-arg value="1" />
+            <constructor-arg value="User A" />
+        </bean>
+
+        <bean id="user_b" class="dummy.Dummy$SomeUser" >
+            <constructor-arg value="2" />
+            <constructor-arg value="User B" />
+        </bean>
+
+        <bean id="user_c" class="dummy.Dummy$SomeUser" >
+            <constructor-arg value="3" />
+            <constructor-arg value="User C" />
+        </bean>
+    </util:set>
+
+    <bean id="dao" class="dummy.Dummy$SomeDao" >
+        <replaced-method name="perform" replacer="serv_comp" />
+        <constructor-arg ref="misc_conn" />
+        <property name="UsersList" value="#{users.?[UserId gt 1]}" />
+        <property name="UsersId" value="#{users.![UserId]}" />
+        <property name="Computers">
+            <set>
+                <ref bean="work_comp" />
+                <ref bean="serv_comp" />
+            </set>
+        </property>
+        <property name="AdminUser" value="123~Admin Username" />
+        <property name="SomeProperty" value="${some.property}" />
+    </bean>
+
+    <bean id="xml_aspect" class="dummy.Dummy$AspectLoggerViaXML" />
+
+    <!--aop:aspectj-autoproxy /-->
+
+    <aop:config>
+        <aop:aspect ref="xml_aspect">
+            <aop:pointcut id="calc" expression="execution(* dummy.Dummy$ICalc.evaluate(int, int, String)) and args(pviArg1, pviArg2, pvsMathAction)" />
+            <!--aop:before pointcut-ref="calc" method="logMethSimpleBegin" />
+            <aop:after-returning pointcut-ref="calc" method="logMethSimpleEnd" /-->
+            <aop:around pointcut-ref="calc" method="logMethAround" arg-names="pviArg1, pviArg2, pvsMathAction" />
+        </aop:aspect>
+
+        <aop:aspect>
+            <aop:declare-parents
+                types-matching="dummy.Dummy$SomeCalc+"
+                implement-interface="dummy.Dummy$IAspectAux"
+                default-impl="dummy.Dummy$AspectAux" />
+        </aop:aspect>
+    </aop:config>
+
+</beans>
