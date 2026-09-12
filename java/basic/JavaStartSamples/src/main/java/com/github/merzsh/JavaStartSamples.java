@@ -1078,10 +1078,10 @@ public class JavaStartSamples {
           .addAnnotatedClass(User.class)
           .addAnnotatedClass(Car.class)
           .setProperty(AvailableSettings.DRIVER, "org.postgresql.Driver")
-          .setProperty(AvailableSettings.URL, "jdbc:postgresql:javadb")
+          .setProperty(AvailableSettings.URL, "jdbc:postgresql://localhost:5432/javadb")
           .setProperty(AvailableSettings.DEFAULT_SCHEMA, "public")
           .setProperty(AvailableSettings.USER, "javauser")
-          .setProperty(AvailableSettings.PASS, "")
+          .setProperty(AvailableSettings.PASS, "javapass")
           //.setProperty(AvailableSettings.DIALECT, "PostgreSQL9Dialect")
           .setProperty(AvailableSettings.SHOW_SQL, "true")
           .setProperty(AvailableSettings.FORMAT_SQL, "true")
@@ -1651,8 +1651,8 @@ public class JavaStartSamples {
       try {
         mriDataProvider.openConnection();
 
-        String lvsHQL = "SELECT NEW dummy.Dummy$SelectionView(u.id, u.name, c.id, c.model) " +
-          "FROM dummy.Dummy$User u INNER JOIN u.cars c " +
+        String lvsHQL = "SELECT NEW com.github.merzsh.JavaStartSamples$SelectionView(u.id, u.name, c.id, c.model) " +
+          "FROM JavaStartSamples$User u INNER JOIN u.cars c " +
           "WHERE u.age < :p_age AND c.color like :p_color";
 
         TypedQuery<SelectionView> query = mriDataProvider.runQuery(lvsHQL, SelectionView.class);
