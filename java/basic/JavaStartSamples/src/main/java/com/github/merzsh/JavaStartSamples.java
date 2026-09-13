@@ -970,7 +970,7 @@ public class JavaStartSamples {
       mrcProps.put(lvsPrefixHib + lvsPrefixCon + "driver_class", "org.postgresql.Driver");
       mrcProps.put(lvsPrefixHib + lvsPrefixCon + "url", "jdbc:postgresql:javadb");
       mrcProps.put(lvsPrefixHib + lvsPrefixCon + "username", "javauser");
-      mrcProps.put(lvsPrefixHib + lvsPrefixCon + "password", "");
+      mrcProps.put(lvsPrefixHib + lvsPrefixCon + "password", "javapass");
       mrcProps.put(lvsPrefixHib + "default_schema", "public");
       mrcProps.put(lvsPrefixHib + "hbm2ddl.auto", "update");
       mrcProps.put(lvsPrefixHib + "show_sql", "true");
@@ -1072,27 +1072,41 @@ public class JavaStartSamples {
 
     public static SessionFactory buildSessionFactory() throws HibernateException {
       if(mriSessionFactory == null) {
-        // can be configurated through 'hibernate.cfg.xml' external file also
+        // can be configured through 'hibernate.cfg.xml' external file also
 
         mriSessionFactory = new org.hibernate.cfg.Configuration()
-          .addAnnotatedClass(User.class)
-          .addAnnotatedClass(Car.class)
-          .setProperty(AvailableSettings.DRIVER, "org.postgresql.Driver")
-          .setProperty(AvailableSettings.URL, "jdbc:postgresql://localhost:5432/javadb")
-          .setProperty(AvailableSettings.DEFAULT_SCHEMA, "public")
-          .setProperty(AvailableSettings.USER, "javauser")
-          .setProperty(AvailableSettings.PASS, "javapass")
-          //.setProperty(AvailableSettings.DIALECT, "PostgreSQL9Dialect")
-          .setProperty(AvailableSettings.SHOW_SQL, "true")
-          .setProperty(AvailableSettings.FORMAT_SQL, "true")
-          .setProperty(AvailableSettings.USE_SQL_COMMENTS, "true")
-          // table autocreation (or update if exists) when SessionFactory creates
-          // .setProperty(AvailableSettings.HBM2DDL_AUTO, "create") // recreates tables with data
-          .setProperty(AvailableSettings.HBM2DDL_AUTO, "update") // updates (creates if not exists)
-          // .setProperty(AvailableSettings.HBM2DDL_AUTO, "create-drop") // creates and drops finally
-          // .setProperty(AvailableSettings.HBM2DDL_AUTO, "none") // no any changes (equals omittion)
-          // .setProperty(AvailableSettings.HBM2DDL_AUTO, "validate") // throws exception if no tab
-          .buildSessionFactory();
+            .addAnnotatedClass(User.class)
+            .addAnnotatedClass(Car.class)
+
+            // Новые Jakarta JPA константы взамен устаревших
+            .setProperty(AvailableSettings.JAKARTA_JDBC_DRIVER, "org.postgresql.Driver")
+            .setProperty(AvailableSettings.JAKARTA_JDBC_URL, "jdbc:postgresql://localhost:5432/javadb")
+            .setProperty(AvailableSettings.JAKARTA_JDBC_USER, "javauser")
+            .setProperty(AvailableSettings.JAKARTA_JDBC_PASSWORD, "javapass")
+
+            /*
+            // Устаревшие константы
+            .setProperty(AvailableSettings.DRIVER, "org.postgresql.Driver")
+            .setProperty(AvailableSettings.URL, "jdbc:postgresql://localhost:5432/javadb")
+            .setProperty(AvailableSettings.USER, "javauser")
+            .setProperty(AvailableSettings.PASS, "javapass")
+            */
+
+            //.setProperty(AvailableSettings.DIALECT, "PostgreSQL9Dialect")
+            .setProperty(AvailableSettings.DEFAULT_SCHEMA, "public")
+            .setProperty(AvailableSettings.SHOW_SQL, "true")
+            .setProperty(AvailableSettings.FORMAT_SQL, "true")
+            .setProperty(AvailableSettings.USE_SQL_COMMENTS, "true")
+
+            // table auto creation (or update if exists) when SessionFactory creates
+            .setProperty(AvailableSettings.HBM2DDL_AUTO, "update") // updates (creates if not exists)
+            /*
+            .setProperty(AvailableSettings.HBM2DDL_AUTO, "create") // recreates tables with data
+            .setProperty(AvailableSettings.HBM2DDL_AUTO, "create-drop") // creates and drops finally
+            .setProperty(AvailableSettings.HBM2DDL_AUTO, "none") // no any changes (equals omittion)
+            .setProperty(AvailableSettings.HBM2DDL_AUTO, "validate") // throws exception if no tab
+            */
+        .buildSessionFactory();
       }
       return mriSessionFactory;
     }
@@ -1527,7 +1541,7 @@ public class JavaStartSamples {
       Objects.requireNonNull(mriDataProvider, this.getClass().getName() + ".mriDataProvider");
     }
 
-    // Dummy constructor to avoid ambigous (2 data providers, Hib & Jpa) autowired.
+    // Dummy constructor to avoid ambiguous (2 data providers, Hib & Jpa) autowired.
     // Single constructor marks as autowired by default
     public DaoLayer() {
     }
