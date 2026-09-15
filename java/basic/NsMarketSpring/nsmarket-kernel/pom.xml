@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<!-- Связь с главным родительским pom.xml -->
+	<parent>
+		<groupId>com.github.merzsh.basic</groupId>
+		<artifactId>nsmarket</artifactId>
+		<version>1.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>nsmarket-kernel</artifactId>
+	<packaging>jar</packaging> <!-- Строго JAR для библиотек! -->
+
+	<dependencies>
+		<!-- Базовый Spring Core для аннотаций @Component, @Autowired -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+		</dependency>
+
+		<!-- Hibernate Core для сущностей базы данных (NsmarketBaseEntity и др.) -->
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+		</dependency>
+
+		<!-- Подключаем интеграцию Hibernate и Hikari -->
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-hikaricp</artifactId>
+		</dependency>
+
+		<!-- Явно заставляем Maven скачать пул HikariCP -->
+		<dependency>
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+		</dependency>
+
+		<!-- Зависимость для аннотаций @NotNull, @Size и т.д. -->
+		<dependency>
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
+		</dependency>
+
+	</dependencies>
+</project>

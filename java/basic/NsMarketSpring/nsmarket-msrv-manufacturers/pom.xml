@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<!-- Связь с главным родительским pom.xml -->
+	<parent>
+		<groupId>com.github.merzsh.basic</groupId>
+		<artifactId>nsmarket</artifactId>
+		<version>1.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>nsmarket-msrv-manufacturers</artifactId>
+	<packaging>war</packaging> <!-- Микросервисы на чистом Spring собираются в WAR -->
+
+	<dependencies>
+		<!-- Подключаем нашу общую библиотеку kernel! -->
+		<dependency>
+			<groupId>com.github.merzsh.basic</groupId>
+			<artifactId>nsmarket-kernel</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+
+		<!-- Spring Веб-слой для @RestController -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+		</dependency>
+		<!-- Spring ORM для связи с Hibernate -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+		</dependency>
+		<!-- Зависимость для работы с JpaRepository -->
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-jpa</artifactId>
+		</dependency>
+
+
+		<!-- Реализация валидации для рантайма -->
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>jakarta.el</artifactId>
+		</dependency>
+
+
+		<!-- API Сервлетов предоставляется самим Tomcat -->
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- Плагин Jetty для эмуляции контейнера на заданном порту -->
+			<plugin>
+				<groupId>org.eclipse.jetty.ee10</groupId>
+				<artifactId>jetty-ee10-maven-plugin</artifactId>
+				<version>12.0.12</version> <!-- Актуальная версия под Jakarta EE 10 (для Spring 6) -->
+				<configuration>
+					<scan>1</scan> <!-- Автоматический перезапуск при изменении кода -->
+					<webApp>
+						<contextPath>/</contextPath>
+					</webApp>
+					<!-- Настройка портов в Jetty 12 задается через HTTP-коннекторы -->
+					<httpConnector>
+						<port>8082</port> <!-- Укажите нужный порт, свой для каждого микросервиса -->
+					</httpConnector>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
