@@ -15,7 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.github.merzsh;
+package com.github.merzsh.basic.console;
 
 import java.lang.reflect.Method;
 
@@ -116,6 +116,10 @@ import org.springframework.cache.jcache.JCacheCacheManager;
   Тип данных: i - int (или первые буквы примитивных типов), s - тип String, o - объект
  */
 public class JavaStartSamples {
+  private static final String STR_DB_DRIVER = "org.postgresql.Driver";
+  private static final String STR_DB_URL = "jdbc:postgresql://localhost:5432/javadb";
+  private static final String STR_DB_USER = "javauser";
+  private static final String STR_DB_PASSWORD = "javapass";
 
   public static class ClassA {
   }
@@ -917,17 +921,12 @@ public class JavaStartSamples {
   }
 
   public static void checkSimpleSQL() {
-    String STR_DB_DRIVER = "org.postgresql.Driver";
-    String STR_DB_URL = "jdbc:postgresql://localhost:5432/javadb";
-    String STR_DB_USERNAME = "javauser"; //"javauser";
-    String STR_DB_USERPASS = "javapass"; //"";
-
     System.out.println("Hi, there! It's Test.java :)");
     //System.setProperty("jdbc.drivers", STR_DB_DRIVER);
 
     String sql = "select id, name from dummy t", sql_where = "where t.id = ?";
 
-    try(Connection conn = DriverManager.getConnection(STR_DB_URL, STR_DB_USERNAME, STR_DB_USERPASS)) {
+    try(Connection conn = DriverManager.getConnection(STR_DB_URL, STR_DB_USER, STR_DB_PASSWORD)) {
       try(Statement st = conn.createStatement()) {
         try(ResultSet rs = st.executeQuery(sql)) {
           while(rs.next()) {
@@ -967,10 +966,10 @@ public class JavaStartSamples {
       String lvsPrefixCon = "connection.";
       mrcProps = new Properties();
 
-      mrcProps.put(lvsPrefixHib + lvsPrefixCon + "driver_class", "org.postgresql.Driver");
+      mrcProps.put(lvsPrefixHib + lvsPrefixCon + "driver_class", STR_DB_DRIVER);
       mrcProps.put(lvsPrefixHib + lvsPrefixCon + "url", "jdbc:postgresql:javadb");
-      mrcProps.put(lvsPrefixHib + lvsPrefixCon + "username", "javauser");
-      mrcProps.put(lvsPrefixHib + lvsPrefixCon + "password", "javapass");
+      mrcProps.put(lvsPrefixHib + lvsPrefixCon + "username", STR_DB_USER);
+      mrcProps.put(lvsPrefixHib + lvsPrefixCon + "password", STR_DB_PASSWORD);
       mrcProps.put(lvsPrefixHib + "default_schema", "public");
       mrcProps.put(lvsPrefixHib + "hbm2ddl.auto", "update");
       mrcProps.put(lvsPrefixHib + "show_sql", "true");
@@ -1078,18 +1077,24 @@ public class JavaStartSamples {
             .addAnnotatedClass(User.class)
             .addAnnotatedClass(Car.class)
 
+            // Подключаем промышленный быстрый менеджер (пул) соединений HikariCP
+            // 1. Указываем провайдер пула HikariCP через системную константу
+            .setProperty(AvailableSettings.CONNECTION_PROVIDER, "org.hibernate.hikaricp.internal.HikariCPConnectionProvider")
+            // 2. Задаем лимит пула (префикс "hibernate.hikari." обязателен, чтобы Хикари подхватил настройку)
+            .setProperty("hibernate.hikari.maximumPoolSize", "5")
+
             // Новые Jakarta JPA константы взамен устаревших
-            .setProperty(AvailableSettings.JAKARTA_JDBC_DRIVER, "org.postgresql.Driver")
-            .setProperty(AvailableSettings.JAKARTA_JDBC_URL, "jdbc:postgresql://localhost:5432/javadb")
-            .setProperty(AvailableSettings.JAKARTA_JDBC_USER, "javauser")
-            .setProperty(AvailableSettings.JAKARTA_JDBC_PASSWORD, "javapass")
+            .setProperty(AvailableSettings.JAKARTA_JDBC_DRIVER, STR_DB_DRIVER)
+            .setProperty(AvailableSettings.JAKARTA_JDBC_URL, STR_DB_URL)
+            .setProperty(AvailableSettings.JAKARTA_JDBC_USER, STR_DB_USER)
+            .setProperty(AvailableSettings.JAKARTA_JDBC_PASSWORD, STR_DB_PASSWORD)
 
             /*
             // Устаревшие константы
-            .setProperty(AvailableSettings.DRIVER, "org.postgresql.Driver")
-            .setProperty(AvailableSettings.URL, "jdbc:postgresql://localhost:5432/javadb")
-            .setProperty(AvailableSettings.USER, "javauser")
-            .setProperty(AvailableSettings.PASS, "javapass")
+            .setProperty(AvailableSettings.DRIVER, STR_DB_DRIVER)
+            .setProperty(AvailableSettings.URL, STR_DB_URL)
+            .setProperty(AvailableSettings.USER, STR_DB_USER)
+            .setProperty(AvailableSettings.PASS, STR_DB_PASSWORD)
             */
 
             //.setProperty(AvailableSettings.DIALECT, "PostgreSQL9Dialect")
@@ -1640,14 +1645,31 @@ public class JavaStartSamples {
         CriteriaQuery<SelectionView> query = cb.createQuery(SelectionView.class);
         Root<User> root = query.from(User.class);
         //root.fetch("cars");
-        query = query.multiselect(root.get("id"), root.get("name"),
-          root.get("cars").get("id"), root.get("cars").get("model"));
+
+        // Создаем явное объединение таблиц (как INNER JOIN в HQL)
+        Join<User, Car> carsJoin = root.join("cars");
+
+        query = query.multiselect(
+            root.get("id"),
+            root.get("name"),
+            carsJoin.get("id"),
+            carsJoin.get("model")
+        );
+
+        // Собираем условия в список, чтобы они не затирали друг друга
+        List<Predicate> predicates = new ArrayList<>();
 
         if(pviAge >= 0) {
-          query = query.where(cb.lt(root.get("age"), pviAge));
+          predicates.add(cb.lt(root.get("age"), pviAge));
         }
         if(pvsColor != null) {
-          query = query.where(cb.equal(root.get("cars").get("color"), pvsColor));
+          // Используем cb.like, чтобы поведение 1-в-1 совпадало с вашим HQL методом
+          predicates.add(cb.like(carsJoin.get("color"), pvsColor));
+        }
+
+        // Если применили хоть один фильтр — добавляем его в запрос через AND
+        if(!predicates.isEmpty()) {
+          query = query.where(cb.and(predicates.toArray(new Predicate[0])));
         }
 
         result = mriDataProvider.runQuery(query).getResultList();
@@ -2641,7 +2663,7 @@ public class JavaStartSamples {
     public AspectSecurityViaAnnotations() {
     }
 
-    @Pointcut("execution(* dummy.Dummy$ICalc.evaluate(..))")
+    @Pointcut("execution(* com.github.merzsh.basic.console.JavaStartSamples.ICalc.evaluate(..))")
     public void pointcutCalc() {
     }
 
@@ -2715,9 +2737,9 @@ public class JavaStartSamples {
 
   public static void checkSpringFrameworkViaXmlConfig() {
     try {
-      ApplicationContext ctx = new ClassPathXmlApplicationContext("./src/dummy/dummy_spring.xml");
+      ApplicationContext ctx = new ClassPathXmlApplicationContext("JavaStartSamples_spring.xml");
 
-      // Use XML bean notationdefinition
+      // Use XML bean notation definition
       SomeDao dao = ctx.getBean(SomeDao.class);
       dao.perform();
       System.out.println("Print users full data:");
@@ -2790,14 +2812,14 @@ public class JavaStartSamples {
   public static class SpringDataConfig {
     @Bean
     public DataSource jdbcds() {
-      System.setProperty("jdbc.drivers", "org.postgresql.Driver");
-      return new DriverManagerDataSource("jdbc:postgresql:javadb", "javauser", "postgres1");
+      System.setProperty("jdbc.drivers", "postgresql");
+      return new DriverManagerDataSource(STR_DB_URL, STR_DB_USER, STR_DB_PASSWORD);
     }
 
     @Bean
-    public MySpringJdbcDao jdbcdao() {
+    public MySpringJdbcDao jdbcdao(DataSource dataSource) {
       var result = new MySpringJdbcDao();
-      result.setDataSource(jdbcds());
+      result.setDataSource(dataSource);
 
       return result;
     }
@@ -2805,7 +2827,7 @@ public class JavaStartSamples {
     // This bean enables Hibernate (ORM) exceptions translation via aspect proxies to Spring exceptions.
     // Option activates such behaviour for classes marked with @Repository annotations
     @Bean
-    public PersistenceExceptionTranslationPostProcessor hibexproc() {
+    public static PersistenceExceptionTranslationPostProcessor hibexproc() {
       return new PersistenceExceptionTranslationPostProcessor();
     }
 
@@ -2818,12 +2840,25 @@ public class JavaStartSamples {
     @Bean
     public SessionFactory hibfactory() {
       Properties pr = new Properties();
-      pr.setProperty(AvailableSettings.DRIVER, "org.postgresql.Driver");
+
+      // Новые Jakarta JPA константы взамен устаревших
+      pr.setProperty(AvailableSettings.JAKARTA_JDBC_DRIVER, STR_DB_DRIVER);
+      pr.setProperty(AvailableSettings.JAKARTA_JDBC_URL, STR_DB_URL);
+      pr.setProperty(AvailableSettings.JAKARTA_JDBC_USER, STR_DB_USER);
+      pr.setProperty(AvailableSettings.JAKARTA_JDBC_PASSWORD, STR_DB_PASSWORD);
+
+      /*
+      // Устаревшие константы
+      pr.setProperty(AvailableSettings.DRIVER, STR_DB_DRIVER);
       pr.setProperty(AvailableSettings.URL, "jdbc:postgresql:javadb");
-      pr.setProperty(AvailableSettings.DEFAULT_SCHEMA, "public");
-      pr.setProperty(AvailableSettings.USER, "javauser");
+      pr.setProperty(AvailableSettings.USER, STR_DB_USER);
       pr.setProperty(AvailableSettings.PASS, "");
-      pr.setProperty(AvailableSettings.DIALECT, "org.hibernate.dialect.PostgreSQL10Dialect");
+      */
+
+      // Не требуется, т.к. выводит в логе предупреждение, чтобы убрать установку диалекта
+      // pr.setProperty(AvailableSettings.DIALECT, "org.hibernate.dialect.PostgreSQLDialect");
+
+      pr.setProperty(AvailableSettings.DEFAULT_SCHEMA, "public");
       pr.setProperty(AvailableSettings.SHOW_SQL, "true");
       pr.setProperty(AvailableSettings.FORMAT_SQL, "true");
       pr.setProperty(AvailableSettings.USE_SQL_COMMENTS, "true");
@@ -2831,7 +2866,7 @@ public class JavaStartSamples {
       //pr.setProperty(AvailableSettings.HBM2DDL_AUTO, "create"); // recreates tables with data
 
       var sf = new LocalSessionFactoryBean();
-      sf.setPackagesToScan("dummy");
+      sf.setPackagesToScan("com.github.merzsh");
       sf.setAnnotatedClasses(User.class, Car.class);
       sf.setHibernateProperties(pr);
       sf.setDataSource(jdbcds());
@@ -2847,10 +2882,10 @@ public class JavaStartSamples {
 			/*
 			return new LocalSessionFactoryBuilder(jdbcds())
 				.addAnnotatedClasses(User.class, Car.class)
-				.setProperty(AvailableSettings.DRIVER, "org.postgresql.Driver")
+				.setProperty(AvailableSettings.DRIVER, STR_DB_DRIVER)
 				.setProperty(AvailableSettings.URL, "jdbc:postgresql:javadb")
 				.setProperty(AvailableSettings.DEFAULT_SCHEMA, "public")
-				.setProperty(AvailableSettings.USER, "javauser")
+				.setProperty(AvailableSettings.USER, STR_DB_USER)
 				.setProperty(AvailableSettings.PASS, "")
 				//.setProperty(AvailableSettings.DIALECT, "PostgreSQL9Dialect")
 				.setProperty(AvailableSettings.SHOW_SQL, "true")
@@ -2871,12 +2906,16 @@ public class JavaStartSamples {
     public EntityManagerFactory jpafactory() {
       Properties pr = new Properties();
 
-      pr.setProperty(AvailableSettings.DRIVER, "org.postgresql.Driver");
-      pr.setProperty(AvailableSettings.URL, "jdbc:postgresql:javadb");
+      // Новые Jakarta JPA константы взамен устаревших
+      pr.setProperty(AvailableSettings.JAKARTA_JDBC_DRIVER, STR_DB_DRIVER);
+      pr.setProperty(AvailableSettings.JAKARTA_JDBC_URL, STR_DB_URL);
+      pr.setProperty(AvailableSettings.JAKARTA_JDBC_USER, STR_DB_USER);
+      pr.setProperty(AvailableSettings.JAKARTA_JDBC_PASSWORD, STR_DB_PASSWORD);
+
+      // Не требуется, т.к. Spring 6 выводит в логе предупреждение, о необходимости отключить установку диалекта
+      // pr.setProperty(AvailableSettings.DIALECT, "org.hibernate.dialect.PostgreSQLDialect");
+
       pr.setProperty(AvailableSettings.DEFAULT_SCHEMA, "public");
-      pr.setProperty(AvailableSettings.USER, "javauser");
-      pr.setProperty(AvailableSettings.PASS, "");
-      pr.setProperty(AvailableSettings.DIALECT, "org.hibernate.dialect.PostgreSQL10Dialect");
       pr.setProperty(AvailableSettings.SHOW_SQL, "true");
       pr.setProperty(AvailableSettings.FORMAT_SQL, "true");
       pr.setProperty(AvailableSettings.USE_SQL_COMMENTS, "true");
@@ -2884,14 +2923,15 @@ public class JavaStartSamples {
       //pr.setProperty(AvailableSettings.HBM2DDL_AUTO, "create"); // recreates tables with data
 
       var jva = new HibernateJpaVendorAdapter();
-      jva.setDatabase(Database.POSTGRESQL);
       jva.setShowSql(true);
       jva.setGenerateDdl(false);
-      jva.setDatabasePlatform("org.hibernate.dialect.PostgreSQL10Dialect");
+      // Не требуется, т.к. Spring 6 выводит в логе предупреждение, о необходимости отключить установку диалекта
+      //jva.setDatabase(Database.POSTGRESQL);
+      //jva.setDatabasePlatform("org.hibernate.dialect.PostgreSQL10Dialect");
 
       var f = new LocalContainerEntityManagerFactoryBean();
       f.setDataSource(jdbcds());
-      f.setPackagesToScan("dummy");
+      f.setPackagesToScan("com.github.merzsh");
       f.setJpaProperties(pr);
       f.setJpaVendorAdapter(jva);
 
@@ -3019,7 +3059,7 @@ public class JavaStartSamples {
 
   public static void checkSpringFrameworkDataAccessJDBC() {
     try {
-      ApplicationContext ctx = new ClassPathXmlApplicationContext("./src/dummy/dummy_spring.xml");
+      ApplicationContext ctx = new ClassPathXmlApplicationContext("JavaStartSamples_spring.xml");
 
       // Use XML bean notationdefinition
       MySpringJdbcDao dao = ctx.getBean(MySpringJdbcDao.class);
@@ -3105,7 +3145,7 @@ public class JavaStartSamples {
   }
 
   public static void checkSpringFrameworkDataAccessHibJpa() {
-    ApplicationContext ctx = new ClassPathXmlApplicationContext("./src/dummy/dummy_spring.xml");
+    ApplicationContext ctx = new ClassPathXmlApplicationContext("JavaStartSamples_spring.xml");
 
     IDaoLayer dao = ctx.getBean(IDaoLayer.class);
     Objects.requireNonNull(dao, "Can't get Hib session, error! Exiting ...");

@@ -28,7 +28,7 @@
                     <archive>
                         <manifest>
                             <!-- Укажите здесь ПОЛНЫЙ путь к вашему классу с методом main -->
-                            <mainClass>com.github.merzsh.JavaStartSamples</mainClass>
+                            <mainClass>com.github.merzsh.basic.console.JavaStartSamples</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -136,6 +136,26 @@
             <groupId>javax.cache</groupId>
             <artifactId>cache-api</artifactId>
             <version>1.1.1</version>
+        </dependency>
+
+        <!-- 10. Добавляет движок логирования Logback -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.5.6</version> <!-- Актуальная стабильная версия под Spring 6 / Java 21 -->
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.13</version> <!-- Принудительно ставим версию 2.x под Spring 6 -->
+        </dependency>
+
+        <!-- Промышленный быстрый пул соединений (стандарт де-факто) на замену встроенному в Hibernate (DriverManagerConnectionProvider), который малопроизводительный  -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-hikaricp</artifactId>
+            <version>6.5.2.Final</version> <!-- Используйте ту же версию, что и у вашего hibernate-core -->
         </dependency>
     </dependencies>
 

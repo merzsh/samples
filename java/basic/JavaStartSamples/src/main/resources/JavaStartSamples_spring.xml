@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xmlns:util="http://www.springframework.org/schema/util"
-xmlns:context="http://www.springframework.org/schema/context"
-xmlns:aop="http://www.springframework.org/schema/aop"
-xmlns:ehcache="http://www.springmodules.org/schema/ehcache"
-xsi:schemaLocation="http://www.springframework.org/schema/beans
-http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
-http://www.springframework.org/schema/util
-http://www.springframework.org/schema/util/spring-util-4.3.xsd
-http://www.springframework.org/schema/context
-http://www.springframework.org/schema/context/spring-context-4.3.xsd
-http://www.springframework.org/schema/aop
-http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
-http://www.springmodules.org/schema/ehcache
-http://www.springmodules.org/schema/cache/springmodules-ehcache.xsd">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+       http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util-4.3.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-4.3.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop-4.3.xsd">
 
-    <context:component-scan base-package="dummy" />
+    <!-- Сканирование аннотаций -->
+    <context:component-scan base-package="com.github.merzsh" />
 
     <!--bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" /-->
 
@@ -38,10 +36,11 @@ http://www.springmodules.org/schema/cache/springmodules-ehcache.xsd">
         <ehcache:caching id="myCacheModel" cacheName="myCache" />
     </ehcache:annotations-->
 
+    <!-- Кастомный редактор свойств для конвертации строки 123~Admin в объект SomeUser -->
     <bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
         <property name="customEditors">
             <map>
-                <entry key="dummy.Dummy$IUser" value="dummy.Dummy$UserEditor">
+                <entry key="com.github.merzsh.basic.console.JavaStartSamples$IUser" value="com.github.merzsh.basic.console.JavaStartSamples$UserEditor">
                     <!--bean id="userEditor" class="Dummy$UserEditor">
                     </bean-->
                 </entry>
@@ -49,82 +48,87 @@ http://www.springmodules.org/schema/cache/springmodules-ehcache.xsd">
         </property>
     </bean>
 
+    <!-- Загрузка внешних свойств -->
     <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="location" value="./src/dummy/Dummy.properties" />
+        <property name="location" value="JavaStartSamples.properties" />
     </bean>
 
-    <bean id="some_conn" class="dummy.Dummy$SomeConnection" />
-    <bean id="misc_conn" class="dummy.Dummy$MiscConnection" />
+    <!-- Биндинг соединений -->
+    <bean id="some_conn" class="com.github.merzsh.basic.console.JavaStartSamples$SomeConnection" />
+    <bean id="misc_conn" class="com.github.merzsh.basic.console.JavaStartSamples$MiscConnection" />
 
-    <bean id="user_1" class="dummy.Dummy$SomeUser"><constructor-arg value="1" /><constructor-arg value="User I" /></bean>
-    <bean id="user_2" class="dummy.Dummy$SomeUser"><constructor-arg value="2" /><constructor-arg value="User II" /></bean>
-    <bean id="user_3" class="dummy.Dummy$SomeUser"><constructor-arg value="3" /><constructor-arg value="User III" /></bean>
+    <!-- Пользователи для тестов DI -->
+    <bean id="user_1" class="com.github.merzsh.basic.console.JavaStartSamples$SomeUser"><constructor-arg value="1" /><constructor-arg value="User I" /></bean>
+    <bean id="user_2" class="com.github.merzsh.basic.console.JavaStartSamples$SomeUser"><constructor-arg value="2" /><constructor-arg value="User II" /></bean>
+    <bean id="user_3" class="com.github.merzsh.basic.console.JavaStartSamples$SomeUser"><constructor-arg value="3" /><constructor-arg value="User III" /></bean>
 
-
-    <bean id="base_comp" class="dummy.Dummy$Computer" abstract="true">
-        <property name="Vendor" value="Hewlett Packard Enterprise" />
+    <!-- Компиляция конфигураций железа -->
+    <bean id="base_comp" class="com.github.merzsh.basic.console.JavaStartSamples$Computer" abstract="true">
+        <property name="vendor" value="Hewlett Packard Enterprise" />
     </bean>
 
-    <bean id="work_comp" class="dummy.Dummy$Computer" parent="base_comp">
-        <property name="Segment" value="Workstation" />
-        <property name="Hardware" value="HP Desctop station xTreme Core i9" />
+    <bean id="work_comp" class="com.github.merzsh.basic.console.JavaStartSamples$Computer" parent="base_comp">
+        <property name="segment" value="Workstation" />
+        <property name="hardware" value="HP Desctop station xTreme Core i9" />
     </bean>
 
-    <bean id="serv_comp" class="dummy.Dummy$Computer" parent="base_comp">
-        <property name="Segment" value="Server" />
-        <property name="Hardware" value="HP DL 360 G5; old pale :)" />
+    <bean id="serv_comp" class="com.github.merzsh.basic.console.JavaStartSamples$Computer" parent="base_comp">
+        <property name="segment" value="Server" />
+        <property name="hardware" value="HP DL 360 G5; old pale :)" />
     </bean>
 
-
+    <!-- Набор пользователей SpEL -->
     <util:set id="users">
-        <bean id="user_a" class="dummy.Dummy$SomeUser" >
+        <bean id="user_a" class="com.github.merzsh.basic.console.JavaStartSamples$SomeUser" >
             <constructor-arg value="1" />
             <constructor-arg value="User A" />
         </bean>
 
-        <bean id="user_b" class="dummy.Dummy$SomeUser" >
+        <bean id="user_b" class="com.github.merzsh.basic.console.JavaStartSamples$SomeUser" >
             <constructor-arg value="2" />
             <constructor-arg value="User B" />
         </bean>
 
-        <bean id="user_c" class="dummy.Dummy$SomeUser" >
+        <bean id="user_c" class="com.github.merzsh.basic.console.JavaStartSamples$SomeUser" >
             <constructor-arg value="3" />
             <constructor-arg value="User C" />
         </bean>
     </util:set>
 
-    <bean id="dao" class="dummy.Dummy$SomeDao" >
+    <!-- Тестовый DAO для старого сценария XML -->
+    <bean id="dao" class="com.github.merzsh.basic.console.JavaStartSamples$SomeDao" >
         <replaced-method name="perform" replacer="serv_comp" />
         <constructor-arg ref="misc_conn" />
-        <property name="UsersList" value="#{users.?[UserId gt 1]}" />
-        <property name="UsersId" value="#{users.![UserId]}" />
-        <property name="Computers">
+        <property name="usersList" value="#{users.?[userId gt 1]}" />
+        <property name="usersId" value="#{users.![userId]}" />
+        <property name="computers">
             <set>
                 <ref bean="work_comp" />
                 <ref bean="serv_comp" />
             </set>
         </property>
-        <property name="AdminUser" value="123~Admin Username" />
-        <property name="SomeProperty" value="${some.property}" />
+        <property name="adminUser" value="123~Admin Username" />
+        <property name="someProperty" value="${some.property}" />
     </bean>
 
-    <bean id="xml_aspect" class="dummy.Dummy$AspectLoggerViaXML" />
+    <!-- Аспекты через XML -->
+    <bean id="xml_aspect" class="com.github.merzsh.basic.console.JavaStartSamples$AspectLoggerViaXML" />
 
-    <!--aop:aspectj-autoproxy /-->
+    <aop:aspectj-autoproxy />
 
     <aop:config>
         <aop:aspect ref="xml_aspect">
-            <aop:pointcut id="calc" expression="execution(* dummy.Dummy$ICalc.evaluate(int, int, String)) and args(pviArg1, pviArg2, pvsMathAction)" />
+            <aop:pointcut id="calc" expression="execution(* com.github.merzsh.basic.console.JavaStartSamples.ICalc.evaluate(int, int, String)) and args(pviArg1, pviArg2, pvsMathAction)" />
             <!--aop:before pointcut-ref="calc" method="logMethSimpleBegin" />
             <aop:after-returning pointcut-ref="calc" method="logMethSimpleEnd" /-->
-            <aop:around pointcut-ref="calc" method="logMethAround" arg-names="pviArg1, pviArg2, pvsMathAction" />
+            <aop:around pointcut-ref="calc" method="logMethAround" arg-names="joinpoint, pviArg1, pviArg2, pvsMathAction" />
         </aop:aspect>
 
         <aop:aspect>
             <aop:declare-parents
-                types-matching="dummy.Dummy$SomeCalc+"
-                implement-interface="dummy.Dummy$IAspectAux"
-                default-impl="dummy.Dummy$AspectAux" />
+                types-matching="com.github.merzsh.basic.console.JavaStartSamples.SomeCalc+"
+                implement-interface="com.github.merzsh.basic.console.JavaStartSamples$IAspectAux"
+                default-impl="com.github.merzsh.basic.console.JavaStartSamples$AspectAux" />
         </aop:aspect>
     </aop:config>
 

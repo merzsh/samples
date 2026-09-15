@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- 1. Настраиваем внешний вид логов в консоли (Pattern) -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 2. ОТКЛЮЧАЕМ ДЕТАЛЬНЫЙ DEBUG ДЛЯ SPRING -->
+    <!-- Уровень INFO означает: показывать только важные сообщения о старте, ошибки и варнинги -->
+    <logger name="org.springframework" level="INFO" />
+
+    <!-- 3. ОТКЛЮЧАЕМ ДЕТАЛЬНЫЙ DEBUG ДЛЯ HIBERNATE -->
+    <logger name="org.hibernate" level="INFO" />
+
+    <!-- Если захотите полностью заглушить логи Hibernate, замените INFO на WARN -->
+    <!-- <logger name="org.hibernate" level="WARN" /> -->
+
+    <!-- 4. Глобальный уровень для всего остального (включая ваш собственный код) -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+</configuration>
